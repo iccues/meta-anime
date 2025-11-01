@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: meta-anime-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/meta-anime
+    username: jim
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
