@@ -1,15 +1,16 @@
 package com.iccues.metaanimebackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
 @Data
 @Entity
@@ -19,7 +20,11 @@ public class AnimeMapping {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long mappingId;
 
-    Long animeId;
+    @ToString.Exclude
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "anime_id")
+    Anime anime;
 
     @NaturalId
     String sourcePlatform;

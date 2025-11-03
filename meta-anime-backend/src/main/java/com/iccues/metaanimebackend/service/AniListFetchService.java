@@ -1,8 +1,6 @@
 package com.iccues.metaanimebackend.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.AnimeMapping;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
@@ -23,9 +21,6 @@ public class AniListFetchService {
     AnimeMappingService animeMappingService;
 
     final WebClient client = WebClient.create("https://graphql.anilist.co");
-
-    @Resource
-    ObjectMapper mapper;
 
     @Resource
     private AnimeService animeService;
@@ -50,12 +45,10 @@ public class AniListFetchService {
 
         anime.setCoverImage(jsonNode.path("coverImage").path("extraLarge").asText());
 
-        repo.save(anime);
-
-        return anime;
+        return repo.save(anime);
     }
 
-    AnimeMapping handleAnimeMapping(JsonNode jsonNode) {
+    void handleAnimeMapping(JsonNode jsonNode) {
         String platformId = jsonNode.path("id").asText();
 
         AnimeMapping mapping = new AnimeMapping("AniList", platformId, jsonNode);
@@ -67,20 +60,20 @@ public class AniListFetchService {
         mapping.setRawScore(rawScore);
         mapping.setNormalizedScore(normalizedScore);
 
-        Anime anime = searchOrCreateAnime(jsonNode);
+        animeMappingService.saveOrUpdate(mapping);
 
-        mapping.setAnimeId(anime.getAnimeId());
-
-        return mapping;
+        if (mapping.getAnime() == null) {
+            Anime anime = searchOrCreateAnime(jsonNode);
+            anime.addMapping(mapping);
+            repo.save(anime);
+        }
     }
 
     public void fetchAnime(int seasonYear, String season) {
         List<JsonNode> mediaList = fetchAnimeData(seasonYear, season);
         for (JsonNode jsonNode : mediaList) {
-            AnimeMapping mapping = handleAnimeMapping(jsonNode);
-            animeMappingService.saveOrUpdate(mapping);
+            handleAnimeMapping(jsonNode);
         }
-
     }
 
     List<JsonNode> fetchAnimeData(int seasonYear, String season) {

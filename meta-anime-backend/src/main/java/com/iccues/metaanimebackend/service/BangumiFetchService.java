@@ -1,19 +1,15 @@
 package com.iccues.metaanimebackend.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.AnimeMapping;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.repo.AnimeRepository;
 import jakarta.annotation.Resource;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -53,12 +49,10 @@ public class BangumiFetchService {
 
         anime.setCoverImage(jsonNode.path("images").path("large").asText());
 
-        repo.save(anime);
-
-        return anime;
+        return repo.save(anime);
     }
 
-    AnimeMapping handleAnimeMapping(JsonNode jsonNode) {
+    void handleAnimeMapping(JsonNode jsonNode) {
         String platformId = jsonNode.path("id").asText();
 
         AnimeMapping mapping = new AnimeMapping("Bangumi", platformId, jsonNode);
@@ -72,18 +66,19 @@ public class BangumiFetchService {
             mapping.setNormalizedScore(normalizedScore);
         }
 
-        Anime anime = searchOrCreateAnime(jsonNode);
+        animeMappingService.saveOrUpdate(mapping);
 
-        mapping.setAnimeId(anime.getAnimeId());
-
-        return mapping;
+        if (mapping.getAnime() == null) {
+            Anime anime = searchOrCreateAnime(jsonNode);
+            anime.addMapping(mapping);
+            repo.save(anime);
+        }
     }
 
     public void fetchAnime(int year, int month) {
         List<JsonNode> mediaList = fetchAnimeData(year, month);
         for (JsonNode jsonNode : mediaList) {
-            AnimeMapping mapping = handleAnimeMapping(jsonNode);
-            animeMappingService.saveOrUpdate(mapping);
+            handleAnimeMapping(jsonNode);
         }
     }
 

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -22,4 +24,20 @@ public class Anime {
     String coverImage;
 
     LocalDate startDate;
+
+    @OneToMany(mappedBy = "anime",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true)
+    List<AnimeMapping> mappings = new ArrayList<>();
+
+    public void addMapping(AnimeMapping mapping) {
+        this.mappings.add(mapping);
+        mapping.setAnime(this);
+    }
+
+    public void removeMapping(AnimeMapping mapping) {
+        this.mappings.remove(mapping);
+        mapping.setAnime(null);
+    }
 }
