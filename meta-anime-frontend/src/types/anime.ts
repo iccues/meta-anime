@@ -6,4 +6,5 @@ export interface Anime {
         titleCn: string,
     },
     coverImage: string,
+    averageScore: number,
 }

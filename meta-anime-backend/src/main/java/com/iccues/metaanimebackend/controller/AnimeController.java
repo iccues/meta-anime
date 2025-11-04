@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -22,7 +21,7 @@ class AnimeController {
     @ResponseBody
     @GetMapping("/get_list")
     public Response<List<Anime>> getAnimeList() {
-        List<Anime> animeList = animeRepository.findAll();
+        List<Anime> animeList = animeRepository.findAllByOrderByAverageScoreDesc();
         return Response.ok(animeList);
     }
 }

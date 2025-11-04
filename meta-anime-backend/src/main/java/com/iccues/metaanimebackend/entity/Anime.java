@@ -25,6 +25,8 @@ public class Anime {
 
     LocalDate startDate;
 
+    Double averageScore;
+
     @OneToMany(mappedBy = "anime",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,

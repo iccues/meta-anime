@@ -98,7 +98,7 @@ public class AniListFetchService {
                     pageInfo {
                       hasNextPage
                     }
-                    media(seasonYear: $seasonYear, season: $season, type: ANIME) {
+                    media(seasonYear: $seasonYear, season: $season, type: ANIME, isAdult: false) {
                       id
                       title {
                         romaji
