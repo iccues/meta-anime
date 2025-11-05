@@ -1,76 +1,44 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import type { Anime } from "../types/anime.ts";
 
 defineProps<{
   anime: Anime,
 }>()
+
+const flipped = ref(true);
+
 </script>
 
 <template>
-  <div class="anime-card">
-    <div class="image-container">
-      <img :src="`${anime.coverImage}`" :alt="anime.title.titleCn"/>
-      <div class="score-badge" v-if="anime.averageScore">
-        {{ anime.averageScore.toFixed(0) }}
+  <div class="w-[200px] cursor-pointer flex flex-col gap-2">
+    <div
+      class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100 rounded-2xl transition-transform duration-300 hover:scale-[1.03]"
+      @click="flipped = !flipped">
+      <div class="w-full h-full">
+        <img class="w-full h-full object-cover block" :src="anime.coverImage"
+          :alt="anime.title.titleCn || anime.title.titleNative" />
+        <div v-if="anime.averageScore"
+          class="absolute bottom-2 right-2 text-white text-base font-bold drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+          {{ anime.averageScore.toFixed(0) }}
+        </div>
       </div>
+      <Transition enter-active-class="transition-opacity duration-300"
+        leave-active-class="transition-opacity duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100"
+        leave-from-class="opacity-100" leave-to-class="opacity-0">
+        <div v-if="!flipped" class="absolute inset-0 bg-black/20 p-4 flex flex-col gap-3 backdrop-blur-lg">
+          <div class="flex flex-col gap-3">
+            <div v-for="mapping in anime.mappings" :key="mapping.mappingId"
+              class="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors">
+              <span class="text-xs font-medium text-gray-600">{{ mapping.sourcePlatform }}</span>
+              <span class="text-sm font-bold text-blue-600">{{ mapping.rawScore.toFixed(1) }}</span>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
-    <h3 class="anime-title">{{ anime.title.titleCn || anime.title.titleNative }}</h3>
+    <h3 class="text-sm font-medium text-gray-800 m-0 px-1 leading-[1.4] h-[calc(1.4em*2)] line-clamp-2">
+      {{ anime.title.titleCn || anime.title.titleNative }}
+    </h3>
   </div>
 </template>
-
-<style scoped>
-.anime-card {
-  width: 200px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.image-container {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
-  background-color: #f0f0f0;
-  position: relative;
-  border-radius: 8px;
-  transition: transform 0.3s ease;
-}
-
-.anime-card:hover .image-container {
-  transform: scale(1.02);
-}
-
-.image-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.anime-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  margin: 0;
-  padding: 0 4px;
-  line-height: 1.4;
-  height: calc(1.4em * 2);
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.score-badge {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 700;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-}
-</style>

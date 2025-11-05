@@ -27,37 +27,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="main-page">
-    <h1>动漫列表</h1>
-    <div v-if="loading" class="loading">加载中...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
+  <div class="p-5 max-w-[1400px] mx-auto">
+    <h1 class="mb-6 text-gray-800">动漫列表</h1>
+    <div v-if="loading" class="text-center py-10 text-base text-gray-600">加载中...</div>
+    <div v-else-if="error" class="text-center py-10 text-base text-red-600">{{ error }}</div>
     <AnimeList v-else :animes="animes"/>
   </div>
 </template>
-
-<style scoped>
-.main-page {
-  padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-h1 {
-  margin-bottom: 24px;
-  color: #333;
-}
-
-.loading, .error {
-  text-align: center;
-  padding: 40px;
-  font-size: 16px;
-}
-
-.loading {
-  color: #666;
-}
-
-.error {
-  color: #e74c3c;
-}
-</style>

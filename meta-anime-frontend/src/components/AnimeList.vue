@@ -8,16 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="anime-list">
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 justify-items-center">
     <AnimeCard v-for="(anime, index) in animes" :key="index" :anime="anime"/>
   </div>
 </template>
-
-<style scoped>
-.anime-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  justify-items: center;
-}
-</style>
