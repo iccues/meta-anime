@@ -21,15 +21,19 @@ public class ScoreService {
 
         for (Anime anime : list) {
             double totalScore = 0.0;
+            int i = 0;
 
             for (AnimeMapping mapping : anime.getMappings()) {
                 Double normalizedScore = mapping.getNormalizedScore();
                 if (normalizedScore != null && normalizedScore > 0) {
                     totalScore += normalizedScore;
+                    i++;
                 }
             }
 
-            anime.setAverageScore(totalScore / anime.getMappings().size());
+            if (i > 0) {
+                anime.setAverageScore(totalScore / i);
+            }
         }
     }
 }

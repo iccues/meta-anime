@@ -2,6 +2,7 @@ package com.iccues.metaanimebackend.repo;
 
 import com.iccues.metaanimebackend.entity.Anime;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -12,4 +13,7 @@ public interface AnimeRepository extends JpaRepository<Anime, Long> {
     List<Anime> findByStartDateBetween(LocalDate startDateAfter, LocalDate startDateBefore);
 
     List<Anime> findAllByOrderByAverageScoreDesc();
+
+    @Query("SELECT a FROM Anime a ORDER BY a.averageScore DESC NULLS LAST")
+    List<Anime> findAllByOrderByAverageScoreDescNullsLast();
 }

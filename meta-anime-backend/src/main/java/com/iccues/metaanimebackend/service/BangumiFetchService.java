@@ -1,7 +1,6 @@
 package com.iccues.metaanimebackend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.AnimeMapping;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
@@ -27,9 +26,6 @@ public class BangumiFetchService {
                     .codecs(cfg -> cfg.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)) // 16MB
                     .build())
             .build();
-
-    @Resource
-    ObjectMapper mapper;
 
     @Resource
     private AnimeService animeService;

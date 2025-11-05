@@ -56,9 +56,10 @@ public class AniListFetchService {
 
         // score
         double rawScore = jsonNode.path("averageScore").asDouble();
-        double normalizedScore = rawScore;
         mapping.setRawScore(rawScore);
-        mapping.setNormalizedScore(normalizedScore);
+        if (rawScore > 0) {
+            mapping.setNormalizedScore(rawScore);
+        }
 
         animeMappingService.saveOrUpdate(mapping);
 
