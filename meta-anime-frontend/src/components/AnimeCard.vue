@@ -31,7 +31,7 @@ const flipped = ref(true);
             <div v-for="mapping in anime.mappings" :key="mapping.mappingId"
               class="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors">
               <span class="text-xs font-medium text-gray-600">{{ mapping.sourcePlatform }}</span>
-              <span class="text-sm font-bold text-blue-600">{{ mapping.rawScore.toFixed(1) }}</span>
+              <span class="text-sm font-bold text-blue-600">{{ mapping.rawScore?.toFixed(1) }}</span>
             </div>
           </div>
         </div>

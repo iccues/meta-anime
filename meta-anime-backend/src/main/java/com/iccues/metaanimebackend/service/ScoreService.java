@@ -33,6 +33,8 @@ public class ScoreService {
 
             if (i > 0) {
                 anime.setAverageScore(totalScore / i);
+            } else  {
+                anime.setAverageScore(null);
             }
         }
     }

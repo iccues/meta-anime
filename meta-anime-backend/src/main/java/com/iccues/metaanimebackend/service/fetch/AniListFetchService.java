@@ -1,11 +1,8 @@
-package com.iccues.metaanimebackend.service;
+package com.iccues.metaanimebackend.service.fetch;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.iccues.metaanimebackend.entity.Anime;
-import com.iccues.metaanimebackend.entity.AnimeMapping;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
-import com.iccues.metaanimebackend.repo.AnimeRepository;
-import jakarta.annotation.Resource;
+import com.iccues.metaanimebackend.entity.Season;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -15,76 +12,60 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class AniListFetchService {
+public class AniListFetchService extends AbstractAnimeFetchService {
+    @Override
+    protected String getPlatform() {
+        return "AniList";
+    }
 
-    @Resource
-    AnimeMappingService animeMappingService;
-
-    final WebClient client = WebClient.create("https://graphql.anilist.co");
-
-    @Resource
-    private AnimeService animeService;
-
-    @Resource
-    AnimeRepository repo;
-
-    Anime searchOrCreateAnime(JsonNode jsonNode) {
+    @Override
+    protected LocalDate extractStartDate(JsonNode jsonNode) {
         JsonNode date = jsonNode.path("startDate");
         int year = date.path("year").asInt();
         int month = date.path("month").asInt();
         int day = date.path("day").asInt();
-        LocalDate startDate = LocalDate.of(year, month, day);
+        return LocalDate.of(year, month, day);
+    }
 
+    @Override
+    protected AnimeTitles extractTitles(JsonNode jsonNode) {
         JsonNode titleJson = jsonNode.path("title");
         AnimeTitles titles = new AnimeTitles();
         titles.setTitleNative(titleJson.path("native").asText());
         titles.setTitleRomaji(titleJson.path("romaji").asText());
         titles.setTitleEn(titleJson.path("english").asText());
-
-        Anime anime = animeService.findAnime(startDate, titles);
-
-        anime.setCoverImage(jsonNode.path("coverImage").path("extraLarge").asText());
-
-        return repo.save(anime);
+        return titles;
     }
 
-    void handleAnimeMapping(JsonNode jsonNode) {
-        String platformId = jsonNode.path("id").asText();
-
-        AnimeMapping mapping = new AnimeMapping("AniList", platformId, jsonNode);
-
-
-        // score
-        double rawScore = jsonNode.path("averageScore").asDouble();
-        mapping.setRawScore(rawScore);
-        if (rawScore > 0) {
-            mapping.setNormalizedScore(rawScore);
-        }
-
-        animeMappingService.saveOrUpdate(mapping);
-
-        if (mapping.getAnime() == null) {
-            Anime anime = searchOrCreateAnime(jsonNode);
-            anime.addMapping(mapping);
-            repo.save(anime);
-        }
+    @Override
+    protected String extractCoverImage(JsonNode jsonNode) {
+        return jsonNode.path("coverImage").path("extraLarge").asText();
     }
 
-    public void fetchAnime(int seasonYear, String season) {
-        List<JsonNode> mediaList = fetchAnimeData(seasonYear, season);
-        for (JsonNode jsonNode : mediaList) {
-            handleAnimeMapping(jsonNode);
-        }
+    @Override
+    protected String extractPlatformId(JsonNode jsonNode) {
+        return jsonNode.path("id").asText();
     }
 
-    List<JsonNode> fetchAnimeData(int seasonYear, String season) {
-        JsonNode firstPage = fetchPage(seasonYear, season, 1);
+    @Override
+    protected double extractRawScore(JsonNode jsonNode) {
+        return jsonNode.path("averageScore").asDouble();
+    }
+
+    @Override
+    protected double normalizeScore(double rawScore) {
+        return rawScore;
+    }
+
+    @Override
+    protected List<JsonNode> fetchAnimeData(int year, Season season) {
+        JsonNode firstPage = fetchPage(year, season, 1);
         boolean hasNextPage = firstPage.path("pageInfo").path("hasNextPage").asBoolean();
         List<JsonNode> resultList = new ArrayList<>();
         firstPage.path("media").forEach(resultList::add);
 
         for (int i = 2; hasNextPage; i++) {
-            JsonNode nextPage = fetchPage(seasonYear, season, i);
+            JsonNode nextPage = fetchPage(year, season, i);
             hasNextPage = nextPage.path("pageInfo").path("hasNextPage").asBoolean();
             nextPage.path("media").forEach(resultList::add);
         }
@@ -92,7 +73,9 @@ public class AniListFetchService {
         return resultList;
     }
 
-    JsonNode fetchPage(int seasonYear, String season, int page) {
+    final WebClient client = WebClient.create("https://graphql.anilist.co");
+
+    JsonNode fetchPage(int seasonYear, Season season, int page) {
         String query = """
                 query ($seasonYear: Int, $season: MediaSeason, $page: Int) {
                   Page(page: $page) {
@@ -127,7 +110,7 @@ public class AniListFetchService {
 
         Map<String, Object> variables = Map.of(
                 "seasonYear", seasonYear,
-                "season", season,
+                "season", season.name(),
                 "page", page
         );
 
