@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { getPlatformConfig } from '../config/platforms';
-import { type AnimeMapping } from '../types/anime';
+import { type Mapping } from '../types/anime';
 
 const props = defineProps<{
-  mapping: AnimeMapping;
+  mapping: Mapping;
 }>();
 
 // 根据平台名称获取配置

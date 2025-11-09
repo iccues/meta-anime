@@ -15,7 +15,7 @@ import java.time.Instant;
 @Data
 @Entity
 @NoArgsConstructor
-public class AnimeMapping {
+public class Mapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long mappingId;
@@ -41,7 +41,7 @@ public class AnimeMapping {
 
     Instant updateTime;
 
-    public AnimeMapping(String sourcePlatform, String platformId, JsonNode rawJSON) {
+    public Mapping(String sourcePlatform, String platformId, JsonNode rawJSON) {
         this.sourcePlatform = sourcePlatform;
         this.platformId = platformId;
         this.rawJSON = rawJSON;

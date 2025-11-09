@@ -3,10 +3,10 @@ export interface Anime {
     title: AnimeTitles,
     coverImage: string,
     averageScore: number,
-    mappings: [AnimeMapping]
+    mappings: [Mapping]
 }
 
-export interface AnimeMapping {
+export interface Mapping {
     mappingId: number,
     sourcePlatform: string,
     platformId: string,

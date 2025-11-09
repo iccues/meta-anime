@@ -1,6 +1,6 @@
 package com.iccues.metaanimebackend.dto;
 
-public record AnimeMappingDTO(
+public record MappingDTO(
         Long mappingId,
         String sourcePlatform,
         String platformId,

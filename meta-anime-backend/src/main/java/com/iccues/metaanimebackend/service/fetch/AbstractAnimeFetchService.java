@@ -2,11 +2,11 @@ package com.iccues.metaanimebackend.service.fetch;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.iccues.metaanimebackend.entity.Anime;
-import com.iccues.metaanimebackend.entity.AnimeMapping;
+import com.iccues.metaanimebackend.entity.Mapping;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Season;
 import com.iccues.metaanimebackend.repo.AnimeRepository;
-import com.iccues.metaanimebackend.service.AnimeMappingService;
+import com.iccues.metaanimebackend.service.MappingService;
 import com.iccues.metaanimebackend.service.AnimeService;
 import jakarta.annotation.Resource;
 
@@ -15,7 +15,7 @@ import java.util.List;
 
 public abstract class AbstractAnimeFetchService {
     @Resource
-    protected AnimeMappingService animeMappingService;
+    protected MappingService mappingService;
 
     @Resource
     protected AnimeService animeService;
@@ -48,10 +48,10 @@ public abstract class AbstractAnimeFetchService {
         return repo.save(anime);
     }
 
-    void handleAnimeMapping(JsonNode jsonNode) {
+    void handleMapping(JsonNode jsonNode) {
         String platformId = extractPlatformId(jsonNode);
 
-        AnimeMapping mapping = new AnimeMapping(getPlatform(), platformId, jsonNode);
+        Mapping mapping = new Mapping(getPlatform(), platformId, jsonNode);
 
         double rawScore = extractRawScore(jsonNode);
         if (rawScore > 0) {
@@ -62,7 +62,7 @@ public abstract class AbstractAnimeFetchService {
             }
         }
 
-        animeMappingService.saveOrUpdate(mapping);
+        mappingService.saveOrUpdate(mapping);
 
         if (mapping.getAnime() == null) {
             Anime anime = searchOrCreateAnime(jsonNode);
@@ -74,7 +74,7 @@ public abstract class AbstractAnimeFetchService {
     public void fetchAnime(int year, Season season) {
         List<JsonNode> mediaList = fetchAnimeData(year, season);
         for (JsonNode jsonNode : mediaList) {
-            handleAnimeMapping(jsonNode);
+            handleMapping(jsonNode);
         }
     }
 

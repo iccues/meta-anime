@@ -31,14 +31,14 @@ public class Anime {
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             orphanRemoval = true)
-    List<AnimeMapping> mappings = new ArrayList<>();
+    List<Mapping> mappings = new ArrayList<>();
 
-    public void addMapping(AnimeMapping mapping) {
+    public void addMapping(Mapping mapping) {
         this.mappings.add(mapping);
         mapping.setAnime(this);
     }
 
-    public void removeMapping(AnimeMapping mapping) {
+    public void removeMapping(Mapping mapping) {
         this.mappings.remove(mapping);
         mapping.setAnime(null);
     }

@@ -9,6 +9,6 @@ public record AnimeDTO(
         String coverImage,
         LocalDate startDate,
         Double averageScore,
-        List<AnimeMappingDTO> mappings
+        List<MappingDTO> mappings
 ) {
 }
