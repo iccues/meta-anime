@@ -29,76 +29,116 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-5 max-w-screen-xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">管理后台</h1>
+  <div class="admin-list-page">
+    <el-page-header title="返回" content="管理后台" class="page-header" />
 
-    <div v-if="loading" class="text-center py-10 text-lg">
-      加载中...
-    </div>
+    <div v-loading="loading" class="content-wrapper">
+      <el-alert
+        v-if="error"
+        :title="error"
+        type="error"
+        center
+        show-icon
+        :closable="false"
+      />
 
-    <div v-else-if="error" class="text-center py-10 text-lg text-red-600">
-      {{ error }}
-    </div>
+      <el-row v-else :gutter="24" class="list-row">
+        <!-- 左列：动画列表 -->
+        <el-col :xs="24" :lg="12">
+          <div class="list-section">
+            <div class="section-header">
+              <h2>动画列表</h2>
+              <el-tag type="info">{{ animeList.length }}</el-tag>
+            </div>
+            <el-scrollbar height="calc(100vh - 200px)" class="list-scrollbar">
+              <div class="list-content">
+                <AdminAnimeItem
+                  v-for="anime in animeList"
+                  :key="anime.animeId"
+                  :anime="anime"
+                />
+              </div>
+            </el-scrollbar>
+          </div>
+        </el-col>
 
-    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-      <!-- 左列：动画列表 -->
-      <div class="flex flex-col h-[calc(100vh-150px)]">
-        <h2 class="text-xl font-semibold mb-4 pb-3 border-b-2 border-gray-200 text-gray-700">
-          动画列表 ({{ animeList.length }})
-        </h2>
-        <div class="flex-1 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 scrollbar-thumb-rounded">
-          <AdminAnimeItem
-            v-for="anime in animeList"
-            :key="anime.animeId"
-            :anime="anime"
-          />
-        </div>
-      </div>
-
-      <!-- 右列：映射列表 -->
-      <div class="flex flex-col h-[calc(100vh-150px)]">
-        <h2 class="text-xl font-semibold mb-4 pb-3 border-b-2 border-gray-200 text-gray-700">
-          映射列表 ({{ mappingList.length }})
-        </h2>
-        <div class="flex-1 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 scrollbar-thumb-rounded">
-          <AdminMappingItem
-            v-for="mapping in mappingList"
-            :key="mapping.mappingId"
-            :mapping="mapping"
-          />
-        </div>
-      </div>
+        <!-- 右列：映射列表 -->
+        <el-col :xs="24" :lg="12">
+          <div class="list-section">
+            <div class="section-header">
+              <h2>映射列表</h2>
+              <el-tag type="warning">{{ mappingList.length }}</el-tag>
+            </div>
+            <el-scrollbar height="calc(100vh - 200px)" class="list-scrollbar">
+              <div class="list-content">
+                <AdminMappingItem
+                  v-for="mapping in mappingList"
+                  :key="mapping.mappingId"
+                  :mapping="mapping"
+                />
+              </div>
+            </el-scrollbar>
+          </div>
+        </el-col>
+      </el-row>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* 自定义滚动条样式 - Tailwind的scrollbar插件在v4可能不可用，使用原生CSS */
-.scrollbar-thin::-webkit-scrollbar {
-  width: 8px;
+.admin-list-page {
+  padding: 20px;
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
-.scrollbar-track-gray-100::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+.page-header {
+  margin-bottom: 24px;
 }
 
-.scrollbar-thumb-gray-400::-webkit-scrollbar-thumb {
-  background: #9ca3af;
-  border-radius: 4px;
+.content-wrapper {
+  min-height: 400px;
 }
 
-.scrollbar-thumb-gray-400::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+.list-row {
+  margin-top: 0;
 }
 
-.scrollbar-thumb-rounded::-webkit-scrollbar-thumb {
-  border-radius: 4px;
+.list-section {
+  display: flex;
+  flex-direction: column;
 }
 
-@media (max-width: 1024px) {
-  .grid-cols-1.lg\:grid-cols-2 > div {
-    height: 600px;
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--el-border-color-lighter);
+}
+
+.section-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  margin: 0;
+}
+
+.list-scrollbar {
+  flex: 1;
+}
+
+.list-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 8px;
+}
+
+@media (max-width: 992px) {
+  .list-section {
+    margin-bottom: 24px;
   }
 }
 </style>
