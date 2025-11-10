@@ -31,7 +31,7 @@ public class FetchService {
 
         log.info("Fetch anime end, calculate average score start");
 
-        scoreService.calculateAverageScore();
+        scoreService.calculateAllAverageScore();
 
         log.info("Calculate average score end");
     }

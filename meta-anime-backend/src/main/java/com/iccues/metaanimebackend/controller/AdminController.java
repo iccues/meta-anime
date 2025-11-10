@@ -9,6 +9,7 @@ import com.iccues.metaanimebackend.entity.Mapping;
 import com.iccues.metaanimebackend.mapper.AdminAnimeMapper;
 import com.iccues.metaanimebackend.repo.MappingRepository;
 import com.iccues.metaanimebackend.repo.AnimeRepository;
+import com.iccues.metaanimebackend.service.ScoreService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,9 @@ public class AdminController {
 
     @Resource
     AdminAnimeMapper adminAnimeMapper;
+
+    @Resource
+    ScoreService scoreService;
 
     @ResponseBody
     @GetMapping("/get_unmapped_mapping_list")
@@ -73,6 +77,13 @@ public class AdminController {
         // 保存并返回
         Mapping savedMapping = mappingRepository.save(mapping);
         AdminMappingDTO mappingDTO = adminAnimeMapper.toMappingDto(savedMapping);
+
+        if (currentAnime != null) {
+            scoreService.calculateAverageScore(currentAnime);
+        }
+        if (savedMapping.getAnime() != null) {
+            scoreService.calculateAverageScore(savedMapping.getAnime());
+        }
         return Response.ok(mappingDTO);
     }
 }

@@ -16,26 +16,31 @@ public class ScoreService {
     AnimeRepository animeRepository;
 
     @Transactional
-    public void calculateAverageScore() {
+    public void calculateAllAverageScore() {
         List<Anime> list = animeRepository.findAll();
 
         for (Anime anime : list) {
-            double totalScore = 0.0;
-            int i = 0;
+            calculateAverageScore(anime);
+        }
+    }
 
-            for (Mapping mapping : anime.getMappings()) {
-                Double normalizedScore = mapping.getNormalizedScore();
-                if (normalizedScore != null && normalizedScore > 0) {
-                    totalScore += normalizedScore;
-                    i++;
-                }
-            }
+    @Transactional
+    public void calculateAverageScore(Anime anime) {
+        double totalScore = 0.0;
+        int i = 0;
 
-            if (i > 0) {
-                anime.setAverageScore(totalScore / i);
-            } else  {
-                anime.setAverageScore(null);
+        for (Mapping mapping : anime.getMappings()) {
+            Double normalizedScore = mapping.getNormalizedScore();
+            if (normalizedScore != null && normalizedScore > 0) {
+                totalScore += normalizedScore;
+                i++;
             }
+        }
+
+        if (i > 0) {
+            anime.setAverageScore(totalScore / i);
+        } else  {
+            anime.setAverageScore(null);
         }
     }
 }
