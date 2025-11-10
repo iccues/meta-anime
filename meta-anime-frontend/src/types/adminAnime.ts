@@ -1,16 +1,18 @@
-export interface Anime {
+export interface AdminAnime {
     animeId: number,
     title: AnimeTitles,
     coverImage: string,
     averageScore: number,
-    mappings: Mapping[]
+    mappings: AdminMapping[]
 }
 
-export interface Mapping {
+export interface AdminMapping {
     mappingId: number,
+    animeId: number,
     sourcePlatform: string,
     platformId: string,
     rawScore: number,
+    rawJSON: string,
 }
 
 export interface AnimeTitles {

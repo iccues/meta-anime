@@ -26,6 +26,12 @@ public class Mapping {
     @JoinColumn(name = "anime_id")
     Anime anime;
 
+    public Long getAnimeId() {
+        return anime.getAnimeId();
+    }
+
+//    public void setAnimeId(Long animeId) {}
+
     @NaturalId
     String sourcePlatform;
 
