@@ -161,7 +161,7 @@ const handleSubmitForm = async (formData: any) => {
         // 保留 mappings，只更新其他字段
         animeList.value[idx] = {
           ...updated,
-          mappings: animeList.value[idx].mappings
+          mappings: animeList.value[idx]?.mappings || []
         }
       }
 
@@ -184,10 +184,10 @@ const handleSubmitForm = async (formData: any) => {
 </script>
 
 <template>
-  <div class="admin-list-page">
-    <el-page-header title="返回" content="管理后台" class="page-header" />
+  <div class="p-5 max-w-[1800px] mx-auto">
+    <el-page-header title="返回" content="管理后台" class="mb-6" />
 
-    <div v-loading="loading" class="content-wrapper">
+    <div v-loading="loading" class="min-h-[400px]">
       <el-alert
         v-if="error"
         :title="error"
@@ -197,13 +197,13 @@ const handleSubmitForm = async (formData: any) => {
         :closable="false"
       />
 
-      <el-row v-else :gutter="24" class="list-row">
+      <el-row v-else :gutter="24">
         <!-- 左列：动画列表 -->
         <el-col :xs="24" :lg="12">
-          <div class="list-section">
-            <div class="section-header">
-              <div class="section-title">
-                <h2>动画列表</h2>
+          <div class="flex flex-col">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b-2 border-gray-200">
+              <div class="flex items-center gap-3">
+                <h2 class="text-xl font-semibold text-gray-800 m-0">动画列表</h2>
                 <el-tag type="info">{{ animeList.length }}</el-tag>
               </div>
               <el-button
@@ -215,8 +215,8 @@ const handleSubmitForm = async (formData: any) => {
                 新建动画
               </el-button>
             </div>
-            <el-scrollbar height="calc(100vh - 200px)" class="list-scrollbar">
-              <div class="list-content">
+            <el-scrollbar height="calc(100vh - 200px)">
+              <div class="flex flex-col gap-3 pr-2">
                 <AdminAnimeItem
                   v-for="anime in animeList"
                   :key="anime.animeId"
@@ -232,19 +232,20 @@ const handleSubmitForm = async (formData: any) => {
 
         <!-- 右列：未关联映射列表 -->
         <el-col :xs="24" :lg="12">
-          <div class="list-section">
-            <div class="section-header">
-              <h2>未关联映射</h2>
+          <div class="flex flex-col">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b-2 border-gray-200">
+              <h2 class="text-xl font-semibold text-gray-800 m-0">未关联映射</h2>
               <el-tag type="warning">{{ mappingList.length }}</el-tag>
             </div>
-            <el-scrollbar height="calc(100vh - 200px)" class="list-scrollbar">
-              <div class="list-content drop-zone">
+            <el-scrollbar height="calc(100vh - 200px)">
+              <div class="min-h-[200px] p-2 rounded transition-colors">
                 <draggable
                   :model-value="mappingList"
                   :group="{ name: 'mappings', pull: true, put: true }"
                   item-key="mappingId"
                   :sort="false"
                   @change="handleMappingToUnmapped"
+                  class="flex flex-col gap-3 pr-2"
                 >
                   <template #item="{ element }">
                     <AdminMappingItem :mapping="element" />
@@ -268,94 +269,9 @@ const handleSubmitForm = async (formData: any) => {
 </template>
 
 <style scoped>
-.admin-list-page {
-  padding: 20px;
-  max-width: 1800px;
-  margin: 0 auto;
-}
-
-.page-header {
-  margin-bottom: 24px;
-}
-
-.content-wrapper {
-  min-height: 400px;
-}
-
-.list-row {
-  margin-top: 0;
-}
-
-.list-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--el-border-color-lighter);
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.section-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-  margin: 0;
-}
-
-.list-scrollbar {
-  flex: 1;
-}
-
-.list-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-right: 8px;
-}
-
-.drop-zone {
-  min-height: 200px;
-  padding: 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.drop-zone.sortable-drag {
-  opacity: 0.5;
-}
-
-.drop-zone.sortable-ghost {
-  opacity: 0.3;
-  background: var(--el-color-primary-light-9);
-}
-
-.empty-unmapped {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  color: var(--el-text-color-placeholder);
-  font-size: 14px;
-  border: 2px dashed var(--el-border-color-lighter);
-  border-radius: 4px;
-  background: var(--el-fill-color-blank);
-  margin: 8px;
-}
-
 @media (max-width: 992px) {
-  .list-section {
-    margin-bottom: 24px;
+  .flex.flex-col > .flex.justify-between:first-child {
+    margin-bottom: 1.5rem;
   }
 }
 </style>

@@ -174,12 +174,12 @@ const handleSubmit = async () => {
         <el-image
           :src="formData.coverImage"
           fit="cover"
-          style="width: 120px; height: 170px; border-radius: 4px;"
+          class="w-[120px] h-[170px] rounded"
           :preview-src-list="[formData.coverImage]"
         >
           <template #error>
-            <div class="image-error">
-              <el-icon><icon-picture /></el-icon>
+            <div class="flex flex-col items-center justify-center w-full h-full bg-gray-100 text-gray-400 text-xs">
+              <el-icon class="text-2xl mb-1"><icon-picture /></el-icon>
               <span>加载失败</span>
             </div>
           </template>
@@ -206,25 +206,8 @@ const handleSubmit = async () => {
 </template>
 
 <style scoped>
-.image-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: var(--el-fill-color-light);
-  color: var(--el-text-color-placeholder);
-  font-size: 12px;
-}
-
-.image-error .el-icon {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
 :deep(.el-divider__text) {
   font-weight: 600;
-  color: var(--el-text-color-primary);
+  color: #1f2937;
 }
 </style>

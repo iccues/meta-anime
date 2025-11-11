@@ -7,120 +7,36 @@ defineProps<{
 </script>
 
 <template>
-  <div class="mapping-item-row">
-    <div class="mapping-cell mapping-id-cell">
-      <span class="cell-label">映射ID</span>
-      <span class="cell-value">{{ mapping.mappingId }}</span>
+  <div class="flex items-center py-1.5 px-2.5 gap-2.5 bg-white border border-gray-200 rounded-sm transition-all min-h-[50px] cursor-grab hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm active:cursor-grabbing">
+    <div class="shrink-0 w-20 flex flex-col items-start py-0.5">
+      <span class="text-[10px] text-gray-500 leading-tight mb-0.5">映射ID</span>
+      <span class="text-xs text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full">{{ mapping.mappingId }}</span>
     </div>
-    <div class="mapping-cell mapping-platform-cell">
+    <div class="shrink-0 w-[100px] flex justify-center py-0.5">
       <el-tag type="primary" size="small" effect="plain">{{ mapping.sourcePlatform }}</el-tag>
     </div>
-    <div class="mapping-cell mapping-anime-id-cell">
-      <span class="cell-label">动画ID</span>
-      <span class="cell-value">{{ mapping.animeId }}</span>
+    <div class="shrink-0 w-20 flex flex-col items-start py-0.5">
+      <span class="text-[10px] text-gray-500 leading-tight mb-0.5">动画ID</span>
+      <span class="text-xs text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full">{{ mapping.animeId }}</span>
     </div>
-    <div class="mapping-cell mapping-platform-id-cell">
-      <span class="cell-label">平台ID</span>
-      <span class="cell-value mono">{{ mapping.platformId }}</span>
+    <div class="flex-1 min-w-0 flex flex-col items-start py-0.5">
+      <span class="text-[10px] text-gray-500 leading-tight mb-0.5">平台ID</span>
+      <span class="text-[11px] text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full font-mono">{{ mapping.platformId }}</span>
     </div>
-    <div class="mapping-cell mapping-score-cell">
-      <span class="cell-label">评分</span>
-      <span class="cell-value score-value">{{ mapping.rawScore }}</span>
+    <div class="shrink-0 w-[70px] flex flex-col items-start py-0.5">
+      <span class="text-[10px] text-gray-500 leading-tight mb-0.5">评分</span>
+      <span class="text-xs text-amber-500 font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-full">{{ mapping.rawScore }}</span>
     </div>
   </div>
 </template>
 
 <style scoped>
-.mapping-item-row {
-  display: flex;
-  align-items: center;
-  padding: 6px 10px;
-  gap: 10px;
-  background: white;
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 3px;
-  transition: all 0.2s;
-  min-height: 50px;
-  /* cursor: move; */
-  cursor: grab;
-}
-
-.mapping-item-row:active {
-  cursor: grabbing;
-}
-
-.mapping-item-row:hover {
-  background: var(--el-fill-color-lighter);
-  border-color: var(--el-border-color);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-}
-
-.mapping-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 2px 0;
-}
-
-.mapping-id-cell {
-  flex-shrink: 0;
-  width: 80px;
-}
-
-.mapping-platform-cell {
-  flex-shrink: 0;
-  width: 100px;
-  justify-content: center;
-}
-
-.mapping-anime-id-cell {
-  flex-shrink: 0;
-  width: 80px;
-}
-
-.mapping-platform-id-cell {
-  flex: 1;
-  min-width: 0;
-}
-
-.mapping-score-cell {
-  flex-shrink: 0;
-  width: 70px;
-}
-
-.cell-label {
-  font-size: 10px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.2;
-  margin-bottom: 2px;
-}
-
-.cell-value {
-  font-size: 12px;
-  color: var(--el-text-color-primary);
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-}
-
-.cell-value.mono {
-  font-family: monospace;
-  font-size: 11px;
-}
-
-.score-value {
-  color: var(--el-color-warning);
-  font-weight: 600;
-}
-
 @media (max-width: 768px) {
-  .mapping-item-row {
+  .flex.items-center {
     flex-wrap: wrap;
   }
 
-  .mapping-cell {
+  .flex.flex-col {
     width: auto !important;
   }
 }

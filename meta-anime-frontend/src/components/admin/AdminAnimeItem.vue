@@ -37,36 +37,39 @@ const handleEdit = (event: Event) => {
 </script>
 
 <template>
-  <div class="anime-item-row" :class="{ expanded: isExpanded }">
-    <div class="anime-row-content" @click="toggleExpand">
-      <div class="anime-cell anime-cover-cell">
+  <div class="border border-gray-200 rounded bg-white transition-all" :class="{ 'border-blue-300': isExpanded, 'hover:shadow-md hover:border-gray-300': true }">
+    <div class="flex items-center py-2 px-3 cursor-pointer gap-3 min-h-[60px] hover:bg-gray-50" @click="toggleExpand">
+      <div class="shrink-0 w-[50px]">
         <el-image
           :src="anime.coverImage"
           :alt="anime.title.titleCn || anime.title.titleNative"
           fit="cover"
-          class="anime-cover"
+          class="w-[50px] h-[70px] rounded-sm"
         />
       </div>
-      <div class="anime-cell anime-id-cell">
-        <span class="cell-label">ID</span>
-        <span class="cell-value">{{ anime.animeId }}</span>
+      <div class="shrink-0 w-20 flex flex-col items-start py-1">
+        <span class="text-[11px] text-gray-500 leading-tight mb-0.5">ID</span>
+        <span class="text-[13px] text-gray-900 font-medium">{{ anime.animeId }}</span>
       </div>
-      <div class="anime-cell anime-title-cell">
-        <div class="title-primary">{{ anime.title.titleCn || anime.title.titleNative }}</div>
-        <div class="title-secondary">{{ anime.title.titleNative }}</div>
+      <div class="flex-1 min-w-0 flex flex-col items-start gap-0.5 py-1">
+        <div class="text-sm font-semibold text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis w-full">
+          {{ anime.title.titleCn || anime.title.titleNative }}
+        </div>
+        <div class="text-xs text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis w-full">
+          {{ anime.title.titleNative }}
+        </div>
       </div>
-      <div class="anime-cell anime-score-cell">
-        <span class="cell-label">评分</span>
-        <span class="cell-value score-value">{{ anime.averageScore?.toFixed(3) }}</span>
+      <div class="shrink-0 w-20 flex flex-col items-start py-1">
+        <span class="text-[11px] text-gray-500 leading-tight mb-0.5">评分</span>
+        <span class="text-[13px] text-green-600 font-semibold">{{ anime.averageScore?.toFixed(3) }}</span>
       </div>
-      <div class="anime-cell anime-action-cell">
+      <div class="shrink-0 w-[120px] flex justify-center items-center gap-2">
         <el-button
           type="primary"
           size="small"
           :icon="Edit"
           circle
           @click="handleEdit"
-          class="edit-btn"
           title="编辑动画"
         />
         <el-button
@@ -75,22 +78,21 @@ const handleEdit = (event: Event) => {
           :icon="Delete"
           circle
           @click="handleDelete"
-          class="delete-btn"
           title="删除动画"
         />
-        <el-icon class="expand-icon" :class="{ expanded: isExpanded }">
+        <el-icon class="text-sm transition-transform duration-300" :class="isExpanded ? 'rotate-180 text-blue-500' : 'text-gray-500'">
           <ArrowDown />
         </el-icon>
       </div>
     </div>
 
     <el-collapse-transition>
-      <div v-show="isExpanded" class="mappings-container" @click.stop>
+      <div v-show="isExpanded" class="border-t border-gray-200 bg-gray-50 py-2 px-3 pb-3" @click.stop>
         <draggable
           :model-value="anime.mappings"
           :group="{ name: 'mappings', pull: true, put: true }"
           item-key="mappingId"
-          class="mappings-list"
+          class="flex flex-col gap-1.5 min-h-[60px]"
           @change="handleMappingChange"
         >
           <template #item="{ element }">
@@ -103,189 +105,15 @@ const handleEdit = (event: Event) => {
 </template>
 
 <style scoped>
-.anime-item-row {
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 4px;
-  background: white;
-  transition: all 0.2s;
-}
-
-.anime-item-row:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-color: var(--el-border-color);
-}
-
-.anime-item-row.expanded {
-  border-color: var(--el-color-primary-light-5);
-}
-
-.anime-row-content {
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  cursor: pointer;
-  gap: 12px;
-  min-height: 60px;
-}
-
-.anime-row-content:hover {
-  background: var(--el-fill-color-lighter);
-}
-
-.anime-cell {
-  display: flex;
-  align-items: center;
-  padding: 4px 0;
-}
-
-.anime-cover-cell {
-  flex-shrink: 0;
-  width: 50px;
-}
-
-.anime-cover {
-  width: 50px;
-  height: 70px;
-  border-radius: 2px;
-}
-
-.anime-id-cell {
-  flex-shrink: 0;
-  width: 80px;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.anime-title-cell {
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-
-.anime-score-cell {
-  flex-shrink: 0;
-  width: 80px;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.anime-mappings-cell {
-  flex-shrink: 0;
-  width: 80px;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.anime-action-cell {
-  flex-shrink: 0;
-  width: 120px;
-  justify-content: center;
-  gap: 8px;
-}
-
-.edit-btn,
-.delete-btn {
-  flex-shrink: 0;
-}
-
-.cell-label {
-  font-size: 11px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.2;
-  margin-bottom: 2px;
-}
-
-.cell-value {
-  font-size: 13px;
-  color: var(--el-text-color-primary);
-  font-weight: 500;
-}
-
-.score-value {
-  color: var(--el-color-success);
-  font-weight: 600;
-}
-
-.title-primary {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-}
-
-.title-secondary {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-}
-
-.mapping-badge {
-  margin-top: 2px;
-}
-
-.expand-icon {
-  font-size: 14px;
-  transition: transform 0.3s;
-  color: var(--el-text-color-secondary);
-}
-
-.expand-icon.expanded {
-  transform: rotate(180deg);
-  color: var(--el-color-primary);
-}
-
-.mappings-container {
-  border-top: 1px solid var(--el-border-color-lighter);
-  background: var(--el-fill-color-lighter);
-  padding: 8px 12px 12px 12px;
-}
-
-.mappings-header {
-  margin-bottom: 8px;
-}
-
-.mappings-title {
-  font-size: 13px;
-  color: var(--el-text-color-regular);
-  font-weight: 600;
-}
-
-.mappings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 60px;
-}
-
-.empty-mappings {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 80px;
-  color: var(--el-text-color-placeholder);
-  font-size: 13px;
-  border: 2px dashed var(--el-border-color-lighter);
-  border-radius: 4px;
-  background: var(--el-fill-color-blank);
-}
-
 @media (max-width: 768px) {
-  .anime-row-content {
+  .flex.items-center.py-2 {
     flex-wrap: wrap;
   }
 
-  .anime-title-cell {
+  .flex-1.min-w-0 {
     width: 100%;
     order: -1;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
   }
 }
 </style>
