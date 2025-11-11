@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getAnimeList, getUnmappedMappingList, updateMappingAnime, deleteAnime } from '../../api/admin';
+import { getAnimeList, getUnmappedMappingList, updateMappingAnime, deleteAnime, createAnime, updateAnime } from '../../api/admin';
 import type { AdminAnime, AdminMapping } from '../../types/adminAnime';
 import AdminAnimeItem from '../../components/admin/AdminAnimeItem.vue';
 import AdminMappingItem from '../../components/admin/AdminMappingItem.vue';
+import AnimeFormDialog from '../../components/admin/AnimeFormDialog.vue';
 import draggable from 'vuedraggable';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { Plus } from '@element-plus/icons-vue';
 
 const animeList = ref<AdminAnime[]>([]);
 const mappingList = ref<AdminMapping[]>([]);
@@ -120,6 +122,65 @@ const handleDeleteAnime = async (animeId: number) => {
     ElMessage.error('删除失败: ' + (e instanceof Error ? e.message : '未知错误'))
   }
 }
+
+// 表单对话框相关
+const dialogVisible = ref(false)
+const editingAnime = ref<AdminAnime | undefined>(undefined)
+
+// 打开创建动画对话框
+const handleCreateAnime = () => {
+  editingAnime.value = undefined
+  dialogVisible.value = true
+}
+
+// 打开编辑动画对话框
+const handleEditAnime = (anime: AdminAnime) => {
+  editingAnime.value = anime
+  dialogVisible.value = true
+}
+
+// 关闭对话框
+const handleCloseDialog = () => {
+  dialogVisible.value = false
+  editingAnime.value = undefined
+}
+
+// 提交表单
+const handleSubmitForm = async (formData: any) => {
+  try {
+    if (editingAnime.value) {
+      // 编辑模式
+      const updated = await updateAnime({
+        animeId: editingAnime.value.animeId,
+        ...formData
+      })
+
+      // 更新列表中的动画数据
+      const idx = animeList.value.findIndex(a => a.animeId === editingAnime.value!.animeId)
+      if (idx !== -1) {
+        // 保留 mappings，只更新其他字段
+        animeList.value[idx] = {
+          ...updated,
+          mappings: animeList.value[idx].mappings
+        }
+      }
+
+      ElMessage.success('动画更新成功')
+    } else {
+      // 创建模式
+      const created = await createAnime(formData)
+
+      // 将新动画添加到列表顶部
+      animeList.value.unshift(created)
+
+      ElMessage.success('动画创建成功')
+    }
+
+    handleCloseDialog()
+  } catch (e) {
+    ElMessage.error('操作失败: ' + (e instanceof Error ? e.message : '未知错误'))
+  }
+}
 </script>
 
 <template>
@@ -141,8 +202,18 @@ const handleDeleteAnime = async (animeId: number) => {
         <el-col :xs="24" :lg="12">
           <div class="list-section">
             <div class="section-header">
-              <h2>动画列表</h2>
-              <el-tag type="info">{{ animeList.length }}</el-tag>
+              <div class="section-title">
+                <h2>动画列表</h2>
+                <el-tag type="info">{{ animeList.length }}</el-tag>
+              </div>
+              <el-button
+                type="primary"
+                size="small"
+                :icon="Plus"
+                @click="handleCreateAnime"
+              >
+                新建动画
+              </el-button>
             </div>
             <el-scrollbar height="calc(100vh - 200px)" class="list-scrollbar">
               <div class="list-content">
@@ -152,6 +223,7 @@ const handleDeleteAnime = async (animeId: number) => {
                   :anime="anime"
                   @mapping-change="(evt) => handleMappingToAnime(evt, anime.animeId)"
                   @delete-anime="handleDeleteAnime"
+                  @edit-anime="handleEditAnime"
                 />
               </div>
             </el-scrollbar>
@@ -184,6 +256,14 @@ const handleDeleteAnime = async (animeId: number) => {
         </el-col>
       </el-row>
     </div>
+
+    <!-- 动画表单对话框 -->
+    <AnimeFormDialog
+      :visible="dialogVisible"
+      :anime="editingAnime"
+      @close="handleCloseDialog"
+      @submit="handleSubmitForm"
+    />
   </div>
 </template>
 
@@ -218,6 +298,12 @@ const handleDeleteAnime = async (animeId: number) => {
   margin-bottom: 16px;
   padding-bottom: 12px;
   border-bottom: 2px solid var(--el-border-color-lighter);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .section-header h2 {
