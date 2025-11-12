@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class MyAnimeListFetchService extends AbstractAnimeFetchService {
@@ -59,7 +60,7 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
     }
 
     @Override
-    protected List<JsonNode> fetchAnimeData(int year, Season season) {
+    protected List<JsonNode> fetchMappingJson(int year, Season season) {
         JsonNode firstPage = fetchPage(year, season, 0);
         if (firstPage == null) {
             return new ArrayList<>();
@@ -67,17 +68,31 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
 
         boolean hasNextPage = firstPage.path("paging").has("next");
         List<JsonNode> list = new ArrayList<>();
-        firstPage.path("data")
-                .forEach(jsonNode -> list.add(jsonNode.path("node")));
+        addAnimeNodesToList(firstPage, list);
 
         for (int i = 1; hasNextPage; i++) {
             JsonNode nextPage = fetchPage(year, season, i);
             hasNextPage = nextPage.path("paging").has("next");
-            nextPage.path("data")
-                    .forEach(jsonNode -> list.add(jsonNode.path("node")));
+            addAnimeNodesToList(nextPage, list);
         }
 
         return list;
+    }
+
+    private void addAnimeNodesToList(JsonNode firstPage, List<JsonNode> list) {
+        firstPage.path("data")
+                .forEach(jsonNode -> {
+                    JsonNode node = jsonNode.path("node");
+//                    if (Objects.equals(node.path("media_type").asText(), "music")) {
+//                        return;
+//                    }
+//                    if (Objects.equals(node.path("media_type").asText(), "pv")) {
+//                        return;
+//                    }
+                    if (Objects.equals(node.path("media_type").asText(), "tv")) {
+                        list.add(node);
+                    }
+                });
     }
 
     final WebClient client;
@@ -95,7 +110,7 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
         return client.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/anime/season/{year}/{season}")
-                        .queryParam("fields", "id,alternative_titles,main_picture,start_date,mean")
+                        .queryParam("fields", "id,alternative_titles,main_picture,start_date,mean,media_type")
                         .queryParam("limit", pageSize)
                         .queryParam("offset", page * pageSize)
                         .build(year, season.toLowerName()))

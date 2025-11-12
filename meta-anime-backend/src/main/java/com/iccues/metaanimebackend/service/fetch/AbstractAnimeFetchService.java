@@ -6,6 +6,7 @@ import com.iccues.metaanimebackend.entity.Mapping;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Season;
 import com.iccues.metaanimebackend.repo.AnimeRepository;
+import com.iccues.metaanimebackend.repo.MappingRepository;
 import com.iccues.metaanimebackend.service.MappingService;
 import com.iccues.metaanimebackend.service.AnimeService;
 import jakarta.annotation.Resource;
@@ -21,7 +22,9 @@ public abstract class AbstractAnimeFetchService {
     protected AnimeService animeService;
 
     @Resource
-    protected AnimeRepository repo;
+    protected AnimeRepository animeRepository;
+    @Resource
+    protected MappingRepository mappingRepository;
 
     protected abstract String getPlatform();
 
@@ -37,18 +40,37 @@ public abstract class AbstractAnimeFetchService {
 
     protected abstract double normalizeScore(double rawScore);
 
-    Anime searchOrCreateAnime(JsonNode jsonNode) {
+    Anime findOrCreateAnime(JsonNode jsonNode) {
         LocalDate startDate = extractStartDate(jsonNode);
         AnimeTitles titles = extractTitles(jsonNode);
 
         Anime anime = animeService.findAnime(startDate, titles);
 
-        anime.setCoverImage(extractCoverImage(jsonNode));
+        if (anime.getCoverImage() == null) {
+            anime.setCoverImage(extractCoverImage(jsonNode));
+        }
 
-        return repo.save(anime);
+        return animeRepository.save(anime);
     }
 
-    void handleMapping(JsonNode jsonNode) {
+    public void linkMappingToAnime(Mapping mapping) {
+        if (mapping.getAnime() == null) {
+            Anime anime = findOrCreateAnime(mapping.getRawJSON());
+            anime.addMapping(mapping);
+            animeRepository.save(anime);
+        }
+    }
+
+    public void linkAllOrphanedMappings() {
+        List<Mapping> mappings = mappingRepository.findAllBySourcePlatformAndAnimeIsNull(getPlatform());
+        for (Mapping mapping : mappings) {
+            linkMappingToAnime(mapping);
+        }
+    }
+
+    protected abstract List<JsonNode> fetchMappingJson(int year, Season season);
+
+    void processAndSaveMapping(JsonNode jsonNode) {
         String platformId = extractPlatformId(jsonNode);
 
         Mapping mapping = new Mapping(getPlatform(), platformId, jsonNode);
@@ -63,20 +85,12 @@ public abstract class AbstractAnimeFetchService {
         }
 
         mappingService.saveOrUpdate(mapping);
-
-        if (mapping.getAnime() == null) {
-            Anime anime = searchOrCreateAnime(jsonNode);
-            anime.addMapping(mapping);
-            repo.save(anime);
-        }
     }
 
-    public void fetchAnime(int year, Season season) {
-        List<JsonNode> mediaList = fetchAnimeData(year, season);
+    public void fetchAndSaveMappings(int year, Season season) {
+        List<JsonNode> mediaList = fetchMappingJson(year, season);
         for (JsonNode jsonNode : mediaList) {
-            handleMapping(jsonNode);
+            processAndSaveMapping(jsonNode);
         }
     }
-
-    protected abstract List<JsonNode> fetchAnimeData(int year, Season season);
 }

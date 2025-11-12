@@ -20,6 +20,6 @@ public class AnimeFetchJob {
 
     @PostConstruct
     public void init() {
-//        fetchAnime();
+        fetchAnime();
     }
 }

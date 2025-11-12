@@ -23,16 +23,32 @@ public class FetchService {
 
     @Async
     public void fetchAnime(int year, Season season) {
-        log.info("Fetch anime start");
+        fetchMapping(year, season);
+        mergeMappings();
+        calculateAllAverageScore();
+    }
 
-        bangumiFetchService.fetchAnime(year, season);
-        aniListFetchService.fetchAnime(year, season);
-        myAnimeListFetchService.fetchAnime(year, season);
+    @Async
+    public void fetchMapping(int year, Season season) {
+        log.info("Fetch mapping start");
+        bangumiFetchService.fetchAndSaveMappings(year, season);
+        aniListFetchService.fetchAndSaveMappings(year, season);
+        myAnimeListFetchService.fetchAndSaveMappings(year, season);
+        log.info("Fetch mapping end");
+    }
 
-        log.info("Fetch anime end, calculate average score start");
+    @Async
+    public void mergeMappings() {
+        log.info("Merge mapping start");
+        bangumiFetchService.linkAllOrphanedMappings();
+        aniListFetchService.linkAllOrphanedMappings();
+        myAnimeListFetchService.linkAllOrphanedMappings();
+        log.info("Merge mapping end");
+    }
 
+    public void calculateAllAverageScore() {
+        log.info("Calculate average score start");
         scoreService.calculateAllAverageScore();
-
         log.info("Calculate average score end");
     }
 }

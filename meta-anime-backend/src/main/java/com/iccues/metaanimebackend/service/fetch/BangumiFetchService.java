@@ -53,7 +53,7 @@ public class BangumiFetchService extends AbstractAnimeFetchService {
     }
 
     @Override
-    protected List<JsonNode> fetchAnimeData(int year, Season season) {
+    protected List<JsonNode> fetchMappingJson(int year, Season season) {
         JsonNode firstPage = fetchPage(year, season, 0);
         if (firstPage == null) {
             return new ArrayList<>();
