@@ -15,7 +15,7 @@ public class AnimeFetchJob {
 
     @Scheduled(cron = "0 0 4 * * *")
     public void fetchAnime() {
-        fetchService.fetchAnime(2025, Season.SUMMER);
+//        fetchService.fetchAnime(2025, Season.SUMMER);
     }
 
     @PostConstruct

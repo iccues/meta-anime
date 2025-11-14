@@ -24,7 +24,7 @@ public class FetchService {
     @Async
     public void fetchAnime(int year, Season season) {
         fetchMapping(year, season);
-        mergeMappings();
+        linkMappings();
         calculateAllAverageScore();
     }
 
@@ -38,7 +38,7 @@ public class FetchService {
     }
 
     @Async
-    public void mergeMappings() {
+    public void linkMappings() {
         log.info("Merge mapping start");
         bangumiFetchService.linkAllOrphanedMappings();
         aniListFetchService.linkAllOrphanedMappings();

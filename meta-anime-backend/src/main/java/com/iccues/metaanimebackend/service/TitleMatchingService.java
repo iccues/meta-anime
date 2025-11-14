@@ -11,7 +11,7 @@ public class TitleMatchingService {
 
     // 2. 定义一个合理的相似度阈值
     // 这个值需要您通过实验来调整
-    private static final double SIMILARITY_THRESHOLD = 0.85;
+    private static final double SIMILARITY_THRESHOLD = 0.95;
 
     /**
      * 检查两个动画标题是否可能指向同一个作品

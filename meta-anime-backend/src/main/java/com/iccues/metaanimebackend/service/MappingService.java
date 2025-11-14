@@ -13,8 +13,11 @@ public class MappingService {
     public void saveOrUpdate(Mapping m) {
         var existing = repo.findBySourcePlatformAndPlatformId(m.getSourcePlatform(), m.getPlatformId());
         if (existing != null) {
-            m.setMappingId(existing.getMappingId());
-            repo.save(m);
+            existing.setRawScore(m.getRawScore());
+            existing.setNormalizedScore(m.getNormalizedScore());
+            existing.setRawJSON(m.getRawJSON());
+            existing.setUpdateTime(m.getUpdateTime());
+            repo.save(existing);
         } else {
             repo.save(m);
         }

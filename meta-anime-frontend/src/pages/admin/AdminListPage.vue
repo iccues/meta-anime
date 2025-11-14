@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { getAnimeList, getUnmappedMappingList, updateMappingAnime, deleteAnime, createAnime, updateAnime } from '../../api/admin';
 import type { AdminAnime, AdminMapping, ReviewStatus } from '../../types/adminAnime';
 import AdminAnimeItem from '../../components/admin/AdminAnimeItem.vue';
@@ -8,6 +9,9 @@ import AnimeFormDialog from '../../components/admin/AnimeFormDialog.vue';
 import draggable from 'vuedraggable';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Filter } from '@element-plus/icons-vue';
+
+
+const router = useRouter();
 
 const animeList = ref<AdminAnime[]>([]);
 const mappingList = ref<AdminMapping[]>([]);
@@ -246,7 +250,7 @@ const handleUpdateReviewStatus = async (animeId: number, reviewStatus: ReviewSta
 
 <template>
   <div class="p-5 max-w-[1800px] mx-auto">
-    <el-page-header title="返回" content="管理后台" class="mb-6" />
+    <el-page-header title="返回" content="动画列表管理" class="mb-6" @back="() => router.push('/admin')"/>
 
     <div v-loading="loading" class="min-h-[400px]">
       <el-alert

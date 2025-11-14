@@ -10,7 +10,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class MyAnimeListFetchService extends AbstractAnimeFetchService {
@@ -83,13 +82,11 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
         firstPage.path("data")
                 .forEach(jsonNode -> {
                     JsonNode node = jsonNode.path("node");
-//                    if (Objects.equals(node.path("media_type").asText(), "music")) {
-//                        return;
-//                    }
-//                    if (Objects.equals(node.path("media_type").asText(), "pv")) {
-//                        return;
-//                    }
-                    if (Objects.equals(node.path("media_type").asText(), "tv")) {
+                    String mediaType = node.path("media_type").asText();
+                    if (mediaType.equals("music") || mediaType.equals("pv")) {
+                        return;
+                    }
+                    if (mediaType.equals("tv")) {
                         list.add(node);
                     }
                 });
