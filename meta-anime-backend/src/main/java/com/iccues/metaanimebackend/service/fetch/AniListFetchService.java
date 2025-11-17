@@ -79,7 +79,7 @@ public class AniListFetchService extends AbstractAnimeFetchService {
 
     final WebClient client = WebClient.create("https://graphql.anilist.co");
 
-    JsonNode fetchPage(int seasonYear, Season season, int page) {
+    JsonNode fetchPage(int year, Season season, int page) {
         String query = """
                 query ($seasonYear: Int, $season: MediaSeason, $page: Int) {
                   Page(page: $page) {
@@ -113,7 +113,7 @@ public class AniListFetchService extends AbstractAnimeFetchService {
                 }""";
 
         Map<String, Object> variables = Map.of(
-                "seasonYear", seasonYear,
+                "seasonYear", year,
                 "season", season.name(),
                 "page", page
         );

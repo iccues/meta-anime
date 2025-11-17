@@ -26,3 +26,5 @@ export interface MappingInfo {
 }
 
 export type ReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export type Season = 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL';

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { getAnimeList, getUnmappedMappingList, updateMappingAnime, deleteAnime, createAnime, updateAnime } from '../../api/admin';
-import type { AdminAnime, AdminMapping, ReviewStatus } from '../../types/adminAnime';
+import type { AdminAnime, AdminMapping, ReviewStatus, Season } from '../../types/adminAnime';
 import AdminAnimeItem from '../../components/admin/AdminAnimeItem.vue';
 import AdminMappingItem from '../../components/admin/AdminMappingItem.vue';
 import AnimeFormDialog from '../../components/admin/AnimeFormDialog.vue';
@@ -27,11 +27,37 @@ const reviewStatusOptions = [
   { label: '已拒绝', value: 'REJECTED' as ReviewStatus }
 ];
 
+const selectedYear = ref<number | undefined>(undefined);
+const selectedSeason = ref<Season | undefined>(undefined);
+
+const seasonOptions = [
+  { label: '全部', value: undefined },
+  { label: '冬季', value: 'WINTER' as Season },
+  { label: '春季', value: 'SPRING' as Season },
+  { label: '夏季', value: 'SUMMER' as Season },
+  { label: '秋季', value: 'FALL' as Season }
+];
+
+// 生成年份选项（从当前年份往前推10年）
+const currentYear = new Date().getFullYear();
+const yearOptions = computed(() => {
+  const years = [{ label: '全部', value: undefined }];
+  for (let i = 0; i <= 10; i++) {
+    const year = currentYear - i;
+    years.push({ label: `${year}年`, value: year });
+  }
+  return years;
+});
+
 // 加载动画列表
 const loadAnimeList = async () => {
   try {
     loading.value = true;
-    const animes = await getAnimeList(selectedReviewStatus.value);
+    const animes = await getAnimeList(
+      selectedReviewStatus.value,
+      selectedYear.value,
+      selectedSeason.value
+    );
     animeList.value = animes;
   } catch (e) {
     error.value = e instanceof Error ? e.message : '加载动画列表失败';
@@ -50,7 +76,11 @@ onMounted(async () => {
   try {
     loading.value = true;
     const [animes, mappings] = await Promise.all([
-      getAnimeList(selectedReviewStatus.value),
+      getAnimeList(
+        selectedReviewStatus.value,
+        selectedYear.value,
+        selectedSeason.value
+      ),
       getUnmappedMappingList()
     ]);
     animeList.value = animes;
@@ -281,18 +311,51 @@ const handleUpdateReviewStatus = async (animeId: number, reviewStatus: ReviewSta
               </el-button>
             </div>
             <!-- 筛选器 -->
-            <div class="mb-3 flex items-center gap-2">
+            <div class="mb-3 flex flex-wrap items-center gap-2">
               <el-icon><Filter /></el-icon>
-              <span class="text-sm text-gray-600">审核状态：</span>
+              <span class="text-sm text-gray-600">筛选：</span>
+
               <el-select
                 v-model="selectedReviewStatus"
-                placeholder="选择审核状态"
+                placeholder="审核状态"
                 size="small"
-                style="width: 140px;"
+                style="width: 110px;"
                 @change="handleFilterChange"
               >
                 <el-option
                   v-for="option in reviewStatusOptions"
+                  :key="option.label"
+                  :label="option.label"
+                  :value="option.value"
+                />
+              </el-select>
+
+              <el-select
+                v-model="selectedYear"
+                placeholder="年份"
+                size="small"
+                style="width: 100px;"
+                clearable
+                @change="handleFilterChange"
+              >
+                <el-option
+                  v-for="option in yearOptions"
+                  :key="option.label"
+                  :label="option.label"
+                  :value="option.value"
+                />
+              </el-select>
+
+              <el-select
+                v-model="selectedSeason"
+                placeholder="季度"
+                size="small"
+                style="width: 100px;"
+                clearable
+                @change="handleFilterChange"
+              >
+                <el-option
+                  v-for="option in seasonOptions"
                   :key="option.label"
                   :label="option.label"
                   :value="option.value"

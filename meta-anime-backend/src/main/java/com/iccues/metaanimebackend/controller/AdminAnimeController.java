@@ -5,12 +5,17 @@ import com.iccues.metaanimebackend.dto.admin.AdminAnimeDTO;
 import com.iccues.metaanimebackend.dto.admin.AnimeCreateRequest;
 import com.iccues.metaanimebackend.dto.admin.AnimeUpdateRequest;
 import com.iccues.metaanimebackend.entity.Anime;
+import com.iccues.metaanimebackend.entity.LocalDateRange;
 import com.iccues.metaanimebackend.entity.ReviewStatus;
+import com.iccues.metaanimebackend.entity.Season;
 import com.iccues.metaanimebackend.mapper.AdminAnimeMapper;
 import com.iccues.metaanimebackend.repo.MappingRepository;
 import com.iccues.metaanimebackend.repo.AnimeRepository;
+import com.iccues.metaanimebackend.service.SeasonService;
+import com.iccues.metaanimebackend.spec.AnimeSpec;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -30,15 +35,24 @@ public class AdminAnimeController {
     @Resource
     AdminAnimeMapper adminAnimeMapper;
 
+    @Resource
+    SeasonService seasonService;
+
     @ResponseBody
     @GetMapping("/get_anime_list")
-    public Response<List<AdminAnimeDTO>> getAnimeList(@RequestParam(required = false) ReviewStatus reviewStatus) {
-        List<Anime> animeList;
-        if (reviewStatus != null) {
-            animeList = animeRepository.findByReviewStatus(reviewStatus);
-        } else {
-            animeList = animeRepository.findAll();
-        }
+    public Response<List<AdminAnimeDTO>> getAnimeList(
+            @RequestParam(required = false) ReviewStatus reviewStatus,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Season season) {
+        LocalDateRange dateRange = seasonService.getStartDateRange(year, season);
+
+        Specification<Anime> spec = Specification.allOf(
+                AnimeSpec.reviewStatusEquals(reviewStatus),
+                AnimeSpec.startDateBetween(dateRange),
+                AnimeSpec.orderById()
+        );
+        List<Anime> animeList = animeRepository.findAll(spec);
+
         List<AdminAnimeDTO> animeDtoList = adminAnimeMapper.toAnimeDtoList(animeList);
         return Response.ok(animeDtoList);
     }

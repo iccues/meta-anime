@@ -14,10 +14,10 @@ const fetchSeason = ref<'SPRING' | 'SUMMER' | 'FALL' | 'WINTER'>('SPRING');
 const fetchLoading = ref(false);
 
 const seasonOptions = [
+  { label: '冬季', value: 'WINTER' },
   { label: '春季', value: 'SPRING' },
   { label: '夏季', value: 'SUMMER' },
   { label: '秋季', value: 'FALL' },
-  { label: '冬季', value: 'WINTER' }
 ];
 
 // 打开抓取对话框
