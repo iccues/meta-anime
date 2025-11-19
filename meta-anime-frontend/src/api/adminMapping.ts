@@ -1,4 +1,4 @@
-import { get, put } from './http';
+import { get, put, post, del } from './http';
 import type { AdminMapping } from '../types/adminAnime';
 
 /**
@@ -21,4 +21,27 @@ export async function updateMappingAnime(
         mappingId,
         animeId
     });
+}
+
+/**
+ * 创建新的映射
+ * @param sourcePlatform 平台名称
+ * @param platformId 平台 ID
+ */
+export async function createMapping(
+    sourcePlatform: string,
+    platformId: string
+): Promise<AdminMapping> {
+    return post<AdminMapping>('/api/admin/create_mapping', {
+        sourcePlatform,
+        platformId
+    });
+}
+
+/**
+ * 删除映射
+ * @param mappingId 映射 ID
+ */
+export async function deleteMapping(mappingId: number): Promise<void> {
+    return del<void>(`/api/admin/delete_mapping/${mappingId}`);
 }

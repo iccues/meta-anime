@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { getAnimeList, getUnmappedMappingList, updateMappingAnime, deleteAnime, createAnime, updateAnime } from '../../api/admin';
+import { getAnimeList, getUnmappedMappingList, updateMappingAnime, deleteAnime, createAnime, updateAnime, createMapping, deleteMapping } from '../../api/admin';
 import type { AdminAnime, AdminMapping, ReviewStatus } from '../../types/adminAnime';
 import type { Season } from '../../types/anime';
 import AdminAnimeItem from '../../components/admin/AdminAnimeItem.vue';
 import AdminMappingItem from '../../components/admin/AdminMappingItem.vue';
 import AnimeFormDialog from '../../components/admin/AnimeFormDialog.vue';
+import MappingFormDialog from '../../components/admin/MappingFormDialog.vue';
 import draggable from 'vuedraggable';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Filter } from '@element-plus/icons-vue';
@@ -186,7 +187,7 @@ const handleDeleteAnime = async (animeId: number) => {
   }
 }
 
-// 表单对话框相关
+// 动画表单对话框相关
 const dialogVisible = ref(false)
 const editingAnime = ref<AdminAnime | undefined>(undefined)
 
@@ -206,6 +207,19 @@ const handleEditAnime = (anime: AdminAnime) => {
 const handleCloseDialog = () => {
   dialogVisible.value = false
   editingAnime.value = undefined
+}
+
+// Mapping 表单对话框相关
+const mappingDialogVisible = ref(false)
+
+// 打开创建 Mapping 对话框
+const handleCreateMapping = () => {
+  mappingDialogVisible.value = true
+}
+
+// 关闭 Mapping 对话框
+const handleCloseMappingDialog = () => {
+  mappingDialogVisible.value = false
 }
 
 // 提交表单
@@ -275,6 +289,49 @@ const handleUpdateReviewStatus = async (animeId: number, reviewStatus: ReviewSta
     }
   } catch (e) {
     ElMessage.error('更新失败: ' + (e instanceof Error ? e.message : '未知错误'))
+  }
+}
+
+// 处理创建 Mapping
+const handleSubmitMapping = async (sourcePlatform: string, platformId: string) => {
+  try {
+    const newMapping = await createMapping(sourcePlatform, platformId)
+    mappingList.value.unshift(newMapping)
+    ElMessage.success('映射创建成功')
+    handleCloseMappingDialog()
+  } catch (e) {
+    ElMessage.error('创建失败: ' + (e instanceof Error ? e.message : '未知错误'))
+  }
+}
+
+// 处理删除 Mapping
+const handleDeleteMapping = async (mappingId: number) => {
+  try {
+    const mapping = mappingList.value.find(m => m.mappingId === mappingId)
+    if (!mapping) return
+
+    await ElMessageBox.confirm(
+      `确定要删除该映射吗？此操作不可恢复。`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+
+    await deleteMapping(mappingId)
+
+    // 从列表中移除
+    const idx = mappingList.value.findIndex(m => m.mappingId === mappingId)
+    if (idx !== -1) {
+      mappingList.value.splice(idx, 1)
+    }
+
+    ElMessage.success('删除成功')
+  } catch (e) {
+    if (e === 'cancel') return
+    ElMessage.error('删除失败: ' + (e instanceof Error ? e.message : '未知错误'))
   }
 }
 </script>
@@ -383,8 +440,18 @@ const handleUpdateReviewStatus = async (animeId: number, reviewStatus: ReviewSta
         <el-col :xs="24" :lg="12">
           <div class="flex flex-col">
             <div class="flex justify-between items-center mb-4 pb-3 border-b-2 border-gray-200">
-              <h2 class="text-xl font-semibold text-gray-800 m-0">未关联映射</h2>
-              <el-tag type="warning">{{ mappingList.length }}</el-tag>
+              <div class="flex items-center gap-3">
+                <h2 class="text-xl font-semibold text-gray-800 m-0">未关联映射</h2>
+                <el-tag type="warning">{{ mappingList.length }}</el-tag>
+              </div>
+              <el-button
+                type="primary"
+                size="small"
+                :icon="Plus"
+                @click="handleCreateMapping"
+              >
+                新建映射
+              </el-button>
             </div>
             <el-scrollbar height="calc(100vh - 200px)">
               <div class="min-h-[200px] p-2 rounded transition-colors">
@@ -397,7 +464,7 @@ const handleUpdateReviewStatus = async (animeId: number, reviewStatus: ReviewSta
                   class="flex flex-col gap-3 pr-2"
                 >
                   <template #item="{ element }">
-                    <AdminMappingItem :mapping="element" />
+                    <AdminMappingItem :mapping="element" @delete-mapping="handleDeleteMapping" />
                   </template>
                 </draggable>
               </div>
@@ -413,6 +480,13 @@ const handleUpdateReviewStatus = async (animeId: number, reviewStatus: ReviewSta
       :anime="editingAnime"
       @close="handleCloseDialog"
       @submit="handleSubmitForm"
+    />
+
+    <!-- Mapping 表单对话框 -->
+    <MappingFormDialog
+      :visible="mappingDialogVisible"
+      @close="handleCloseMappingDialog"
+      @submit="handleSubmitMapping"
     />
   </div>
 </template>

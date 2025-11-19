@@ -20,7 +20,9 @@ export {
 // 导出 Mapping 相关 API
 export {
     getUnmappedMappingList,
-    updateMappingAnime
+    updateMappingAnime,
+    createMapping,
+    deleteMapping
 } from './adminMapping';
 
 // 导出 Fetch 相关 API

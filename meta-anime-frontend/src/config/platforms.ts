@@ -45,3 +45,19 @@ const platformConfigs: Record<string, PlatformConfig> = {
 export function getPlatformConfig(platformName: string): PlatformConfig {
     return platformConfigs[platformName] || { name: platformName };
 }
+
+/**
+ * 获取所有支持的平台列表
+ * @returns 平台名称数组
+ */
+export function getAllPlatforms(): string[] {
+    return Object.keys(platformConfigs);
+}
+
+/**
+ * 获取所有平台的配置列表（用于下拉选择等）
+ * @returns 平台配置数组
+ */
+export function getAllPlatformConfigs(): PlatformConfig[] {
+    return Object.values(platformConfigs);
+}

@@ -2,9 +2,14 @@
 import { computed } from 'vue';
 import { getPlatformConfig } from '../../config/platforms';
 import type { AdminMapping } from '../../types/adminAnime';
+import { Delete } from '@element-plus/icons-vue';
 
 const props = defineProps<{
   mapping: AdminMapping;
+}>();
+
+const emit = defineEmits<{
+  deleteMapping: [mappingId: number];
 }>();
 
 // 根据平台名称获取配置
@@ -33,6 +38,11 @@ const titleTooltip = computed(() => {
   }
   return title.trim();
 });
+
+const handleDelete = (e: Event) => {
+  e.stopPropagation();
+  emit('deleteMapping', props.mapping.mappingId);
+};
 </script>
 
 <template>
@@ -70,6 +80,16 @@ const titleTooltip = computed(() => {
     <div v-if="mapping.mappingInfo.startDate" class="shrink-0 w-20 flex flex-col items-start py-0.5">
       <span class="text-[10px] text-gray-500 leading-tight mb-0.5">开始日期</span>
       <span class="text-[11px] text-gray-700 whitespace-nowrap">{{ mapping.mappingInfo.startDate }}</span>
+    </div>
+    <div class="shrink-0 flex items-center">
+      <el-button
+        type="danger"
+        size="small"
+        :icon="Delete"
+        circle
+        @click="handleDelete"
+        title="删除映射"
+      />
     </div>
   </div>
 </template>
