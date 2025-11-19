@@ -24,6 +24,9 @@ public class Mapping {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long mappingId;
 
+    @Version
+    Integer version;
+
     @ToString.Exclude
     @JsonIgnore
     @ManyToOne

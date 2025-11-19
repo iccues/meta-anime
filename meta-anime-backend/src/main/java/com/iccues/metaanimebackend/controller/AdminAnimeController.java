@@ -59,6 +59,7 @@ public class AdminAnimeController {
 
     @ResponseBody
     @PostMapping("/create_anime")
+    @Transactional
     public Response<AdminAnimeDTO> createAnime(@Valid @RequestBody AnimeCreateRequest request) {
         Anime anime = new Anime();
         anime.setTitle(request.title());
@@ -72,6 +73,7 @@ public class AdminAnimeController {
 
     @ResponseBody
     @PutMapping("/update_anime")
+    @Transactional
     public Response<AdminAnimeDTO> updateAnime(@Valid @RequestBody AnimeUpdateRequest request) {
         Anime anime = animeRepository.findById(request.animeId())
                 .orElseThrow(() -> new RuntimeException("Anime not found with id: " + request.animeId()));

@@ -11,6 +11,7 @@ import com.iccues.metaanimebackend.repo.MappingRepository;
 import com.iccues.metaanimebackend.service.MappingService;
 import com.iccues.metaanimebackend.service.AnimeService;
 import jakarta.annotation.Resource;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -50,6 +51,7 @@ public abstract class AbstractAnimeFetchService {
         );
     }
 
+    @Transactional
     Anime findOrCreateAnime(JsonNode jsonNode) {
         LocalDate startDate = extractStartDate(jsonNode);
         AnimeTitles titles = extractTitles(jsonNode);
@@ -63,6 +65,7 @@ public abstract class AbstractAnimeFetchService {
         return animeRepository.save(anime);
     }
 
+    @Transactional
     public void linkMappingToAnime(Mapping mapping) {
         if (mapping.getAnime() == null) {
             Anime anime = findOrCreateAnime(mapping.getRawJSON());
@@ -71,6 +74,7 @@ public abstract class AbstractAnimeFetchService {
         }
     }
 
+    @Transactional
     public void linkAllOrphanedMappings() {
         List<Mapping> mappings = mappingRepository.findAllBySourcePlatformAndAnimeIsNull(getPlatform());
         for (Mapping mapping : mappings) {
@@ -99,6 +103,7 @@ public abstract class AbstractAnimeFetchService {
         mappingService.saveOrUpdate(mapping);
     }
 
+    @Transactional
     public void fetchAndSaveMappings(int year, Season season) {
         List<JsonNode> mediaList = fetchMappingJson(year, season);
         for (JsonNode jsonNode : mediaList) {

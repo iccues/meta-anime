@@ -18,6 +18,9 @@ public class Anime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long animeId;
 
+    @Version
+    Integer version;
+
     @Embedded
     AnimeTitles title;
 
