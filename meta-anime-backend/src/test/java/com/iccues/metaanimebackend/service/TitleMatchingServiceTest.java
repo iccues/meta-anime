@@ -1,19 +1,13 @@
 package com.iccues.metaanimebackend.service;
 
-import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
 public class TitleMatchingServiceTest {
 
-    @Resource
-    TitleMatchingService titleMatchingService;
+    final TitleMatchingService titleMatchingService = new TitleMatchingService();
 
     @Test
     public void testAreTitlesSimilar_IdenticalTitles() {

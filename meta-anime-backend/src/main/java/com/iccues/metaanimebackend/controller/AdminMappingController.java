@@ -6,6 +6,9 @@ import com.iccues.metaanimebackend.dto.admin.CreateMappingRequest;
 import com.iccues.metaanimebackend.dto.admin.UpdateMappingAnimeRequest;
 import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.Mapping;
+import com.iccues.metaanimebackend.exception.ResourceAlreadyExistsException;
+import com.iccues.metaanimebackend.exception.ResourceNotFoundException;
+import com.iccues.metaanimebackend.exception.UnsupportedPlatformException;
 import com.iccues.metaanimebackend.mapper.AdminAnimeMapper;
 import com.iccues.metaanimebackend.repo.AnimeRepository;
 import com.iccues.metaanimebackend.repo.MappingRepository;
@@ -56,7 +59,7 @@ public class AdminMappingController {
     public Response<AdminMappingDTO> updateMappingAnime(@RequestBody UpdateMappingAnimeRequest request) {
         // 查找映射
         Mapping mapping = mappingRepository.findById(request.mappingId())
-                .orElseThrow(() -> new RuntimeException("映射不存在: " + request.mappingId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Mapping", request.mappingId()));
 
         // 获取当前关联的动画（如果有）
         Anime currentAnime = mapping.getAnime();
@@ -67,7 +70,7 @@ public class AdminMappingController {
 
         if (request.animeId() != null) {
             Anime targetAnime = animeRepository.findById(request.animeId())
-                    .orElseThrow(() -> new RuntimeException("动画不存在: " + request.animeId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Anime", request.animeId()));
             targetAnime.addMapping(mapping);
         }
 
@@ -90,7 +93,7 @@ public class AdminMappingController {
     public Response<Void> deleteMapping(@PathVariable Long mappingId) {
         // 查找映射
         Mapping mapping = mappingRepository.findById(mappingId)
-                .orElseThrow(() -> new RuntimeException("映射不存在: " + mappingId));
+                .orElseThrow(() -> new ResourceNotFoundException("Mapping", mappingId));
 
         // 获取关联的动画（如果有）
         Anime relatedAnime = mapping.getAnime();
@@ -127,13 +130,13 @@ public class AdminMappingController {
         );
 
         if (existingMapping != null) {
-            throw new RuntimeException("映射已存在: " + request.sourcePlatform() + " - " + request.platformId());
+            throw new ResourceAlreadyExistsException("Mapping", request.sourcePlatform() + " - " + request.platformId());
         }
 
         // 获取对应的 FetchService
         AbstractAnimeFetchService fetchServiceImpl = fetchService.getFetchServiceByName(request.sourcePlatform());
         if (fetchServiceImpl == null) {
-            throw new RuntimeException("不支持的平台: " + request.sourcePlatform());
+            throw new UnsupportedPlatformException(request.sourcePlatform());
         }
 
         // 从平台获取数据并创建映射

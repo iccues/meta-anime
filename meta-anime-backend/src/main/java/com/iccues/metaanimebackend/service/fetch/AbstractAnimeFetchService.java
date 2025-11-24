@@ -6,6 +6,7 @@ import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.Mapping;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Season;
+import com.iccues.metaanimebackend.exception.FetchFailedException;
 import com.iccues.metaanimebackend.repo.AnimeRepository;
 import com.iccues.metaanimebackend.repo.MappingRepository;
 import com.iccues.metaanimebackend.service.MappingService;
@@ -114,7 +115,7 @@ public abstract class AbstractAnimeFetchService {
     public Mapping fetchAndCreateMapping(String platformId) {
         JsonNode jsonNode = fetchSingleMappingJson(platformId);
         if (jsonNode == null) {
-            throw new RuntimeException("无法从平台获取数据: " + platformId);
+            throw new FetchFailedException(getPlatform(), platformId);
         }
         processAndSaveMapping(jsonNode);
         return mappingRepository.findBySourcePlatformAndPlatformId(getPlatform(), platformId);

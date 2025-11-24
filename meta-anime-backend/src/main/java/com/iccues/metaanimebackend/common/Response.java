@@ -7,6 +7,7 @@ public class Response<T> {
     private boolean success;
     private T data;
     private String message;
+    private String code;
 
     public static <T> Response<T> ok(T data) {
         Response<T> response = new Response<>();
@@ -18,6 +19,14 @@ public class Response<T> {
     public static <T> Response<T> fail(String message) {
         Response<T> response = new Response<>();
         response.success = false;
+        response.message = message;
+        return response;
+    }
+
+    public static <T> Response<T> fail(String code, String message) {
+        Response<T> response = new Response<>();
+        response.success = false;
+        response.code = code;
         response.message = message;
         return response;
     }

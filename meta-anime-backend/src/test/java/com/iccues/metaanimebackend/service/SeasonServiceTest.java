@@ -2,21 +2,15 @@ package com.iccues.metaanimebackend.service;
 
 import com.iccues.metaanimebackend.entity.LocalDateRange;
 import com.iccues.metaanimebackend.entity.Season;
-import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
 public class SeasonServiceTest {
 
-    @Resource
-    SeasonService seasonService;
+    final SeasonService seasonService = new SeasonService();
 
     @Test
     public void testGetStartDateRange_WithNullYear() {

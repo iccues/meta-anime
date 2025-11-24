@@ -8,6 +8,7 @@ import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.LocalDateRange;
 import com.iccues.metaanimebackend.entity.ReviewStatus;
 import com.iccues.metaanimebackend.entity.Season;
+import com.iccues.metaanimebackend.exception.ResourceNotFoundException;
 import com.iccues.metaanimebackend.mapper.AdminAnimeMapper;
 import com.iccues.metaanimebackend.repo.MappingRepository;
 import com.iccues.metaanimebackend.repo.AnimeRepository;
@@ -73,7 +74,7 @@ public class AdminAnimeController {
     @Transactional
     public Response<AdminAnimeDTO> updateAnime(@Valid @RequestBody AnimeUpdateRequest request) {
         Anime anime = animeRepository.findById(request.animeId())
-                .orElseThrow(() -> new RuntimeException("Anime not found with id: " + request.animeId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Anime", request.animeId()));
 
         adminAnimeMapper.updateAnimeByRequest(request, anime);
 
@@ -87,7 +88,7 @@ public class AdminAnimeController {
     @Transactional
     public Response<Void> deleteAnime(@PathVariable Long animeId) {
         Anime anime = animeRepository.findById(animeId)
-                .orElseThrow(() -> new RuntimeException("Anime not found with id: " + animeId));
+                .orElseThrow(() -> new ResourceNotFoundException("Anime", animeId));
 
         // 解除所有映射的关联
         anime.getMappings().forEach(mapping -> {

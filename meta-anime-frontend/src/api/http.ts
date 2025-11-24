@@ -40,6 +40,19 @@ async function request<T>(
 
     // 检查 HTTP 状态
     if (!response.ok) {
+        try {
+            const result: Response<T> = await response.json();
+            // 如果能解析且有业务错误信息，使用业务错误
+            if (!result.success && result.message) {
+                throw new Error(result.message);
+            }
+        } catch (e) {
+            // 解析失败或没有业务错误信息，使用HTTP错误
+            if (e instanceof Error && e.message !== `HTTP错误: ${response.status}`) {
+                throw e;  // 重新抛出已解析的业务错误
+            }
+        }
+        // 兜底：HTTP错误
         throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
     }
 
