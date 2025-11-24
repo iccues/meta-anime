@@ -44,7 +44,7 @@ public class Mapping {
     Double normalizedScore;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "json")
     JsonNode rawJSON;
 
     Instant updateTime;
