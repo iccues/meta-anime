@@ -3,6 +3,7 @@ package com.iccues.metaanimebackend.service.fetch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Season;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -77,7 +78,8 @@ public class AniListFetchService extends AbstractAnimeFetchService {
         return list;
     }
 
-    final WebClient client = WebClient.create("https://graphql.anilist.co");
+    @Resource
+    WebClient aniListWebClient;
 
     JsonNode fetchPage(int year, Season season, int page) {
         String query = """
@@ -123,7 +125,7 @@ public class AniListFetchService extends AbstractAnimeFetchService {
                 "variables", variables
         );
 
-        var result = client.post()
+        var result = aniListWebClient.post()
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(JsonNode.class)
@@ -172,7 +174,7 @@ public class AniListFetchService extends AbstractAnimeFetchService {
                 "variables", variables
         );
 
-        var result = client.post()
+        var result = aniListWebClient.post()
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(JsonNode.class)
