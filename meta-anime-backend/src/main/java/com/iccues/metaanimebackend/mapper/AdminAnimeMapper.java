@@ -1,11 +1,11 @@
 package com.iccues.metaanimebackend.mapper;
 
-import com.iccues.metaanimebackend.dto.admin.AdminAnimeDTO;
-import com.iccues.metaanimebackend.dto.admin.AdminMappingDTO;
-import com.iccues.metaanimebackend.dto.admin.AnimeCreateRequest;
-import com.iccues.metaanimebackend.dto.admin.AnimeUpdateRequest;
+import com.iccues.metaanimebackend.dto.admin.*;
 import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.Mapping;
+import com.iccues.metaanimebackend.service.fetch.AbstractAnimeFetchService;
+import com.iccues.metaanimebackend.service.fetch.FetchService;
+import jakarta.annotation.Resource;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -16,16 +16,34 @@ import java.util.List;
         componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
-public interface AdminAnimeMapper {
-    List<AdminMappingDTO> toMappingDtoList(List<Mapping> mappingList);
+public abstract class AdminAnimeMapper {
 
-    AdminAnimeDTO toAnimeDto(Anime anime);
-    List<AdminAnimeDTO> toAnimeDtoList(List<Anime> animeList);
+    @Resource
+    protected FetchService fetchService;
 
-    AdminMappingDTO toMappingDto(Mapping mapping);
+    public abstract List<AdminMappingDTO> toMappingDtoList(List<Mapping> mappingList);
 
-    Anime requestToAnime(AnimeCreateRequest animeCreateRequest);
+    public abstract AdminAnimeDTO toAnimeDto(Anime anime);
+    public abstract List<AdminAnimeDTO> toAnimeDtoList(List<Anime> animeList);
+
+    @org.mapstruct.Mapping(target = "mappingInfo", expression = "java(extractMappingInfo(mapping))")
+    public abstract AdminMappingDTO toMappingDto(Mapping mapping);
+
+    protected MappingInfo extractMappingInfo(Mapping mapping) {
+        if (mapping == null || mapping.getSourcePlatform() == null) {
+            return null;
+        }
+
+        AbstractAnimeFetchService service = fetchService.getFetchServiceByName(mapping.getSourcePlatform());
+        if (service == null) {
+            return null;
+        }
+
+        return service.getMappingInfo(mapping);
+    }
+
+    public abstract Anime requestToAnime(AnimeCreateRequest animeCreateRequest);
 
     @org.mapstruct.Mapping(target = "animeId", ignore = true)
-    void updateAnimeByRequest(AnimeUpdateRequest animeUpdateRequest, @MappingTarget Anime anime);
+    public abstract void updateAnimeByRequest(AnimeUpdateRequest animeUpdateRequest, @MappingTarget Anime anime);
 }
