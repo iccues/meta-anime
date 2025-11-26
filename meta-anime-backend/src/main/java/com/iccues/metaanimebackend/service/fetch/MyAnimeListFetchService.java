@@ -3,7 +3,7 @@ package com.iccues.metaanimebackend.service.fetch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Season;
-import org.springframework.beans.factory.annotation.Value;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -92,19 +92,20 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
                 });
     }
 
-    final WebClient client;
+    @Resource
+    WebClient myAnimeListWebClient;
 
-    public MyAnimeListFetchService(@Value("${mal.client-id}") String clientId) {
-        this.client = WebClient.builder()
-                .baseUrl("https://api.myanimelist.net/v2")
-                .defaultHeader("X-MAL-CLIENT-ID", clientId)
-                .build();
-    }
+//    public MyAnimeListFetchService(@Value("${mal.client-id}") String clientId) {
+//        this.client = WebClient.builder()
+//                .baseUrl("https://api.myanimelist.net/v2")
+//                .defaultHeader("X-MAL-CLIENT-ID", clientId)
+//                .build();
+//    }
 
     final int pageSize = 100;
 
     JsonNode fetchPage(int year, Season season, int page) {
-        return client.get()
+        return myAnimeListWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/anime/season/{year}/{season}")
                         .queryParam("fields", "id,alternative_titles,main_picture,start_date,mean,media_type")
@@ -118,7 +119,7 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
 
     @Override
     protected JsonNode fetchSingleMappingJson(String platformId) {
-        return client.get()
+        return myAnimeListWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/anime/{anime_id}")
                         .queryParam("fields", "id,alternative_titles,main_picture,start_date,mean,media_type")

@@ -3,8 +3,8 @@ package com.iccues.metaanimebackend.service.fetch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Season;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
@@ -74,17 +74,13 @@ public class BangumiFetchService extends AbstractAnimeFetchService {
         return list;
     }
 
-    final WebClient client = WebClient.builder()
-            .baseUrl("https://api.bgm.tv/v0/subjects?type=2&sort=rank")
-            .exchangeStrategies(ExchangeStrategies.builder()
-                    .codecs(cfg -> cfg.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)) // 16MB
-                    .build())
-            .build();
+    @Resource
+    WebClient bangumiWebClient;
 
     final int pageSize = 50;
 
     JsonNode fetchPage(int year, Season season, int page) {
-        return client.get()
+        return bangumiWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("year", year)
                         .queryParam("month", season.toMonth())
