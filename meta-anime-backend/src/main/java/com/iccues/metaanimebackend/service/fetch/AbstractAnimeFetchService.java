@@ -128,7 +128,7 @@ public abstract class AbstractAnimeFetchService {
     }
 
     @Transactional
-    public Mapping fetchAndCreateMapping(String platformId) {
+    public Mapping fetchAndSaveMapping(String platformId) {
         try {
             JsonNode jsonNode = fetchSingleMappingJson(platformId);
             if (jsonNode == null) {

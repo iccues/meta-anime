@@ -297,7 +297,7 @@ public class AbstractAnimeFetchServiceTest {
     }
 
     @Test
-    public void testFetchAndCreateMapping_Success() throws Exception {
+    public void testFetchAndSaveMapping_Success() throws Exception {
         // 准备 JSON 数据
         String jsonString = """
                 {
@@ -316,7 +316,7 @@ public class AbstractAnimeFetchServiceTest {
                 .thenReturn(savedMapping);
 
         // 调用方法
-        Mapping result = testService.fetchAndCreateMapping("12345");
+        Mapping result = testService.fetchAndSaveMapping("12345");
 
         // 验证
         assertNotNull(result);
@@ -330,7 +330,7 @@ public class AbstractAnimeFetchServiceTest {
         testService.mockSingleNode = null;
 
         // 调用方法并验证异常
-        assertThrows(FetchFailedException.class, () -> testService.fetchAndCreateMapping("99999"));
+        assertThrows(FetchFailedException.class, () -> testService.fetchAndSaveMapping("99999"));
 
         // 验证：不应该调用 saveOrUpdate
         verify(mappingService, never()).saveOrUpdate(any(Mapping.class));
@@ -369,13 +369,13 @@ public class AbstractAnimeFetchServiceTest {
     }
 
     @Test
-    public void testFetchAndCreateMapping_WebClientResponseException() {
+    public void testFetchAndSaveMapping_WebClientResponseException() {
         // Mock fetchSingleMappingJson 抛出 WebClientResponseException
         testService.shouldThrowWebClientExceptionForSingle = true;
 
         // 调用方法并验证异常
         FetchFailedException exception = assertThrows(FetchFailedException.class,
-                () -> testService.fetchAndCreateMapping("12345"));
+                () -> testService.fetchAndSaveMapping("12345"));
 
         // 验证异常信息
         assertTrue(exception.getMessage().contains("TestPlatform"));
@@ -386,13 +386,13 @@ public class AbstractAnimeFetchServiceTest {
     }
 
     @Test
-    public void testFetchAndCreateMapping_GenericException() {
+    public void testFetchAndSaveMapping_GenericException() {
         // Mock fetchSingleMappingJson 抛出一般异常
         testService.shouldThrowGenericExceptionForSingle = true;
 
         // 调用方法并验证异常
         FetchFailedException exception = assertThrows(FetchFailedException.class,
-                () -> testService.fetchAndCreateMapping("12345"));
+                () -> testService.fetchAndSaveMapping("12345"));
 
         // 验证异常信息
         assertTrue(exception.getMessage().contains("TestPlatform"));

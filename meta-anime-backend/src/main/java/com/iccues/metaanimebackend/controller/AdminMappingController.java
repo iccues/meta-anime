@@ -141,7 +141,7 @@ public class AdminMappingController {
         }
 
         // 从平台获取数据并创建映射
-        Mapping mapping = fetchServiceImpl.fetchAndCreateMapping(request.platformId());
+        Mapping mapping = fetchServiceImpl.fetchAndSaveMapping(request.platformId());
         AdminMappingDTO mappingDTO = adminAnimeMapper.toMappingDto(mapping);
 
         return Response.ok(mappingDTO);
