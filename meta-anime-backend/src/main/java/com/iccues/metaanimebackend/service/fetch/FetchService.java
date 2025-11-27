@@ -30,20 +30,38 @@ public class FetchService {
 
     @Async
     public void fetchMapping(int year, Season season) {
-        log.info("Fetch mapping start");
-        bangumiFetchService.fetchAndSaveMappings(year, season);
-        aniListFetchService.fetchAndSaveMappings(year, season);
-        myAnimeListFetchService.fetchAndSaveMappings(year, season);
-        log.info("Fetch mapping end");
+        log.info("Fetch mapping start for year={}, season={}", year, season);
+        safeFetchMappings(bangumiFetchService, "Bangumi", year, season);
+        safeFetchMappings(aniListFetchService, "AniList", year, season);
+        safeFetchMappings(myAnimeListFetchService, "MyAnimeList", year, season);
+        log.info("Fetch mapping end for year={}, season={}", year, season);
+    }
+
+    private void safeFetchMappings(AbstractAnimeFetchService service, String platform, int year, Season season) {
+        try {
+            service.fetchAndSaveMappings(year, season);
+            log.info("{} fetch completed successfully for year={}, season={}", platform, year, season);
+        } catch (Exception e) {
+            log.error("{} fetch failed for year={}, season={}", platform, year, season, e);
+        }
     }
 
     @Async
     public void linkMappings() {
         log.info("Merge mapping start");
-        bangumiFetchService.linkAllOrphanedMappings();
-        aniListFetchService.linkAllOrphanedMappings();
-        myAnimeListFetchService.linkAllOrphanedMappings();
+        safeLinkMappings(bangumiFetchService, "Bangumi");
+        safeLinkMappings(aniListFetchService, "AniList");
+        safeLinkMappings(myAnimeListFetchService, "MyAnimeList");
         log.info("Merge mapping end");
+    }
+
+    private void safeLinkMappings(AbstractAnimeFetchService service, String platform) {
+        try {
+            service.linkAllOrphanedMappings();
+            log.info("{} link mappings completed successfully", platform);
+        } catch (Exception e) {
+            log.error("{} link mappings failed", platform, e);
+        }
     }
 
     @Async

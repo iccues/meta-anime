@@ -3,6 +3,7 @@ package com.iccues.metaanimebackend.service.fetch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Season;
+import com.iccues.metaanimebackend.util.RetryUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -86,46 +87,43 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
                     if (mediaType.equals("music") || mediaType.equals("pv")) {
                         return;
                     }
-                    if (mediaType.equals("tv")) {
-                        list.add(node);
-                    }
+                    list.add(node);
                 });
     }
 
     @Resource
     WebClient myAnimeListWebClient;
 
-//    public MyAnimeListFetchService(@Value("${mal.client-id}") String clientId) {
-//        this.client = WebClient.builder()
-//                .baseUrl("https://api.myanimelist.net/v2")
-//                .defaultHeader("X-MAL-CLIENT-ID", clientId)
-//                .build();
-//    }
-
     final int pageSize = 100;
 
     JsonNode fetchPage(int year, Season season, int page) {
-        return myAnimeListWebClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/anime/season/{year}/{season}")
-                        .queryParam("fields", "id,alternative_titles,main_picture,start_date,mean,media_type")
-                        .queryParam("limit", pageSize)
-                        .queryParam("offset", page * pageSize)
-                        .build(year, season.toLowerName()))
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+        return RetryUtil.executeWithRetry(
+                () -> myAnimeListWebClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/anime/season/{year}/{season}")
+                                .queryParam("fields", "id,alternative_titles,main_picture,start_date,mean,media_type")
+                                .queryParam("limit", pageSize)
+                                .queryParam("offset", page * pageSize)
+                                .build(year, season.toLowerName()))
+                        .retrieve()
+                        .bodyToMono(JsonNode.class)
+                        .block(),
+                String.format("MyAnimeList.fetchPage(year=%d, season=%s, page=%d)", year, season, page)
+        );
     }
 
     @Override
     protected JsonNode fetchSingleMappingJson(String platformId) {
-        return myAnimeListWebClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/anime/{anime_id}")
-                        .queryParam("fields", "id,alternative_titles,main_picture,start_date,mean,media_type")
-                        .build(platformId))
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+        return RetryUtil.executeWithRetry(
+                () -> myAnimeListWebClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/anime/{anime_id}")
+                                .queryParam("fields", "id,alternative_titles,main_picture,start_date,mean,media_type")
+                                .build(platformId))
+                        .retrieve()
+                        .bodyToMono(JsonNode.class)
+                        .block(),
+                String.format("MyAnimeList.fetchSingle(platformId=%s)", platformId)
+        );
     }
 }

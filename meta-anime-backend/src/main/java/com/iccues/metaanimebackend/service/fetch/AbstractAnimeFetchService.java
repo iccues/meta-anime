@@ -12,11 +12,14 @@ import com.iccues.metaanimebackend.repo.MappingRepository;
 import com.iccues.metaanimebackend.service.MappingService;
 import com.iccues.metaanimebackend.service.AnimeService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 public abstract class AbstractAnimeFetchService {
     @Resource
     protected MappingService mappingService;
@@ -106,18 +109,43 @@ public abstract class AbstractAnimeFetchService {
 
     @Transactional
     public void fetchAndSaveMappings(int year, Season season) {
-        List<JsonNode> mediaList = fetchMappingJson(year, season);
-        for (JsonNode jsonNode : mediaList) {
-            processAndSaveMapping(jsonNode);
+        try {
+            List<JsonNode> mediaList = fetchMappingJson(year, season);
+            for (JsonNode jsonNode : mediaList) {
+                processAndSaveMapping(jsonNode);
+            }
+        } catch (WebClientResponseException e) {
+            log.error("Failed to fetch mappings from {} for year={}, season={}: {} {}",
+                    getPlatform(), year, season, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new FetchFailedException(getPlatform(),
+                    String.format("year=%d, season=%s", year, season));
+        } catch (Exception e) {
+            log.error("Unexpected error fetching mappings from {} for year={}, season={}",
+                    getPlatform(), year, season, e);
+            throw new FetchFailedException(getPlatform(),
+                    String.format("year=%d, season=%s", year, season));
         }
     }
 
     public Mapping fetchAndCreateMapping(String platformId) {
-        JsonNode jsonNode = fetchSingleMappingJson(platformId);
-        if (jsonNode == null) {
+        try {
+            JsonNode jsonNode = fetchSingleMappingJson(platformId);
+            if (jsonNode == null) {
+                log.warn("{} API returned null for platformId={}", getPlatform(), platformId);
+                throw new FetchFailedException(getPlatform(), platformId);
+            }
+            processAndSaveMapping(jsonNode);
+            return mappingRepository.findBySourcePlatformAndPlatformId(getPlatform(), platformId);
+        } catch (WebClientResponseException e) {
+            log.error("Failed to fetch mapping from {} for platformId={}: {} {}",
+                    getPlatform(), platformId, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new FetchFailedException(getPlatform(), platformId);
+        } catch (FetchFailedException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error fetching mapping from {} for platformId={}",
+                    getPlatform(), platformId, e);
             throw new FetchFailedException(getPlatform(), platformId);
         }
-        processAndSaveMapping(jsonNode);
-        return mappingRepository.findBySourcePlatformAndPlatformId(getPlatform(), platformId);
     }
 }

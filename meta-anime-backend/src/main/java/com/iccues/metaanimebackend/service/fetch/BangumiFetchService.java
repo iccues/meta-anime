@@ -3,6 +3,7 @@ package com.iccues.metaanimebackend.service.fetch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Season;
+import com.iccues.metaanimebackend.util.RetryUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -80,25 +81,31 @@ public class BangumiFetchService extends AbstractAnimeFetchService {
     final int pageSize = 50;
 
     JsonNode fetchPage(int year, Season season, int page) {
-        return bangumiWebClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .queryParam("year", year)
-                        .queryParam("month", season.toMonth())
-                        .queryParam("limit", pageSize)
-                        .queryParam("offset", page * pageSize)
-                        .build())
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+        return RetryUtil.executeWithRetry(
+                () -> bangumiWebClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .queryParam("year", year)
+                                .queryParam("month", season.toMonth())
+                                .queryParam("limit", pageSize)
+                                .queryParam("offset", page * pageSize)
+                                .build())
+                        .retrieve()
+                        .bodyToMono(JsonNode.class)
+                        .block(),
+                String.format("Bangumi.fetchPage(year=%d, season=%s, page=%d)", year, season, page)
+        );
     }
 
     @Override
     protected JsonNode fetchSingleMappingJson(String platformId) {
         WebClient singleClient = WebClient.create("https://api.bgm.tv/v0/subjects");
-        return singleClient.get()
-                .uri("/{id}", platformId)
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+        return RetryUtil.executeWithRetry(
+                () -> singleClient.get()
+                        .uri("/{id}", platformId)
+                        .retrieve()
+                        .bodyToMono(JsonNode.class)
+                        .block(),
+                String.format("Bangumi.fetchSingle(platformId=%s)", platformId)
+        );
     }
 }
