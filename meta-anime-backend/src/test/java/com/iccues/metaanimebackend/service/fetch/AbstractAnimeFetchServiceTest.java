@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -296,7 +297,7 @@ public class AbstractAnimeFetchServiceTest {
     }
 
     @Test
-    public void testFetchAndCreateMapping_Success() throws Exception {
+    public void testFetchAndSaveMapping_Success() throws Exception {
         // 准备 JSON 数据
         String jsonString = """
                 {
@@ -315,7 +316,7 @@ public class AbstractAnimeFetchServiceTest {
                 .thenReturn(savedMapping);
 
         // 调用方法
-        Mapping result = testService.fetchAndCreateMapping("12345");
+        Mapping result = testService.fetchAndSaveMapping("12345");
 
         // 验证
         assertNotNull(result);
@@ -329,7 +330,73 @@ public class AbstractAnimeFetchServiceTest {
         testService.mockSingleNode = null;
 
         // 调用方法并验证异常
-        assertThrows(FetchFailedException.class, () -> testService.fetchAndCreateMapping("99999"));
+        assertThrows(FetchFailedException.class, () -> testService.fetchAndSaveMapping("99999"));
+
+        // 验证：不应该调用 saveOrUpdate
+        verify(mappingService, never()).saveOrUpdate(any(Mapping.class));
+    }
+
+    @Test
+    public void testFetchAndSaveMappings_WebClientResponseException() {
+        // Mock fetchMappingJson 抛出 WebClientResponseException
+        testService.shouldThrowWebClientException = true;
+
+        // 调用方法并验证异常
+        FetchFailedException exception = assertThrows(FetchFailedException.class,
+                () -> testService.fetchAndSaveMappings(2024, Season.SPRING));
+
+        // 验证异常信息
+        assertTrue(exception.getMessage().contains("TestPlatform"));
+
+        // 验证：不应该调用 saveOrUpdate
+        verify(mappingService, never()).saveOrUpdate(any(Mapping.class));
+    }
+
+    @Test
+    public void testFetchAndSaveMappings_GenericException() {
+        // Mock fetchMappingJson 抛出一般异常
+        testService.shouldThrowGenericException = true;
+
+        // 调用方法并验证异常
+        FetchFailedException exception = assertThrows(FetchFailedException.class,
+                () -> testService.fetchAndSaveMappings(2024, Season.SPRING));
+
+        // 验证异常信息
+        assertTrue(exception.getMessage().contains("TestPlatform"));
+
+        // 验证：不应该调用 saveOrUpdate
+        verify(mappingService, never()).saveOrUpdate(any(Mapping.class));
+    }
+
+    @Test
+    public void testFetchAndSaveMapping_WebClientResponseException() {
+        // Mock fetchSingleMappingJson 抛出 WebClientResponseException
+        testService.shouldThrowWebClientExceptionForSingle = true;
+
+        // 调用方法并验证异常
+        FetchFailedException exception = assertThrows(FetchFailedException.class,
+                () -> testService.fetchAndSaveMapping("12345"));
+
+        // 验证异常信息
+        assertTrue(exception.getMessage().contains("TestPlatform"));
+        assertTrue(exception.getMessage().contains("12345"));
+
+        // 验证：不应该调用 saveOrUpdate
+        verify(mappingService, never()).saveOrUpdate(any(Mapping.class));
+    }
+
+    @Test
+    public void testFetchAndSaveMapping_GenericException() {
+        // Mock fetchSingleMappingJson 抛出一般异常
+        testService.shouldThrowGenericExceptionForSingle = true;
+
+        // 调用方法并验证异常
+        FetchFailedException exception = assertThrows(FetchFailedException.class,
+                () -> testService.fetchAndSaveMapping("12345"));
+
+        // 验证异常信息
+        assertTrue(exception.getMessage().contains("TestPlatform"));
+        assertTrue(exception.getMessage().contains("12345"));
 
         // 验证：不应该调用 saveOrUpdate
         verify(mappingService, never()).saveOrUpdate(any(Mapping.class));
@@ -339,6 +406,10 @@ public class AbstractAnimeFetchServiceTest {
     private static class TestAnimeFetchService extends AbstractAnimeFetchService {
         public List<JsonNode> mockMediaList;
         public JsonNode mockSingleNode;
+        public boolean shouldThrowWebClientException = false;
+        public boolean shouldThrowGenericException = false;
+        public boolean shouldThrowWebClientExceptionForSingle = false;
+        public boolean shouldThrowGenericExceptionForSingle = false;
 
         @Override
         protected String getPlatform() {
@@ -384,11 +455,35 @@ public class AbstractAnimeFetchServiceTest {
 
         @Override
         protected List<JsonNode> fetchMappingJson(int year, Season season) {
+            if (shouldThrowWebClientException) {
+                throw WebClientResponseException.create(
+                        404,
+                        "Not Found",
+                        null,
+                        "API returned 404".getBytes(),
+                        null
+                );
+            }
+            if (shouldThrowGenericException) {
+                throw new RuntimeException("Generic error during fetch");
+            }
             return mockMediaList;
         }
 
         @Override
         protected JsonNode fetchSingleMappingJson(String platformId) {
+            if (shouldThrowWebClientExceptionForSingle) {
+                throw WebClientResponseException.create(
+                        500,
+                        "Internal Server Error",
+                        null,
+                        "API error".getBytes(),
+                        null
+                );
+            }
+            if (shouldThrowGenericExceptionForSingle) {
+                throw new RuntimeException("Generic error during single fetch");
+            }
             return mockSingleNode;
         }
     }

@@ -3,6 +3,7 @@ package com.iccues.metaanimebackend.service.fetch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Season;
+import com.iccues.metaanimebackend.util.RetryUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -125,11 +126,14 @@ public class AniListFetchService extends AbstractAnimeFetchService {
                 "variables", variables
         );
 
-        var result = aniListWebClient.post()
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+        var result = RetryUtil.executeWithRetry(
+                () -> aniListWebClient.post()
+                        .bodyValue(requestBody)
+                        .retrieve()
+                        .bodyToMono(JsonNode.class)
+                        .block(),
+                String.format("AniList.fetchPage(year=%d, season=%s, page=%d)", year, season, page)
+        );
 
         if (result == null) {
             return null;
@@ -174,11 +178,14 @@ public class AniListFetchService extends AbstractAnimeFetchService {
                 "variables", variables
         );
 
-        var result = aniListWebClient.post()
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+        var result = RetryUtil.executeWithRetry(
+                () -> aniListWebClient.post()
+                        .bodyValue(requestBody)
+                        .retrieve()
+                        .bodyToMono(JsonNode.class)
+                        .block(),
+                String.format("AniList.fetchSingle(platformId=%s)", platformId)
+        );
 
         if (result == null) {
             return null;

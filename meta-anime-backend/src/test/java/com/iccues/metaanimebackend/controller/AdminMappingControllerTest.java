@@ -263,7 +263,7 @@ public class AdminMappingControllerTest {
         mockedMapping.setRawScore(8.5);
 
         when(fetchService.getFetchServiceByName("MAL")).thenReturn(mockFetchServiceImpl);
-        when(mockFetchServiceImpl.fetchAndCreateMapping("12345")).thenReturn(mockedMapping);
+        when(mockFetchServiceImpl.fetchAndSaveMapping("12345")).thenReturn(mockedMapping);
 
         CreateMappingRequest request = new CreateMappingRequest("MAL", "12345");
 
@@ -276,7 +276,7 @@ public class AdminMappingControllerTest {
                 .andExpect(jsonPath("$.data.platformId").value("12345"));
 
         verify(fetchService, atLeast(1)).getFetchServiceByName("MAL");
-        verify(mockFetchServiceImpl, times(1)).fetchAndCreateMapping("12345");
+        verify(mockFetchServiceImpl, times(1)).fetchAndSaveMapping("12345");
     }
 
     @Test
