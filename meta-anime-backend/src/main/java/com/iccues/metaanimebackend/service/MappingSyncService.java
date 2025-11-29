@@ -90,8 +90,21 @@ public class MappingSyncService {
         long startDate = anime.getStartDate().toEpochDay();
         long daysSinceStart = today - startDate;
 
-        // 同步最近 90 天内开播的动漫（修正了日期计算逻辑）
-        return daysSinceStart >= 0 && daysSinceStart < 90;
+//        // 同步最近 90 天内开播的动漫（修正了日期计算逻辑）
+//        return daysSinceStart >= 0 && daysSinceStart < 90;
+        if (daysSinceStart <= 0) {
+            return false;
+        }
+        if (daysSinceStart < 30) {
+            return true;
+        }
+        if (daysSinceStart < 90) {
+            return today % 2 == anime.getAnimeId() % 2;
+        }
+        if (daysSinceStart < 180) {
+            return today % 7 == anime.getAnimeId() % 7;
+        }
+        return today % 30 == anime.getAnimeId() % 30;
     }
 
     /**

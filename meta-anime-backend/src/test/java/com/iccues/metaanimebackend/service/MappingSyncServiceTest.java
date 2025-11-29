@@ -50,73 +50,57 @@ class MappingSyncServiceTest {
     }
 
     /**
-     * 测试收集映射 - 成功场景
+     * 测试收集映射 - 成功场景（使用0-30天的动漫确保稳定性）
      */
     @Test
     void testCollectMappingsForSync_Success() {
-        // 准备测试数据
-        Anime anime1 = createAnime(1L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping mapping1 = createMapping("mal", "12345", anime1);
-        anime1.setMappings(List.of(mapping1));
+        // 准备测试数据 - 都使用 0-30 天内的动漫，确保一定会被同步
+        Anime anime1 = createAnimeWithMapping(1L, LocalDate.now().minusDays(10), "mal", "12345");
+        Anime anime2 = createAnimeWithMapping(2L, LocalDate.now().minusDays(20), "mal", "67890");
 
-        Anime anime2 = createAnime(2L, LocalDate.now().minusDays(60), ReviewStatus.APPROVED);
-        Mapping mapping2 = createMapping("mal", "67890", anime2);
-        anime2.setMappings(List.of(mapping2));
-
-        when(animeRepository.findAllByReviewStatus(ReviewStatus.APPROVED))
-                .thenReturn(List.of(anime1, anime2));
-
-        // 执行测试
-        mappingSyncService.collectMappingsForSync();
+        // 执行测试并获取结果
+        List<Mapping> pendingMappings = collectAndGetPendingMappings(List.of(anime1, anime2));
 
         // 验证结果
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
         assertNotNull(pendingMappings);
         assertEquals(2, pendingMappings.size());
-        assertTrue(pendingMappings.contains(mapping1));
-        assertTrue(pendingMappings.contains(mapping2));
+        assertTrue(pendingMappings.contains(anime1.getMappings().getFirst()));
+        assertTrue(pendingMappings.contains(anime2.getMappings().getFirst()));
 
         verify(animeRepository, times(1)).findAllByReviewStatus(ReviewStatus.APPROVED);
     }
 
     /**
-     * 测试收集映射 - 过滤最近 90 天内的动漫
+     * 测试收集映射 - 渐进式同步策略
+     * 规则：
+     * - 未来开播：不同步
+     * - 0-30天：每天同步
+     * - 30-90天：隔天同步（today % 2 == animeId % 2）
+     * - 90-180天：每周同步（today % 7 == animeId % 7）
+     * - 180天以上：每月同步（today % 30 == animeId % 30）
      */
     @Test
     void testCollectMappingsForSync_FilterByDate() {
-        // 准备测试数据 - 包含不同日期的动漫
-        Anime recentAnime = createAnime(1L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping recentMapping = createMapping("mal", "12345", recentAnime);
-        recentAnime.setMappings(List.of(recentMapping));
+        // 准备测试数据
+        Anime newAnime = createAnimeWithMapping(1L, LocalDate.now().minusDays(15), "mal", "12345");
+        Anime mediumAnime = createAnimeWithMapping(createMatchingAnimeId(2), LocalDate.now().minusDays(60), "mal", "67890");
+        Anime mediumAnimeSkip = createAnimeWithMapping(createNonMatchingAnimeId(2), LocalDate.now().minusDays(60), "mal", "11111");
+        Anime futureAnime = createAnimeWithMapping(10L, LocalDate.now().plusDays(10), "mal", "22222");
 
-        Anime oldAnime = createAnime(2L, LocalDate.now().minusDays(100), ReviewStatus.APPROVED); // 超过 90 天
-        Mapping oldMapping = createMapping("mal", "67890", oldAnime);
-        oldAnime.setMappings(List.of(oldMapping));
+        // 执行测试并获取结果
+        List<Mapping> pendingMappings = collectAndGetPendingMappings(
+                List.of(newAnime, mediumAnime, mediumAnimeSkip, futureAnime));
 
-        Anime futureAnime = createAnime(3L, LocalDate.now().plusDays(10), ReviewStatus.APPROVED); // 未来开播
-        Mapping futureMapping = createMapping("mal", "11111", futureAnime);
-        futureAnime.setMappings(List.of(futureMapping));
-
-        Anime boundaryAnime = createAnime(4L, LocalDate.now().minusDays(89), ReviewStatus.APPROVED); // 边界情况
-        Mapping boundaryMapping = createMapping("mal", "22222", boundaryAnime);
-        boundaryAnime.setMappings(List.of(boundaryMapping));
-
-        when(animeRepository.findAllByReviewStatus(ReviewStatus.APPROVED))
-                .thenReturn(List.of(recentAnime, oldAnime, futureAnime, boundaryAnime));
-
-        // 执行测试
-        mappingSyncService.collectMappingsForSync();
-
-        // 验证结果 - 只有最近 90 天内开播的动漫被收集
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
+        // 验证结果
         assertNotNull(pendingMappings);
-        assertEquals(2, pendingMappings.size());
-        assertTrue(pendingMappings.contains(recentMapping));
-        assertTrue(pendingMappings.contains(boundaryMapping));
-        assertFalse(pendingMappings.contains(oldMapping));
-        assertFalse(pendingMappings.contains(futureMapping));
+        assertTrue(pendingMappings.contains(newAnime.getMappings().getFirst()),
+                "New anime (0-30 days) should be synced");
+        assertTrue(pendingMappings.contains(mediumAnime.getMappings().getFirst()),
+                "Medium anime matching mod should be synced");
+        assertFalse(pendingMappings.contains(mediumAnimeSkip.getMappings().getFirst()),
+                "Medium anime not matching mod should be skipped");
+        assertFalse(pendingMappings.contains(futureAnime.getMappings().getFirst()),
+                "Future anime should not be synced");
     }
 
     /**
@@ -125,26 +109,16 @@ class MappingSyncServiceTest {
     @Test
     void testCollectMappingsForSync_SkipNoStartDate() {
         // 准备测试数据
-        Anime animeWithDate = createAnime(1L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping mapping1 = createMapping("mal", "12345", animeWithDate);
-        animeWithDate.setMappings(List.of(mapping1));
+        Anime animeWithDate = createAnimeWithMapping(1L, LocalDate.now().minusDays(15), "mal", "12345");
+        Anime animeWithoutDate = createAnimeWithMapping(2L, null, "mal", "67890");
 
-        Anime animeWithoutDate = createAnime(2L, null, ReviewStatus.APPROVED);
-        Mapping mapping2 = createMapping("mal", "67890", animeWithoutDate);
-        animeWithoutDate.setMappings(List.of(mapping2));
-
-        when(animeRepository.findAllByReviewStatus(ReviewStatus.APPROVED))
-                .thenReturn(List.of(animeWithDate, animeWithoutDate));
-
-        // 执行测试
-        mappingSyncService.collectMappingsForSync();
+        // 执行测试并获取结果
+        List<Mapping> pendingMappings = collectAndGetPendingMappings(List.of(animeWithDate, animeWithoutDate));
 
         // 验证结果 - 只收集有开播日期的动漫
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
         assertNotNull(pendingMappings);
         assertEquals(1, pendingMappings.size());
-        assertEquals(mapping1, pendingMappings.get(0));
+        assertEquals(animeWithDate.getMappings().getFirst(), pendingMappings.getFirst());
     }
 
     /**
@@ -153,28 +127,18 @@ class MappingSyncServiceTest {
     @Test
     void testCollectMappingsForSync_ClearPreviousPending() {
         // 模拟前一天有失败的 mappings
-        Anime oldAnime = createAnime(1L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping oldMapping = createMapping("mal", "99999", oldAnime);
+        List<Mapping> pendingMappings = getPendingMappings();
+        Anime oldAnime = createAnimeWithMapping(1L, LocalDate.now().minusDays(15), "mal", "99999");
+        pendingMappings.add(oldAnime.getMappings().getFirst());
 
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
-        pendingMappings.add(oldMapping);
-
-        // 准备新一天的数据
-        Anime newAnime = createAnime(2L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping newMapping = createMapping("mal", "12345", newAnime);
-        newAnime.setMappings(List.of(newMapping));
-
-        when(animeRepository.findAllByReviewStatus(ReviewStatus.APPROVED))
-                .thenReturn(List.of(newAnime));
-
-        // 执行测试
-        mappingSyncService.collectMappingsForSync();
+        // 准备新一天的数据并执行测试
+        Anime newAnime = createAnimeWithMapping(2L, LocalDate.now().minusDays(15), "mal", "12345");
+        collectAndGetPendingMappings(List.of(newAnime));
 
         // 验证结果 - 旧的记录被清空，只包含新的
         assertEquals(1, pendingMappings.size());
-        assertEquals(newMapping, pendingMappings.get(0));
-        assertFalse(pendingMappings.contains(oldMapping));
+        assertEquals(newAnime.getMappings().getFirst(), pendingMappings.getFirst());
+        assertFalse(pendingMappings.contains(oldAnime.getMappings().getFirst()));
     }
 
     /**
@@ -183,37 +147,71 @@ class MappingSyncServiceTest {
     @Test
     void testCollectMappingsForSync_MultipleMapping() {
         // 准备测试数据 - 一个动漫有多个 mappings
-        Anime anime = createAnime(1L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping mapping1 = createMapping("mal", "12345", anime);
-        Mapping mapping2 = createMapping("bangumi", "67890", anime);
-        anime.setMappings(List.of(mapping1, mapping2));
+        Anime anime = createAnimeWithMappings(1L, LocalDate.now().minusDays(15),
+                "mal", "12345", "bangumi", "67890");
 
-        when(animeRepository.findAllByReviewStatus(ReviewStatus.APPROVED))
-                .thenReturn(List.of(anime));
-
-        // 执行测试
-        mappingSyncService.collectMappingsForSync();
+        // 执行测试并获取结果
+        List<Mapping> pendingMappings = collectAndGetPendingMappings(List.of(anime));
 
         // 验证结果 - 所有 mappings 都被收集
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
         assertNotNull(pendingMappings);
         assertEquals(2, pendingMappings.size());
-        assertTrue(pendingMappings.contains(mapping1));
-        assertTrue(pendingMappings.contains(mapping2));
+        assertTrue(pendingMappings.containsAll(anime.getMappings()));
+    }
+
+    /**
+     * 测试渐进式同步策略 - 90-180天范围
+     */
+    @Test
+    void testCollectMappingsForSync_OldAnime90To180Days() {
+        // 准备测试数据
+        Anime oldAnimeMatch = createAnimeWithMapping(createMatchingAnimeId(7),
+                LocalDate.now().minusDays(120), "mal", "12345");
+        Anime oldAnimeSkip = createAnimeWithMapping(createNonMatchingAnimeId(7),
+                LocalDate.now().minusDays(120), "mal", "67890");
+
+        // 执行测试并获取结果
+        List<Mapping> pendingMappings = collectAndGetPendingMappings(List.of(oldAnimeMatch, oldAnimeSkip));
+
+        // 验证结果 - 只有匹配的会被同步（每周同步一次）
+        assertNotNull(pendingMappings);
+        assertTrue(pendingMappings.contains(oldAnimeMatch.getMappings().getFirst()),
+                "Old anime (90-180 days) matching mod 7 should be synced");
+        assertFalse(pendingMappings.contains(oldAnimeSkip.getMappings().getFirst()),
+                "Old anime (90-180 days) not matching mod 7 should be skipped");
+    }
+
+    /**
+     * 测试渐进式同步策略 - 180天以上
+     */
+    @Test
+    void testCollectMappingsForSync_VeryOldAnimeOver180Days() {
+        // 准备测试数据
+        Anime veryOldAnimeMatch = createAnimeWithMapping(createMatchingAnimeId(30),
+                LocalDate.now().minusDays(365), "mal", "12345");
+        Anime veryOldAnimeSkip = createAnimeWithMapping(createNonMatchingAnimeId(30),
+                LocalDate.now().minusDays(365), "mal", "67890");
+
+        // 执行测试并获取结果
+        List<Mapping> pendingMappings = collectAndGetPendingMappings(List.of(veryOldAnimeMatch, veryOldAnimeSkip));
+
+        // 验证结果 - 只有匹配的会被同步（每月同步一次）
+        assertNotNull(pendingMappings);
+        assertTrue(pendingMappings.contains(veryOldAnimeMatch.getMappings().getFirst()),
+                "Very old anime (>180 days) matching mod 30 should be synced");
+        assertFalse(pendingMappings.contains(veryOldAnimeSkip.getMappings().getFirst()),
+                "Very old anime (>180 days) not matching mod 30 should be skipped");
     }
 
     /**
      * 测试同步单个映射 - 成功场景
      */
     @Test
-    void testSyncMapping_Success() throws Exception {
+    void testSyncMapping_Success() {
         // 准备测试数据
-        Anime anime = createAnime(1L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping mapping = createMapping("mal", "12345", anime);
-
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
+        Anime anime = createAnimeWithMapping(1L, LocalDate.now().minusDays(30), "mal", "12345");
+        Mapping mapping = anime.getMappings().getFirst();
+        List<Mapping> pendingMappings = getPendingMappings();
         pendingMappings.add(mapping);
 
         when(fetchService.getFetchServiceByName("mal")).thenReturn(malFetchService);
@@ -234,11 +232,9 @@ class MappingSyncServiceTest {
     @Test
     void testSyncMapping_NoFetchService() {
         // 准备测试数据
-        Anime anime = createAnime(1L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping mapping = createMapping("unknown", "12345", anime);
-
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
+        Anime anime = createAnimeWithMapping(1L, LocalDate.now().minusDays(30), "unknown", "12345");
+        Mapping mapping = anime.getMappings().getFirst();
+        List<Mapping> pendingMappings = getPendingMappings();
         pendingMappings.add(mapping);
 
         when(fetchService.getFetchServiceByName("unknown")).thenReturn(null);
@@ -256,13 +252,11 @@ class MappingSyncServiceTest {
      * 测试同步单个映射 - 抛出异常
      */
     @Test
-    void testSyncMapping_ThrowsException() throws Exception {
+    void testSyncMapping_ThrowsException() {
         // 准备测试数据
-        Anime anime = createAnime(1L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping mapping = createMapping("mal", "12345", anime);
-
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
+        Anime anime = createAnimeWithMapping(1L, LocalDate.now().minusDays(30), "mal", "12345");
+        Mapping mapping = anime.getMappings().getFirst();
+        List<Mapping> pendingMappings = getPendingMappings();
         pendingMappings.add(mapping);
 
         when(fetchService.getFetchServiceByName("mal")).thenReturn(malFetchService);
@@ -281,21 +275,18 @@ class MappingSyncServiceTest {
      * 测试处理待同步映射 - 成功场景
      */
     @Test
-    void testProcessPendingMappings_Success() throws Exception {
+    void testProcessPendingMappings_Success() {
         // 准备测试数据
-        Anime anime1 = createAnime(1L, LocalDate.now().minusDays(30), ReviewStatus.APPROVED);
-        Mapping mapping1 = createMapping("mal", "12345", anime1);
+        Anime anime1 = createAnimeWithMapping(1L, LocalDate.now().minusDays(30), "mal", "12345");
+        Anime anime2 = createAnimeWithMapping(2L, LocalDate.now().minusDays(60), "mal", "67890");
 
-        Anime anime2 = createAnime(2L, LocalDate.now().minusDays(60), ReviewStatus.APPROVED);
-        Mapping mapping2 = createMapping("mal", "67890", anime2);
-
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
-        pendingMappings.add(mapping1);
-        pendingMappings.add(mapping2);
+        List<Mapping> pendingMappings = getPendingMappings();
+        pendingMappings.add(anime1.getMappings().getFirst());
+        pendingMappings.add(anime2.getMappings().getFirst());
 
         when(fetchService.getFetchServiceByName("mal")).thenReturn(malFetchService);
-        when(malFetchService.fetchAndSaveMapping(anyString())).thenReturn(mapping1, mapping2);
+        when(malFetchService.fetchAndSaveMapping(anyString()))
+                .thenReturn(anime1.getMappings().getFirst(), anime2.getMappings().getFirst());
         doNothing().when(scoreService).calculateAllAverageScore();
 
         // 执行测试
@@ -315,8 +306,7 @@ class MappingSyncServiceTest {
     @Test
     void testProcessPendingMappings_EmptyQueue() {
         // 准备测试数据 - 空队列
-        @SuppressWarnings("unchecked")
-        List<Mapping> pendingMappings = (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
+        List<Mapping> pendingMappings = getPendingMappings();
         assertTrue(pendingMappings.isEmpty());
 
         doNothing().when(scoreService).calculateAllAverageScore();
@@ -330,6 +320,14 @@ class MappingSyncServiceTest {
     }
 
     // ==================== 辅助方法 ====================
+
+    /**
+     * 获取 pendingMappings 列表（消除重复的 ReflectionTestUtils 调用）
+     */
+    @SuppressWarnings("unchecked")
+    private List<Mapping> getPendingMappings() {
+        return (List<Mapping>) ReflectionTestUtils.getField(mappingSyncService, "pendingMappings");
+    }
 
     /**
      * 创建测试用 Anime 对象
@@ -352,5 +350,56 @@ class MappingSyncServiceTest {
         mapping.setPlatformId(platformId);
         mapping.setAnime(anime);
         return mapping;
+    }
+
+    /**
+     * 创建带 Mapping 的 Anime（简化创建流程）
+     */
+    private Anime createAnimeWithMapping(Long id, LocalDate startDate, String platform, String platformId) {
+        Anime anime = createAnime(id, startDate, ReviewStatus.APPROVED);
+        Mapping mapping = createMapping(platform, platformId, anime);
+        anime.setMappings(List.of(mapping));
+        return anime;
+    }
+
+    /**
+     * 创建带多个 Mappings 的 Anime
+     */
+    private Anime createAnimeWithMappings(Long id, LocalDate startDate, String... platformAndIds) {
+        Anime anime = createAnime(id, startDate, ReviewStatus.APPROVED);
+        List<Mapping> mappings = new ArrayList<>();
+        for (int i = 0; i < platformAndIds.length; i += 2) {
+            String platform = platformAndIds[i];
+            String platformId = platformAndIds[i + 1];
+            mappings.add(createMapping(platform, platformId, anime));
+        }
+        anime.setMappings(mappings);
+        return anime;
+    }
+
+    /**
+     * 创建匹配今天取模规则的动漫ID（用于测试渐进式同步）
+     */
+    private long createMatchingAnimeId(int modulo) {
+        long today = LocalDate.now().toEpochDay();
+        return today % modulo;
+    }
+
+    /**
+     * 创建不匹配今天取模规则的动漫ID
+     */
+    private long createNonMatchingAnimeId(int modulo) {
+        long today = LocalDate.now().toEpochDay();
+        return (today + 1) % modulo;
+    }
+
+    /**
+     * 执行收集并返回 pendingMappings（简化测试流程）
+     */
+    private List<Mapping> collectAndGetPendingMappings(List<Anime> animeList) {
+        when(animeRepository.findAllByReviewStatus(ReviewStatus.APPROVED))
+                .thenReturn(animeList);
+        mappingSyncService.collectMappingsForSync();
+        return getPendingMappings();
     }
 }
