@@ -64,7 +64,6 @@ const loadAnimeList = async () => {
     animeList.value = animes;
   } catch (e) {
     error.value = e instanceof Error ? e.message : '加载动画列表失败';
-    console.error('Failed to load anime list:', e);
   } finally {
     loading.value = false;
   }
@@ -90,7 +89,6 @@ onMounted(async () => {
     mappingList.value = mappings;
   } catch (e) {
     error.value = e instanceof Error ? e.message : '加载数据失败';
-    console.error('Failed to load admin data:', e);
   } finally {
     loading.value = false;
   }
