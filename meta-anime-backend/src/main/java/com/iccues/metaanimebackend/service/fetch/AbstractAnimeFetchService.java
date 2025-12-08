@@ -55,24 +55,15 @@ public abstract class AbstractAnimeFetchService {
         );
     }
 
-    public MappingInfo getMappingInfo(Mapping mapping) {
-        JsonNode jsonNode = mapping.getRawJSON();
-        return new MappingInfo(
-                extractTitles(jsonNode),
-                extractCoverImage(jsonNode),
-                extractStartDate(jsonNode)
-        );
-    }
-
     @Transactional
-    Anime findOrCreateAnime(JsonNode jsonNode) {
-        LocalDate startDate = extractStartDate(jsonNode);
-        AnimeTitles titles = extractTitles(jsonNode);
+    Anime findOrCreateAnime(MappingInfo mappingInfo) {
+        LocalDate startDate = mappingInfo.getStartDate();
+        AnimeTitles titles = mappingInfo.getTitle();
 
         Anime anime = animeService.findAnime(startDate, titles);
 
         if (anime.getCoverImage() == null) {
-            anime.setCoverImage(extractCoverImage(jsonNode));
+            anime.setCoverImage(mappingInfo.getCoverImage());
         }
 
         return animeRepository.save(anime);
@@ -81,7 +72,7 @@ public abstract class AbstractAnimeFetchService {
     @Transactional
     public void linkMappingToAnime(Mapping mapping) {
         if (mapping.getAnime() == null) {
-            Anime anime = findOrCreateAnime(mapping.getRawJSON());
+            Anime anime = findOrCreateAnime(mapping.getMappingInfo());
             anime.addMapping(mapping);
             animeRepository.save(anime);
         }
@@ -101,8 +92,9 @@ public abstract class AbstractAnimeFetchService {
 
     void processAndSaveMapping(JsonNode jsonNode) {
         String platformId = extractPlatformId(jsonNode);
+        MappingInfo mappingInfo = extractMappingInfo(jsonNode);
 
-        Mapping mapping = new Mapping(getPlatform(), platformId, jsonNode);
+        Mapping mapping = new Mapping(getPlatform(), platformId, mappingInfo);
 
         double rawScore = extractRawScore(jsonNode);
         if (rawScore > 0) {
@@ -112,8 +104,6 @@ public abstract class AbstractAnimeFetchService {
                 mapping.setNormalizedScore(normalizedScore);
             }
         }
-
-        mapping.setMappingInfo(extractMappingInfo(jsonNode));
 
         mappingService.saveOrUpdate(mapping);
     }
