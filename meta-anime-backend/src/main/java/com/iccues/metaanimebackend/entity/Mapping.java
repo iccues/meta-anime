@@ -48,6 +48,9 @@ public class Mapping {
     @Column(columnDefinition = "jsonb")
     JsonNode rawJSON;
 
+    @Embedded
+    MappingInfo mappingInfo;
+
     Instant updateTime;
 
     public Mapping(Platform sourcePlatform, String platformId, JsonNode rawJSON) {

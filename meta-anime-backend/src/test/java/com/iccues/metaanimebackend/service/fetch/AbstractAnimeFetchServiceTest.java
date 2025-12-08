@@ -2,7 +2,7 @@ package com.iccues.metaanimebackend.service.fetch;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iccues.metaanimebackend.dto.admin.MappingInfo;
+import com.iccues.metaanimebackend.entity.MappingInfo;
 import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Mapping;
@@ -76,9 +76,9 @@ public class AbstractAnimeFetchServiceTest {
 
         // 验证结果
         assertNotNull(result);
-        assertEquals("Test Anime", result.title().getTitleNative());
-        assertEquals("https://example.com/image.jpg", result.coverImage());
-        assertEquals(LocalDate.of(2024, 1, 15), result.startDate());
+        assertEquals("Test Anime", result.getTitle().getTitleNative());
+        assertEquals("https://example.com/image.jpg", result.getCoverImage());
+        assertEquals(LocalDate.of(2024, 1, 15), result.getStartDate());
     }
 
     @Test

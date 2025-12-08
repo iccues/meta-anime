@@ -3,6 +3,7 @@ package com.iccues.metaanimebackend.mapper;
 import com.iccues.metaanimebackend.dto.admin.*;
 import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.Mapping;
+import com.iccues.metaanimebackend.entity.MappingInfo;
 import com.iccues.metaanimebackend.service.fetch.AbstractAnimeFetchService;
 import com.iccues.metaanimebackend.service.fetch.FetchService;
 import jakarta.annotation.Resource;
@@ -26,7 +27,7 @@ public abstract class AdminAnimeMapper {
     public abstract AdminAnimeDTO toAnimeDto(Anime anime);
     public abstract List<AdminAnimeDTO> toAnimeDtoList(List<Anime> animeList);
 
-    @org.mapstruct.Mapping(target = "mappingInfo", expression = "java(extractMappingInfo(mapping))")
+//    @org.mapstruct.Mapping(target = "mappingInfo", expression = "java(extractMappingInfo(mapping))")
     public abstract AdminMappingDTO toMappingDto(Mapping mapping);
 
     protected MappingInfo extractMappingInfo(Mapping mapping) {
