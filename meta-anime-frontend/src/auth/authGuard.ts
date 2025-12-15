@@ -13,7 +13,7 @@ export async function authGuard(
     const user = await oidcManager.getUser()
     if (!user || user.expired) {
         return next({
-            path: '/login',
+            path: '/admin/auth/login',
         })
     }
 

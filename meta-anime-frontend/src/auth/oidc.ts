@@ -3,13 +3,12 @@ import { getOidcConfig } from "../api/config";
 
 const oidcConfig = await getOidcConfig();
 
-console.log("OIDC Config:", oidcConfig);
-
 export const oidcManager = new UserManager({
     authority: oidcConfig.issuer,
     client_id: oidcConfig.clientId,
-    redirect_uri: `${location.origin}/callback`,
-
+    redirect_uri: `${location.origin}/admin/auth/callback`,
+    response_type: 'code',
+    scope: 'openid profile email',
     automaticSilentRenew: false,
 });
 
