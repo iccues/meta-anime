@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { fetchAnime, fetchMapping, linkMappings, calculateScores } from '../../api/admin';
 import { ElMessage } from 'element-plus';
-import { List, Download, Refresh, SetUp } from '@element-plus/icons-vue';
+import { List, Download, Refresh, SetUp, User } from '@element-plus/icons-vue';
 
 const router = useRouter();
 
@@ -83,11 +83,19 @@ const handleCalculateScores = async () => {
 const goToListPage = () => {
   router.push('/admin/list');
 };
+
+// 导航到用户页面
+const goToAuthHome = () => {
+  router.push('/admin/auth');
+};
 </script>
 
 <template>
   <div class="p-6 max-w-[1200px] mx-auto">
-    <el-page-header title="返回前台" content="管理后台" class="mb-8" @back="() => router.push('/')" />
+    <div class="flex justify-between items-center mb-8">
+      <el-page-header title="返回前台" content="管理后台" @back="() => router.push('/')" />
+      <el-button :icon="User" circle @click="goToAuthHome" title="用户信息" />
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- 页面导航卡片 -->

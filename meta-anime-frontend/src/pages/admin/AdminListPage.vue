@@ -10,7 +10,7 @@ import AnimeFormDialog from '../../components/admin/AnimeFormDialog.vue';
 import MappingFormDialog from '../../components/admin/MappingFormDialog.vue';
 import draggable from 'vuedraggable';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Plus, Filter } from '@element-plus/icons-vue';
+import { Plus, Filter, User } from '@element-plus/icons-vue';
 import { VList } from 'virtua/vue';
 
 
@@ -333,11 +333,19 @@ const handleDeleteMapping = async (mappingId: number) => {
     ElMessage.error('删除失败: ' + (e instanceof Error ? e.message : '未知错误'))
   }
 }
+
+// 导航到用户页面
+const goToAuthHome = () => {
+  router.push('/admin/auth');
+};
 </script>
 
 <template>
   <div class="p-5 max-w-[1800px] mx-auto">
-    <el-page-header title="返回" content="动画列表管理" class="mb-6" @back="() => router.push('/admin')"/>
+    <div class="flex justify-between items-center mb-6">
+      <el-page-header title="返回" content="动画列表管理" @back="() => router.push('/admin')"/>
+      <el-button :icon="User" circle @click="goToAuthHome" title="用户信息" />
+    </div>
 
     <div v-loading="loading" class="min-h-[400px]">
       <el-alert
