@@ -3,7 +3,7 @@ import { ref, onMounted, watchEffect } from 'vue';
 import AnimeCard from "./AnimeCard.vue";
 import type { Anime } from "@/types/anime.ts";
 import type { Page, PageInfo } from '@/types/page.ts';
-import { getAnimeList, type AnimeListParams } from '@/api/anime.ts';
+import { getAnimeList, type AnimeListParams } from '@/api/public/anime';
 
 const props = defineProps<AnimeListParams>();
 const emit = defineEmits<{
