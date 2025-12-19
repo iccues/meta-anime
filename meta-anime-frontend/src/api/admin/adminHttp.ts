@@ -29,7 +29,7 @@ async function request<T>(
         method,
         headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${user?.access_token}`,
+            Authorization: `Bearer ${user?.id_token}`,
             ...options?.headers,
         },
     };
