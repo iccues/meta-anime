@@ -5,7 +5,7 @@ export default [
         children: [
             {
                 path: '',
-                component: () => import('@/pages/public/MainPage.vue'),
+                component: () => import('@/pages/public/HomePage.vue'),
             },
             {
                 path: 'anime/list',

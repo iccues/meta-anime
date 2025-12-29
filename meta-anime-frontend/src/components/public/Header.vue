@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
 import logo from '@/assets/logo.svg';
-
-const router = useRouter();
 
 const isScrolled = ref(false);
 
@@ -26,15 +23,15 @@ onUnmounted(() => {
     :class="{ 'bg-white/70 backdrop-blur-md shadow-sm border-gray-100 py-3': isScrolled, 'bg-transparent py-5': !isScrolled }"
   >
     <div class="max-w-[1240px] mx-auto px-4 sm:px-6 flex items-center justify-between">
-      <div 
-        class="flex items-center gap-2 cursor-pointer group" 
-        @click="router.push('/')"
+      <router-link
+        to="/"
+        class="flex items-center gap-2 cursor-pointer group"
       >
         <img :src="logo" alt="Meta Anime Logo" class="w-8 h-8 rounded-lg shadow-lg group-hover:shadow-indigo-500/30 transition-shadow" />
         <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600">
           Meta Anime
         </span>
-      </div>
+      </router-link>
     </div>
   </header>
 </template>
