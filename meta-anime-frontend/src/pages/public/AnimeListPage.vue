@@ -86,46 +86,41 @@ const handlePageChange = (page: number) => {
 <template>
   <div class="p-5 max-w-[1400px] mx-auto">
     <!-- 筛选器 -->
-    <div class="mb-6 flex flex-wrap items-center gap-6 p-4 rounded-lg">
-      <div class="gap-3 flex items-center">
-        <el-icon><Filter /></el-icon>
-        <span class="text-sm text-gray-600">筛选：</span>
-      </div>
+    <div class="mb-6 grid grid-cols-[repeat(auto-fill,12.5rem)] gap-5 justify-center">
+      <div class="flex items-center gap-5 col-span-full">
+        <el-icon size="20"><Filter /></el-icon>
 
-      <el-select
-        v-model="selectedYear"
-        placeholder="年份"
-        size="medium"
-        class="!w-40"
-        clearable
-        @change="handleFilterChange"
-      >
-        <el-option
-          v-for="option in yearOptions"
-          :key="option.label"
-          :label="option.label"
-          :value="option.value"
-        />
-      </el-select>
+        <el-select
+          v-model="selectedYear"
+          placeholder="年份"
+          size="medium"
+          class="!w-40"
+          clearable
+          @change="handleFilterChange"
+        >
+          <el-option
+            v-for="option in yearOptions"
+            :key="option.label"
+            :label="option.label"
+            :value="option.value"
+          />
+        </el-select>
 
-      <el-select
-        v-model="selectedSeason"
-        placeholder="季度"
-        size="medium"
-        style="width: 180px;"
-        clearable
-        @change="handleFilterChange"
-      >
-        <el-option
-          v-for="option in seasonOptions"
-          :key="option.label"
-          :label="option.label"
-          :value="option.value"
-        />
-      </el-select>
-
-      <div class="text-sm text-gray-400" v-if="pageInfo">
-        共 {{ pageInfo.totalElements }} 部动画
+        <el-select
+          v-model="selectedSeason"
+          placeholder="季度"
+          size="medium"
+          class="!w-40"
+          clearable
+          @change="handleFilterChange"
+        >
+          <el-option
+            v-for="option in seasonOptions"
+            :key="option.label"
+            :label="option.label"
+            :value="option.value"
+          />
+        </el-select>
       </div>
     </div>
 
@@ -145,7 +140,7 @@ const handlePageChange = (page: number) => {
         :page-size="pageSize"
         :total="pageInfo.totalElements"
         :page-count="pageInfo.totalPages"
-        layout="prev, pager, next"
+        layout="prev, pager, next, total"
         @current-change="handlePageChange"
       />
     </div>
