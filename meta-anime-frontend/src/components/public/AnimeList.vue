@@ -37,7 +37,7 @@ watch(
 <template>
   <div v-if="error" class="text-center py-10 text-base text-red-600">{{ error }}</div>
   <div v-else-if="loading" class="text-center py-10 text-base text-gray-600">加载中...</div>
-  <div v-else-if="animes && animes.content.length > 0" class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 justify-items-center">
+  <div v-else-if="animes && animes.content.length > 0" class="grid grid-cols-[repeat(auto-fill,12.5rem)] gap-5 justify-center">
     <AnimeCard v-for="anime in animes.content" :key="anime.animeId" :anime="anime"/>
   </div>
   <div v-else class="text-center py-10 text-base text-gray-600">暂无数据</div>

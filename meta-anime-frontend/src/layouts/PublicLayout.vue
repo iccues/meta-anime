@@ -5,7 +5,7 @@ import Header from "@/components/public/Header.vue";
 <template>
   <Header />
   
-  <main class="min-h-screen pt-[72px]">
+  <main class="pt-20">
     <router-view />
   </main>
 

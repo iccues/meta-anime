@@ -12,15 +12,18 @@ const flipped = ref(true);
 </script>
 
 <template>
-  <div class="w-[200px] flex flex-col gap-2">
+  <div class="w-[12.5rem] flex flex-col gap-2">
     <div
       class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100 rounded-3xl transition-all duration-300 group"
       @click="flipped = !flipped">
       <div class="w-full h-full group-hover:brightness-80 transition-all duration-300">
         <img class="w-full h-full object-cover block" :src="anime.coverImage"
           :alt="anime.title.titleCn || anime.title.titleNative" />
+        <div class="absolute inset-x-0 bottom-0 h-12
+          bg-gradient-to-t from-black/70 to-transparent">
+        </div>
         <div v-if="anime.averageScore"
-          class="absolute bottom-3 right-3 text-white text-base font-bold drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+          class="absolute bottom-1 right-3 text-white text-base font-bold">
           {{ anime.averageScore.toFixed(0) }}
         </div>
       </div>
