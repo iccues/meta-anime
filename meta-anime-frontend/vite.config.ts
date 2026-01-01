@@ -32,7 +32,13 @@ export default defineConfig(({ mode }) => ({
     } : undefined
   },
   test: {
+    server: {
+      deps: {
+        inline: ['element-plus'],
+      },
+    },
     environment: 'happy-dom',
     globals: true,
+    css: true,
   },
 }))
