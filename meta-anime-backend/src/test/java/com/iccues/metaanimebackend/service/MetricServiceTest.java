@@ -137,7 +137,8 @@ public class MetricServiceTest {
 
         metricService.calculateAverageScore(anime);
 
-        assertNull(anime.getAverageScore());
+        // 0 分参与计算: (0.0*2 + 0.0*1) / (2+1) = 0.0
+        assertEquals(0.0, anime.getAverageScore(), 0.0001);
     }
 
     @Test
@@ -154,7 +155,7 @@ public class MetricServiceTest {
         mapping2.setSourcePlatform(Platform.MyAnimeList);
         mapping2.setNormalizedScore(null);
 
-        // 0 分数，应该被忽略
+        // 0 分数，参与计算，权重 1
         Mapping mapping3 = new Mapping();
         mapping3.setSourcePlatform(Platform.AniList);
         mapping3.setNormalizedScore(0.0);
@@ -171,9 +172,9 @@ public class MetricServiceTest {
 
         metricService.calculateAverageScore(anime);
 
-        // 只有 mapping1 (8.0*2) 和 mapping4 (9.0*1) 应该被计算
-        // (8.0*2 + 9.0*1) / (2+1) = 25/3 = 8.333...
-        assertEquals(8.333333333333334, anime.getAverageScore(), 0.0001);
+        // mapping1 (8.0*2) + mapping3 (0.0*1) + mapping4 (9.0*1), null 被忽略
+        // (8.0*2 + 0.0*1 + 9.0*1) / (2+1+1) = 25/4 = 6.25
+        assertEquals(6.25, anime.getAverageScore(), 0.0001);
     }
 
     @Test
@@ -239,8 +240,8 @@ public class MetricServiceTest {
 
         metricService.calculateAverageScore(anime);
 
-        // 负分数应该被忽略，只计算 mapping2
-        assertEquals(8.0, anime.getAverageScore(), 0.0001);
+        // 负分参与计算: (-1.0*2 + 8.0*1) / (2+1) = 6/3 = 2.0
+        assertEquals(2.0, anime.getAverageScore(), 0.0001);
     }
 
     @Test

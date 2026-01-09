@@ -116,10 +116,10 @@ public class AdminFetchControllerTest {
     }
 
     @Test
-    public void testCalculateScores_Success() throws Exception {
+    public void testCalculateMetric_Success() throws Exception {
         doNothing().when(fetchService).calculateAllMetric();
 
-        mockMvc.perform(post("/api/admin/fetch/calculate_scores"))
+        mockMvc.perform(post("/api/admin/fetch/calculate_metric"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").value("评分计算任务已启动"));
@@ -154,11 +154,11 @@ public class AdminFetchControllerTest {
     }
 
     @Test
-    public void testCalculateScores_ServiceException() throws Exception {
+    public void testCalculateMetric_ServiceException() throws Exception {
         // Mock service 抛出异常
         doThrow(new RuntimeException("计算失败")).when(fetchService).calculateAllMetric();
 
-        mockMvc.perform(post("/api/admin/fetch/calculate_scores"))
+        mockMvc.perform(post("/api/admin/fetch/calculate_metric"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.success").value(false));
 
