@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class ScoreService {
+public class MetricService {
 
     @Resource
     AnimeRepository animeRepository;
@@ -21,7 +21,7 @@ public class ScoreService {
     PlatformConfigProperties platformConfigProperties;
 
     @Transactional
-    public void calculateAllAverageScore() {
+    public void calculateAllMetric() {
         List<Anime> list = animeRepository.findAll();
 
         for (Anime anime : list) {
