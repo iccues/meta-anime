@@ -56,11 +56,6 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
     }
 
     @Override
-    protected double normalizeScore(double rawScore) {
-        return (rawScore - 1) / 9 * 100;
-    }
-
-    @Override
     protected double extractRawPopularity(JsonNode jsonNode) {
         return jsonNode.path("num_scoring_users").asDouble();
     }

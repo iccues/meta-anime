@@ -16,4 +16,14 @@ public class PlatformConfig {
      * 评分权重
      */
     private int scoreWeight = 1;
+
+    /**
+     * 评分归一化 - 均值（用于 z-score 标准化）
+     */
+    private double scoreMean = 7.0;
+
+    /**
+     * 评分归一化 - 标准差（用于 z-score 标准化）
+     */
+    private double scoreStd = 1.0;
 }

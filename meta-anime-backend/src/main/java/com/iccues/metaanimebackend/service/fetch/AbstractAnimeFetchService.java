@@ -1,6 +1,7 @@
 package com.iccues.metaanimebackend.service.fetch;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.iccues.metaanimebackend.config.PlatformConfig;
 import com.iccues.metaanimebackend.config.PlatformConfigProperties;
 import com.iccues.metaanimebackend.entity.MappingInfo;
 import com.iccues.metaanimebackend.entity.Anime;
@@ -47,12 +48,23 @@ public abstract class AbstractAnimeFetchService {
     protected abstract String extractPlatformId(JsonNode jsonNode);
 
     protected abstract double extractRawScore(JsonNode jsonNode);
-    protected abstract double normalizeScore(double rawScore);
+
+    public Double normalizeScore(double rawScore) {
+        if (rawScore < 0) {
+            return null;
+        }
+        PlatformConfig config = platformConfigProperties.getConfig(getPlatform());
+        double mean = config.getScoreMean();
+        double std = config.getScoreStd();
+        double z = (rawScore - mean) / std;
+        return 50 + (z * (100 / 6.0));
+    }
 
     protected abstract double extractRawPopularity(JsonNode jsonNode);
 
     public double normalizePopularity(double rawPopularity) {
-        double multiplier = platformConfigProperties.getConfig(getPlatform()).getPopularityMultiplier();
+        PlatformConfig config = platformConfigProperties.getConfig(getPlatform());
+        double multiplier = config.getPopularityMultiplier();
         return rawPopularity * multiplier;
     }
 
@@ -107,13 +119,9 @@ public abstract class AbstractAnimeFetchService {
         Mapping mapping = new Mapping(getPlatform(), platformId, mappingInfo);
 
         double rawScore = extractRawScore(jsonNode);
-        if (rawScore > 0) {
-            mapping.setRawScore(rawScore);
-            double normalizedScore = normalizeScore(rawScore);
-            if (normalizedScore > 0) {
-                mapping.setNormalizedScore(normalizedScore);
-            }
-        }
+        Double normalizedScore = normalizeScore(rawScore);
+        mapping.setRawScore(rawScore);
+        mapping.setNormalizedScore(normalizedScore);
 
         double rawPopularity = extractRawPopularity(jsonNode);
         double normalizedPopularity = normalizePopularity(rawPopularity);

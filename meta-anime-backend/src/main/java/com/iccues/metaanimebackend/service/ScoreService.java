@@ -37,7 +37,7 @@ public class ScoreService {
 
         for (Mapping mapping : anime.getMappings()) {
             Double normalizedScore = mapping.getNormalizedScore();
-            if (normalizedScore != null && normalizedScore > 0) {
+            if (normalizedScore != null) {
                 int weight = getWeight(mapping.getSourcePlatform());
                 totalScore += normalizedScore * weight;
                 totalWeight += weight;
