@@ -4,16 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.iccues.metaanimebackend.config.PlatformConfig;
 import com.iccues.metaanimebackend.config.PlatformConfigProperties;
 import com.iccues.metaanimebackend.entity.MappingInfo;
-import com.iccues.metaanimebackend.entity.Anime;
 import com.iccues.metaanimebackend.entity.Mapping;
 import com.iccues.metaanimebackend.entity.AnimeTitles;
 import com.iccues.metaanimebackend.entity.Platform;
 import com.iccues.metaanimebackend.entity.Season;
 import com.iccues.metaanimebackend.exception.FetchFailedException;
-import com.iccues.metaanimebackend.repo.AnimeRepository;
 import com.iccues.metaanimebackend.repo.MappingRepository;
 import com.iccues.metaanimebackend.service.MappingRepoService;
-import com.iccues.metaanimebackend.service.AnimeRepoService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +24,6 @@ public abstract class AbstractAnimeFetchService {
     @Resource
     protected MappingRepoService mappingRepoService;
 
-    @Resource
-    protected AnimeRepoService animeRepoService;
-
-    @Resource
-    protected AnimeRepository animeRepository;
     @Resource
     protected MappingRepository mappingRepository;
     @Resource
@@ -68,45 +60,12 @@ public abstract class AbstractAnimeFetchService {
         return rawPopularity * multiplier;
     }
 
-
     protected MappingInfo extractMappingInfo(JsonNode jsonNode) {
         return new MappingInfo(
                 extractTitles(jsonNode),
                 extractCoverImage(jsonNode),
                 extractStartDate(jsonNode)
         );
-    }
-
-    @Transactional
-    Anime findOrCreateAnime(MappingInfo mappingInfo) {
-        Anime existing = animeRepoService.findAnime(
-                mappingInfo.getStartDate(),
-                mappingInfo.getTitle()
-        );
-
-        if (existing != null) {
-            return existing;
-        }
-
-        Anime anime = animeRepoService.createAnime(mappingInfo);
-        return animeRepository.save(anime);
-    }
-
-    @Transactional
-    public void linkMappingToAnime(Mapping mapping) {
-        if (mapping.getAnime() == null) {
-            Anime anime = findOrCreateAnime(mapping.getMappingInfo());
-            anime.addMapping(mapping);
-            animeRepository.save(anime);
-        }
-    }
-
-    @Transactional
-    public void linkAllOrphanedMappings() {
-        List<Mapping> mappings = mappingRepository.findAllBySourcePlatformAndAnimeIsNull(getPlatform());
-        for (Mapping mapping : mappings) {
-            linkMappingToAnime(mapping);
-        }
     }
 
     protected abstract List<JsonNode> fetchMappingJson(int year, Season season);
