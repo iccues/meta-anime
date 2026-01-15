@@ -21,6 +21,9 @@ public class TitleBasedLinkService {
     @Resource
     protected MappingRepository mappingRepository;
 
+    @Resource
+    AnimeAggregationService animeAggregationService;
+
     @Transactional
     Anime findOrCreateAnime(MappingInfo mappingInfo) {
         Anime existing = animeRepoService.findAnime(
@@ -40,7 +43,7 @@ public class TitleBasedLinkService {
     public void linkMappingToAnime(Mapping mapping) {
         if (mapping.getAnime() == null) {
             Anime anime = findOrCreateAnime(mapping.getMappingInfo());
-            anime.addMapping(mapping);
+            animeAggregationService.addMappingIfAbsent(anime, mapping);
             animeRepository.save(anime);
         }
     }

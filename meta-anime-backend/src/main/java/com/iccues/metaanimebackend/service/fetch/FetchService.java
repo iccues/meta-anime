@@ -29,7 +29,6 @@ public class FetchService {
     public void fetchAnime(int year, Season season) {
         fetchMapping(year, season);
         linkMappings();
-        calculateAllMetric();
     }
 
     @Async

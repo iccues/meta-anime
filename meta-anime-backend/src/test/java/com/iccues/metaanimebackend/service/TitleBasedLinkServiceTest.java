@@ -32,6 +32,9 @@ public class TitleBasedLinkServiceTest {
     @Mock
     private MappingRepository mappingRepository;
 
+    @Mock
+    private AnimeAggregationService animeAggregationService;
+
     @InjectMocks
     private TitleBasedLinkService titleBasedLinkService;
 

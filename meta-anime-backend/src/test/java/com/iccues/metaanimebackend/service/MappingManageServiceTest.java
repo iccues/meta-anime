@@ -45,6 +45,9 @@ public class MappingManageServiceTest {
     @MockitoBean
     private MetricService metricService;
 
+    @Resource
+    private AnimeAggregationService animeAggregationService;
+
     @MockitoBean
     private FetchService fetchService;
 
@@ -112,8 +115,8 @@ public class MappingManageServiceTest {
         assertNotNull(result.getAnime());
         assertEquals(animeId, result.getAnime().getAnimeId());
 
-        // 验证：调用了分数计算
-        verify(metricService, times(1)).calculateAverageScore(any(Anime.class));
+        // 验证：调用了指标计算
+        verify(metricService, times(1)).calculateMetric(any(Anime.class));
     }
 
     @Test
@@ -134,8 +137,8 @@ public class MappingManageServiceTest {
         assertEquals(mappingId, result.getMappingId());
         assertNull(result.getAnime());
 
-        // 验证：调用了分数计算（只对原动画）
-        verify(metricService, times(1)).calculateAverageScore(any(Anime.class));
+        // 验证：调用了指标计算（只对原动画）
+        verify(metricService, times(1)).calculateMetric(any(Anime.class));
     }
 
     @Test
@@ -161,8 +164,8 @@ public class MappingManageServiceTest {
         assertEquals(mappingId, result.getMappingId());
         assertEquals(anime2Id, result.getAnime().getAnimeId());
 
-        // 验证：调用了两次分数计算（原动画和新动画）
-        verify(metricService, times(2)).calculateAverageScore(any(Anime.class));
+        // 验证：调用了两次指标计算（原动画和新动画）
+        verify(metricService, times(2)).calculateMetric(any(Anime.class));
 
         // 验证：anime1已解除关联
         Anime updatedAnime1 = animeRepository.findById(anime1Id).orElse(null);
@@ -217,8 +220,8 @@ public class MappingManageServiceTest {
         // 验证：映射已被删除
         assertFalse(mappingRepository.existsById(mappingId));
 
-        // 验证：未调用分数计算（因为没有关联动画）
-        verify(metricService, never()).calculateAverageScore(any(Anime.class));
+        // 验证：未调用指标计算（因为没有关联动画）
+        verify(metricService, never()).calculateMetric(any(Anime.class));
     }
 
     @Test
@@ -243,8 +246,8 @@ public class MappingManageServiceTest {
         assertNotNull(updatedAnime);
         assertTrue(updatedAnime.getMappings().isEmpty());
 
-        // 验证：调用了分数计算
-        verify(metricService, times(1)).calculateAverageScore(any(Anime.class));
+        // 验证：调用了指标计算
+        verify(metricService, times(1)).calculateMetric(any(Anime.class));
     }
 
     @Test
@@ -324,8 +327,8 @@ public class MappingManageServiceTest {
         // 将mapping2从anime2移到anime1
         mappingManageService.updateMappingAnime(mapping2.getMappingId(), anime1.getAnimeId());
 
-        // 验证：两个动画都重新计算了分数
-        verify(metricService, times(2)).calculateAverageScore(any(Anime.class));
+        // 验证：两个动画都重新计算了指标
+        verify(metricService, times(2)).calculateMetric(any(Anime.class));
     }
 
     @Test

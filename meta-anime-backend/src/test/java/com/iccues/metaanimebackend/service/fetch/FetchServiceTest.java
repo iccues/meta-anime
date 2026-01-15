@@ -98,7 +98,8 @@ public class FetchServiceTest {
 
         verify(titleBasedLinkService, times(1)).linkAllOrphanedMappings();
 
-        verify(metricService, times(1)).calculateAllMetric();
+        // calculateAllMetric() 已被注释，因为在 linkMappings 过程中已经通过 AnimeMergeService 计算了指标
+        verify(metricService, never()).calculateAllMetric();
     }
 
     @Test
