@@ -293,6 +293,142 @@ public class AnimeManageServiceTest {
         assertEquals(initialMappingCount, unmappedMappings.size());
     }
 
+    @Test
+    public void testDeleteNonApprovedAnimes_DeletesPendingAndRejected() {
+        // 创建不同审核状态的动画
+        Anime approved1 = createAnime("已审核1", LocalDate.of(2024, 4, 1), ReviewStatus.APPROVED);
+        Anime approved2 = createAnime("已审核2", LocalDate.of(2024, 4, 2), ReviewStatus.APPROVED);
+        Anime pending = createAnime("待审核", LocalDate.of(2024, 4, 3), ReviewStatus.PENDING);
+        Anime rejected = createAnime("已拒绝", LocalDate.of(2024, 4, 4), ReviewStatus.REJECTED);
+
+        // 验证初始状态
+        assertEquals(4, animeRepository.count());
+
+        // 执行删除
+        animeManageService.deleteNonApprovedAnimes();
+
+        // 验证：只有 APPROVED 状态的动画保留
+        assertEquals(2, animeRepository.count());
+        List<Anime> remaining = animeRepository.findAll();
+        assertTrue(remaining.stream()
+                .allMatch(anime -> anime.getReviewStatus() == ReviewStatus.APPROVED));
+        assertTrue(remaining.contains(approved1));
+        assertTrue(remaining.contains(approved2));
+    }
+
+    @Test
+    public void testDeleteNonApprovedAnimes_WithMappings_CascadeDeletesMappings() {
+        // 创建 PENDING 动画并关联映射
+        Anime pendingAnime = createAnime("待审核动画", LocalDate.of(2024, 4, 1), ReviewStatus.PENDING);
+        Mapping mapping1 = createMapping(Platform.MyAnimeList, "111");
+        Mapping mapping2 = createMapping(Platform.AniList, "222");
+        pendingAnime.addMapping(mapping1);
+        pendingAnime.addMapping(mapping2);
+        animeRepository.save(pendingAnime);
+
+        // 创建 APPROVED 动画并关联映射
+        Anime approvedAnime = createAnime("已审核动画", LocalDate.of(2024, 4, 2), ReviewStatus.APPROVED);
+        Mapping mapping3 = createMapping(Platform.Bangumi, "333");
+        approvedAnime.addMapping(mapping3);
+        animeRepository.save(approvedAnime);
+
+        Long mapping1Id = mapping1.getMappingId();
+        Long mapping2Id = mapping2.getMappingId();
+        Long mapping3Id = mapping3.getMappingId();
+
+        // 验证初始状态
+        assertEquals(2, animeRepository.count());
+        assertEquals(3, mappingRepository.count());
+
+        // 执行删除
+        animeManageService.deleteNonApprovedAnimes();
+
+        // 验证：PENDING 动画被删除，其映射也被级联删除
+        assertEquals(1, animeRepository.count());
+        assertFalse(mappingRepository.existsById(mapping1Id));
+        assertFalse(mappingRepository.existsById(mapping2Id));
+
+        // 验证：APPROVED 动画及其映射保留
+        assertTrue(mappingRepository.existsById(mapping3Id));
+        Mapping savedMapping3 = mappingRepository.findById(mapping3Id).orElse(null);
+        assertNotNull(savedMapping3);
+        assertEquals(approvedAnime.getAnimeId(), savedMapping3.getAnime().getAnimeId());
+    }
+
+    @Test
+    public void testDeleteNonApprovedAnimes_CleansUpOrphanMappings() {
+        // 创建 PENDING 动画
+        Anime pendingAnime = createAnime("待审核", LocalDate.of(2024, 4, 1), ReviewStatus.PENDING);
+
+        // 创建孤儿映射（没有关联动画）
+        Mapping orphanMapping = createMapping(Platform.MyAnimeList, "orphan");
+
+        // 验证初始状态
+        assertEquals(1, animeRepository.count());
+        assertEquals(1, mappingRepository.count());
+        assertEquals(1, mappingRepository.findAllByAnimeIsNull().size());
+
+        // 执行删除
+        animeManageService.deleteNonApprovedAnimes();
+
+        // 验证：PENDING 动画被删除，孤儿映射也被清理
+        assertEquals(0, animeRepository.count());
+        assertEquals(0, mappingRepository.count());
+    }
+
+    @Test
+    public void testDeleteNonApprovedAnimes_OnlyApproved_NoChange() {
+        // 只创建 APPROVED 状态的动画
+        Anime approved1 = createAnime("已审核1", LocalDate.of(2024, 4, 1), ReviewStatus.APPROVED);
+        Anime approved2 = createAnime("已审核2", LocalDate.of(2024, 4, 2), ReviewStatus.APPROVED);
+
+        // 验证初始状态
+        assertEquals(2, animeRepository.count());
+
+        // 执行删除
+        animeManageService.deleteNonApprovedAnimes();
+
+        // 验证：没有动画被删除
+        assertEquals(2, animeRepository.count());
+        assertTrue(animeRepository.existsById(approved1.getAnimeId()));
+        assertTrue(animeRepository.existsById(approved2.getAnimeId()));
+    }
+
+    @Test
+    public void testDeleteNonApprovedAnimes_EmptyDatabase_NoError() {
+        // 不创建任何数据
+        assertEquals(0, animeRepository.count());
+
+        // 执行删除（不应该抛出异常）
+        assertDoesNotThrow(() -> animeManageService.deleteNonApprovedAnimes());
+
+        // 验证：仍然为空
+        assertEquals(0, animeRepository.count());
+    }
+
+    @Test
+    public void testDeleteNonApprovedAnimes_MultipleStatuses_DeletesCorrectly() {
+        // 创建多个不同状态的动画
+        createAnime("已审核1", LocalDate.of(2024, 1, 1), ReviewStatus.APPROVED);
+        createAnime("待审核1", LocalDate.of(2024, 2, 1), ReviewStatus.PENDING);
+        createAnime("已拒绝1", LocalDate.of(2024, 3, 1), ReviewStatus.REJECTED);
+        createAnime("已审核2", LocalDate.of(2024, 4, 1), ReviewStatus.APPROVED);
+        createAnime("待审核2", LocalDate.of(2024, 5, 1), ReviewStatus.PENDING);
+        createAnime("已拒绝2", LocalDate.of(2024, 6, 1), ReviewStatus.REJECTED);
+
+        // 验证初始状态：6个动画
+        assertEquals(6, animeRepository.count());
+
+        // 执行删除
+        animeManageService.deleteNonApprovedAnimes();
+
+        // 验证：只剩下2个 APPROVED 动画
+        assertEquals(2, animeRepository.count());
+        List<Anime> remaining = animeRepository.findAll();
+        assertTrue(remaining.stream()
+                .allMatch(anime -> anime.getReviewStatus() == ReviewStatus.APPROVED));
+    }
+
     // 辅助方法：创建测试用的 Anime
     private Anime createAnime(String titleNative, LocalDate startDate, ReviewStatus reviewStatus) {
         AnimeTitles titles = new AnimeTitles();
