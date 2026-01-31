@@ -71,3 +71,10 @@ export async function updateAnime(
 export async function deleteAnime(animeId: number): Promise<void> {
   return del<void>(`/api/admin/delete_anime/${animeId}`);
 }
+
+/**
+ * 删除所有非 APPROVED 状态的动画（PENDING 和 REJECTED）
+ */
+export async function deleteNonApprovedAnimes(): Promise<void> {
+  return del<void>("/api/admin/delete_non_approved_animes");
+}

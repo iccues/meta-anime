@@ -13,6 +13,7 @@ export {
   type AnimeUpdateRequest,
   createAnime,
   deleteAnime,
+  deleteNonApprovedAnimes,
   getAnimeList,
   updateAnime,
 } from "./adminAnime";
