@@ -3,17 +3,11 @@ package com.iccues.metaanimebackend.service.fetch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.iccues.metaanimebackend.config.PlatformConfig;
 import com.iccues.metaanimebackend.config.PlatformConfigProperties;
-import com.iccues.metaanimebackend.entity.MappingInfo;
-import com.iccues.metaanimebackend.entity.Anime;
-import com.iccues.metaanimebackend.entity.Mapping;
-import com.iccues.metaanimebackend.entity.AnimeTitles;
-import com.iccues.metaanimebackend.entity.Platform;
-import com.iccues.metaanimebackend.entity.Season;
+import com.iccues.metaanimebackend.entity.*;
 import com.iccues.metaanimebackend.exception.FetchFailedException;
-import com.iccues.metaanimebackend.repo.AnimeRepository;
 import com.iccues.metaanimebackend.repo.MappingRepository;
 import com.iccues.metaanimebackend.service.MappingRepoService;
-import com.iccues.metaanimebackend.service.AnimeRepoService;
+import com.iccues.metaanimebackend.service.MetricService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +21,6 @@ public abstract class AbstractAnimeFetchService {
     @Resource
     protected MappingRepoService mappingRepoService;
 
-    @Resource
-    protected AnimeRepoService animeRepoService;
-
-    @Resource
-    protected AnimeRepository animeRepository;
     @Resource
     protected MappingRepository mappingRepository;
     @Resource
@@ -47,10 +36,10 @@ public abstract class AbstractAnimeFetchService {
 
     protected abstract String extractPlatformId(JsonNode jsonNode);
 
-    protected abstract double extractRawScore(JsonNode jsonNode);
+    protected abstract Double extractRawScore(JsonNode jsonNode);
 
-    public Double normalizeScore(double rawScore) {
-        if (rawScore < 0) {
+    public Double normalizeScore(Double rawScore) {
+        if (rawScore == null || rawScore < 0) {
             return null;
         }
         PlatformConfig config = platformConfigProperties.getConfig(getPlatform());
@@ -68,44 +57,12 @@ public abstract class AbstractAnimeFetchService {
         return rawPopularity * multiplier;
     }
 
-
     protected MappingInfo extractMappingInfo(JsonNode jsonNode) {
         return new MappingInfo(
                 extractTitles(jsonNode),
                 extractCoverImage(jsonNode),
                 extractStartDate(jsonNode)
         );
-    }
-
-    @Transactional
-    Anime findOrCreateAnime(MappingInfo mappingInfo) {
-        LocalDate startDate = mappingInfo.getStartDate();
-        AnimeTitles titles = mappingInfo.getTitle();
-
-        Anime anime = animeRepoService.findAnime(startDate, titles);
-
-        if (anime.getCoverImage() == null) {
-            anime.setCoverImage(mappingInfo.getCoverImage());
-        }
-
-        return animeRepository.save(anime);
-    }
-
-    @Transactional
-    public void linkMappingToAnime(Mapping mapping) {
-        if (mapping.getAnime() == null) {
-            Anime anime = findOrCreateAnime(mapping.getMappingInfo());
-            anime.addMapping(mapping);
-            animeRepository.save(anime);
-        }
-    }
-
-    @Transactional
-    public void linkAllOrphanedMappings() {
-        List<Mapping> mappings = mappingRepository.findAllBySourcePlatformAndAnimeIsNull(getPlatform());
-        for (Mapping mapping : mappings) {
-            linkMappingToAnime(mapping);
-        }
     }
 
     protected abstract List<JsonNode> fetchMappingJson(int year, Season season);
@@ -118,7 +75,7 @@ public abstract class AbstractAnimeFetchService {
 
         Mapping mapping = new Mapping(getPlatform(), platformId, mappingInfo);
 
-        double rawScore = extractRawScore(jsonNode);
+        Double rawScore = extractRawScore(jsonNode);
         Double normalizedScore = normalizeScore(rawScore);
         mapping.setRawScore(rawScore);
         mapping.setNormalizedScore(normalizedScore);

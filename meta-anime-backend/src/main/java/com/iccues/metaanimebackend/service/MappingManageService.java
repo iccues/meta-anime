@@ -33,6 +33,9 @@ public class MappingManageService {
     @Resource
     FetchService fetchService;
 
+    @Resource
+    AnimeAggregationService animeAggregationService;
+
     /**
      * 获取未关联的映射列表
      */
@@ -51,26 +54,16 @@ public class MappingManageService {
         Anime currentAnime = mapping.getAnime();
 
         if (currentAnime != null) {
-            currentAnime.removeMapping(mapping);
+            animeAggregationService.removeMappingWithMetrics(currentAnime, mapping);
         }
 
         if (animeId != null) {
             Anime targetAnime = animeRepository.findById(animeId)
                     .orElseThrow(() -> new ResourceNotFoundException("Anime", animeId));
-            targetAnime.addMapping(mapping);
+            animeAggregationService.addMappingWithMetrics(targetAnime, mapping);
         }
 
-        Mapping savedMapping = mappingRepository.save(mapping);
-
-        // 重新计算分数
-        if (currentAnime != null) {
-            metricService.calculateAverageScore(currentAnime);
-        }
-        if (savedMapping.getAnime() != null) {
-            metricService.calculateAverageScore(savedMapping.getAnime());
-        }
-
-        return savedMapping;
+        return mappingRepository.save(mapping);
     }
 
     /**
@@ -84,15 +77,10 @@ public class MappingManageService {
         Anime relatedAnime = mapping.getAnime();
 
         if (relatedAnime != null) {
-            relatedAnime.removeMapping(mapping);
-            animeRepository.save(relatedAnime);
+            animeAggregationService.removeMappingWithMetrics(relatedAnime, mapping);
         }
 
         mappingRepository.delete(mapping);
-
-        if (relatedAnime != null) {
-            metricService.calculateAverageScore(relatedAnime);
-        }
     }
 
     /**

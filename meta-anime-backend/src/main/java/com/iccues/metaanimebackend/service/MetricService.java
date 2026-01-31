@@ -25,9 +25,14 @@ public class MetricService {
         List<Anime> list = animeRepository.findAll();
 
         for (Anime anime : list) {
-            calculateAverageScore(anime);
-            calculatePopularity(anime);
+            calculateMetric(anime);
         }
+    }
+
+    @Transactional
+    public void calculateMetric(Anime anime) {
+        calculateAverageScore(anime);
+        calculatePopularity(anime);
     }
 
     @Transactional

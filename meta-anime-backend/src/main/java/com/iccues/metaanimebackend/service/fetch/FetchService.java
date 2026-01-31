@@ -2,6 +2,7 @@ package com.iccues.metaanimebackend.service.fetch;
 
 import com.iccues.metaanimebackend.entity.Platform;
 import com.iccues.metaanimebackend.entity.Season;
+import com.iccues.metaanimebackend.service.TitleBasedLinkService;
 import com.iccues.metaanimebackend.service.MetricService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +21,14 @@ public class FetchService {
     MyAnimeListFetchService myAnimeListFetchService;
 
     @Resource
+    TitleBasedLinkService titleBasedLinkService;
+    @Resource
     MetricService metricService;
 
     @Async
     public void fetchAnime(int year, Season season) {
         fetchMapping(year, season);
         linkMappings();
-        calculateAllMetric();
     }
 
     @Async
@@ -47,17 +49,11 @@ public class FetchService {
 
     @Async
     public void linkMappings() {
-        safeLinkMappings(bangumiFetchService, Platform.Bangumi);
-        safeLinkMappings(aniListFetchService, Platform.AniList);
-        safeLinkMappings(myAnimeListFetchService, Platform.MyAnimeList);
-    }
-
-    private void safeLinkMappings(AbstractAnimeFetchService service, Platform platform) {
         try {
-            service.linkAllOrphanedMappings();
-            log.debug("{} link mappings completed", platform);
+            titleBasedLinkService.linkAllOrphanedMappings();
+            log.debug("link mappings completed");
         } catch (Exception e) {
-            log.error("{} link mappings failed: {}", platform, e.getMessage());
+            log.error("link mappings failed: {}", e.getMessage());
         }
     }
 

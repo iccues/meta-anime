@@ -81,7 +81,8 @@ public class BangumiFetchServiceTest {
                 {
                     "images": {
                         "large": "https://example.com/image_large.jpg",
-                        "medium": "https://example.com/image_medium.jpg"
+                        "medium": "https://example.com/image_medium.jpg",
+                        "common": "https://example.com/image_common.jpg"
                     }
                 }
                 """;
@@ -89,7 +90,7 @@ public class BangumiFetchServiceTest {
 
         String result = service.extractCoverImage(jsonNode);
 
-        assertEquals("https://example.com/image_large.jpg", result);
+        assertEquals("https://example.com/image_common.jpg", result);
     }
 
     @Test

@@ -84,8 +84,6 @@ public class MappingSyncService {
         
         log.info("Mapping sync completed - Total: {}, Success: {}, Failed: {}, Duration: {}ms", 
             total, success, failed, duration);
-
-        metricService.calculateAllMetric();
     }
 
     private boolean shouldSyncAnime(Anime anime) {

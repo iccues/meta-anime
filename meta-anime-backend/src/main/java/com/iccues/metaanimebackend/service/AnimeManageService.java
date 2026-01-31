@@ -33,6 +33,9 @@ public class AnimeManageService {
     @Resource
     SeasonService seasonService;
 
+    @Resource
+    private AnimeAggregationService animeAggregationService;
+
     /**
      * 获取动画列表（管理员，支持按审核状态筛选）
      */
@@ -41,7 +44,7 @@ public class AnimeManageService {
         Specification<Anime> spec = Specification.allOf(
                 AnimeSpec.reviewStatusEquals(reviewStatus),
                 AnimeSpec.startDateBetween(dateRange),
-                AnimeSpec.orderById()
+                AnimeSpec.orderByScoreNullLast()
         );
         return animeRepository.findAll(spec);
     }
@@ -76,7 +79,7 @@ public class AnimeManageService {
         // 解除所有映射的关联
         List<Mapping> mappingsCopy = new ArrayList<>(anime.getMappings());
         mappingsCopy.forEach(mapping -> {
-            anime.removeMapping(mapping);
+            animeAggregationService.removeMappingWithMetrics(anime, mapping);
             mappingRepository.save(mapping);
         });
 
