@@ -104,7 +104,7 @@ onMounted(async () => {
     <h2 class="text-3xl font-bold text-gray-900 border-l-4 border-blue-500 pl-4">
       {{ title }}
     </h2>
-    <router-link :to="`/anime/list?year=${year || ''}&season=${season || ''}`"
+    <router-link :to="`/anime/list?year=${year || ''}&season=${season || ''}&sortBy=${sortBy || ''}`"
       class="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center gap-1 transition-colors">
       查看更多 <span aria-hidden="true">&rarr;</span>
     </router-link>

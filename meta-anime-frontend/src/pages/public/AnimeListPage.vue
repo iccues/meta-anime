@@ -92,6 +92,9 @@ const yearOptions = computed(() => generateYearOptions(10));
 // 处理筛选变化
 const handleFilterChange = () => {
   currentPage.value = 0; // 重置到第一页
+  if (selectedYear.value === undefined) {
+    selectedSeason.value = undefined;
+  }
   updateQuery();
 };
 
@@ -134,6 +137,7 @@ const handlePageChange = (page: number) => {
           class="!w-40"
           clearable
           @change="handleFilterChange"
+          :disabled="selectedYear === undefined"
         >
           <el-option
             v-for="option in seasonOptions"
