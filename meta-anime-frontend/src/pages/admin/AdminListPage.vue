@@ -10,6 +10,7 @@ import type { AdminMapping, ReviewStatus } from "@/types/adminAnime";
 import type { Season } from "@/types/anime";
 import type { DraggableChangeEvent } from "@/types/draggable";
 import { generateYearOptions } from "@/utils/dateUtils";
+import "element-plus/dist/index.css";
 
 // 筛选器状态
 const selectedReviewStatus = ref<ReviewStatus | undefined>("PENDING");
