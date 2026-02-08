@@ -1,16 +1,15 @@
-import type { Anime, Season, SortBy } from "@/types/anime";
+import type { Anime } from "@/types/anime";
 import type { Page } from "@/types/page";
 import { get } from "./http";
+import type { AnimeFilterParams } from "@/types/filter";
 
 /**
  * 获取动画列表的查询参数
+ * 继承筛选参数并添加分页参数
  */
-export interface AnimeListParams {
-  year?: number;
-  season?: Season;
+export interface AnimeListParams extends AnimeFilterParams {
   page?: number;
   pageSize?: number;
-  sortBy?: SortBy;
 }
 
 /**

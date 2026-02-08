@@ -13,7 +13,7 @@ const flipped = ref(true);
 <template>
   <div class="w-[12.5rem] flex flex-col gap-2">
     <div
-      class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100 rounded-3xl transition-all duration-300 group"
+      class="relative w-full aspect-[1/1.4] overflow-hidden bg-gray-100 rounded-3xl transition-all duration-300 group"
       @click="flipped = !flipped">
       <div class="w-full h-full group-hover:brightness-80 transition-all duration-300">
         <img class="w-full h-full object-cover block" :src="anime.coverImage"

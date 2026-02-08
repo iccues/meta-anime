@@ -2,6 +2,7 @@
 import { List } from "@element-plus/icons-vue";
 import DataManagementCard from "@/components/admin/DataManagementCard.vue";
 import FetchDataCard from "@/components/admin/FetchDataCard.vue";
+import "element-plus/dist/index.css";
 </script>
 
 <template>
