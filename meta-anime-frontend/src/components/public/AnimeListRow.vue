@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowRight } from "@element-plus/icons-vue";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { getAnimeList } from "@/api/public/anime";
-import type { Season, SortBy } from "@/types/anime";
 import type { Anime } from "@/types/anime.ts";
+import type { AnimeFilterParams } from "@/types/filter";
 import type { Page } from "@/types/page.ts";
+import { filtersToQuery } from "@/utils/filterUtils";
 import AnimeCard from "./AnimeCard.vue";
 
-const props = defineProps<{
-  title?: string;
-  year?: number;
-  season?: Season;
-  sortBy?: SortBy;
-}>();
+const props = defineProps<
+  AnimeFilterParams & {
+    title?: string;
+  }
+>();
 
 const animes = ref<Page<Anime> | null>(null);
 const loading = ref(false);
@@ -22,14 +22,19 @@ const showLeftButton = ref(false);
 const showRightButton = ref(false);
 const isHovering = ref(false);
 
+// 构建查看更多链接的查询参数
+const moreLink = computed(() => {
+  const query = filtersToQuery(props);
+  const queryString = new URLSearchParams(query).toString();
+  return `/anime/list${queryString ? `?${queryString}` : ""}`;
+});
+
 const fetchAnimes = async () => {
   try {
     loading.value = true;
     error.value = null;
     animes.value = await getAnimeList({
-      year: props.year,
-      season: props.season,
-      sortBy: props.sortBy,
+      ...props,
       pageSize: 12,
     });
   } catch (err) {
@@ -104,7 +109,7 @@ onMounted(async () => {
     <h2 class="text-3xl font-bold text-gray-900 border-l-4 border-blue-500 pl-4">
       {{ title }}
     </h2>
-    <router-link :to="`/anime/list?year=${year || ''}&season=${season || ''}&sortBy=${sortBy || ''}`"
+    <router-link :to="moreLink"
       class="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center gap-1 transition-colors">
       查看更多 <span aria-hidden="true">&rarr;</span>
     </router-link>
