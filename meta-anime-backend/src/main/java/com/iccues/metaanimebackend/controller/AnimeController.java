@@ -34,8 +34,7 @@ class AnimeController {
             @RequestParam(defaultValue = "30") int pageSize,
             @RequestParam(defaultValue = "SCORE") SortBy sortBy) {
 
-        int limitedPageSize = Math.min(pageSize, 60);
-        Page<Anime> animePage = animeQueryService.getAnimeList(year, season, page, limitedPageSize, sortBy);
+        Page<Anime> animePage = animeQueryService.getAnimeList(year, season, page, pageSize, sortBy);
         Page<AnimeDTO> dtoPage = animePage.map(animeMapper::toDto);
         return Response.ok(dtoPage);
     }
