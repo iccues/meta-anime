@@ -7,11 +7,9 @@
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
-
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-
     "fmt": "biome format ./src",
     "fmt:fix": "biome format --write ./src",
     "lint": "biome lint ./src",
@@ -21,6 +19,7 @@
     "check:ci": "biome ci ./src"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "@tailwindcss/vite": "^4.1.16",
     "element-plus": "^2.11.7",
     "oidc-client-ts": "^3.4.1",
@@ -45,5 +44,6 @@
     "vite": "^7.1.7",
     "vitest": "^4.0.15",
     "vue-tsc": "^3.1.0"
-  }
+  },
+  "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc"
 }
