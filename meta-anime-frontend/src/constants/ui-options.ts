@@ -48,3 +48,21 @@ export const SORT_BY_OPTIONS: { label: string; value: SortBy }[] = [
   { label: "按评分", value: "SCORE" },
   { label: "按人气", value: "POPULARITY" },
 ];
+
+/**
+ * 季度名称映射（用于 SEO、文案等场景）
+ */
+export const SEASON_NAME_MAP: Record<Season, string> = {
+  WINTER: "冬季",
+  SPRING: "春季",
+  SUMMER: "夏季",
+  FALL: "秋季",
+};
+
+/**
+ * 排序方式名称映射（用于 SEO、文案等场景）
+ */
+export const SORT_BY_NAME_MAP: Record<SortBy, string> = {
+  SCORE: "评分",
+  POPULARITY: "人气",
+};
