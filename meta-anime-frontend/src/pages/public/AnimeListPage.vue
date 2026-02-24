@@ -44,12 +44,6 @@ watch(
   { deep: true, immediate: true },
 );
 
-// 处理分页变化
-const handlePageChange = (page: number) => {
-  animeListParams.value.page = page;
-  window.scrollTo(0, 0);
-};
-
 // 动态 SEO 配置
 useAnimeListHead(animeListParams);
 </script>
@@ -63,7 +57,7 @@ useAnimeListHead(animeListParams);
       :animes="animes"
       :loading="loading"
       :error="error"
-      v-on:page-change="handlePageChange"
+      v-on:page-change="animeListParams.page = $event"
     />
   </div>
 </template>
