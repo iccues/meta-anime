@@ -1,0 +1,17 @@
+{
+  "name": "pjyk-web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.32.0",
+    "oxlint": "^1.50.0",
+    "turbo": "^2.8.11"
+  },
+  "packageManager": "pnpm@10.29.3"
+}
