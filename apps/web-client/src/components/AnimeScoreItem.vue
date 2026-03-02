@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { getPlatformConfig } from "@/config/platforms";
+import { getPlatformConfig } from "@pjyk-web/shared/config/platforms.ts";
 import type { Mapping } from "@/types/anime";
 
 const props = defineProps<{

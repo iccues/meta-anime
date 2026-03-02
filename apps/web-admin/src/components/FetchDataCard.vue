@@ -3,7 +3,7 @@ import { Download, Refresh, SetUp } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { ref } from "vue";
 import { calculateMetric, fetchAnime, fetchMapping, linkMappings } from "@/api/admin";
-import { SEASON_OPTIONS_REQUIRED } from "@/constants/ui-options";
+import { SEASON_OPTIONS_REQUIRED } from "@pjyk-web/shared/constants/ui-options.ts";
 
 // 数据抓取相关
 const fetchDialogVisible = ref(false);

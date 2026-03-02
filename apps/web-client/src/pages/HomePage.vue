@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AnimeListRow from "@/components/AnimeListRow.vue";
-import { SEASON_NAME_MAP } from "@/constants/ui-options";
+import { SEASON_NAME_MAP } from "@pjyk-web/shared/constants/ui-options.ts";
 
 // 获取当前年份和季度
 const now = new Date();

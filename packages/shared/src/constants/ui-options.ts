@@ -4,8 +4,9 @@
  * 此文件包含用于 UI 组件的选项常量，如下拉菜单、筛选器等。
  */
 
-import type { ReviewStatus } from "@/types/adminAnime";
-import type { Season, SortBy } from "@/types/anime";
+export type ReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type Season = "WINTER" | "SPRING" | "SUMMER" | "FALL";
+export type SortBy = "SCORE" | "POPULARITY";
 
 /**
  * 季度选项（含"全部"选项，用于筛选器）

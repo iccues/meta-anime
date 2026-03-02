@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Filter } from "@element-plus/icons-vue";
 import { computed } from "vue";
-import { SEASON_OPTIONS, SORT_BY_OPTIONS } from "@/constants/ui-options";
+import { SEASON_OPTIONS, SORT_BY_OPTIONS } from "@pjyk-web/shared/constants/ui-options.ts";
 import type { AnimeListParams } from "@/api/anime";
-import { generateYearOptions } from "@/utils/dateUtils";
+import { generateYearOptions } from "@pjyk-web/shared/utils/dateUtils.ts";
 
 const props = defineProps<{
   modelValue: AnimeListParams;

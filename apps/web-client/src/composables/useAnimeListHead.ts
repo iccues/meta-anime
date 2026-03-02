@@ -1,7 +1,7 @@
 import { computed } from "vue";
 import { useHead } from "@unhead/vue";
 import type { AnimeListParams } from "@/api/anime";
-import { SEASON_NAME_MAP, SORT_BY_NAME_MAP } from "@/constants/ui-options";
+import { SEASON_NAME_MAP, SORT_BY_NAME_MAP } from "@pjyk-web/shared/constants/ui-options.ts";
 import type { Ref } from "vue";
 import { buildSeoHead } from "@/utils/seoUtils";
 

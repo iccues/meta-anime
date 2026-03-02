@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
 import { computed, ref, watch } from "vue";
-import { getAllPlatformConfigs } from "@/config/platforms";
+import { getAllPlatformConfigs } from "@pjyk-web/shared/config/platforms.ts";
 
 const props = defineProps<{
   visible: boolean;
