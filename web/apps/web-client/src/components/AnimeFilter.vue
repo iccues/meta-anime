@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Filter } from "@element-plus/icons-vue";
-import { computed } from "vue";
 import { SEASON_OPTIONS, SORT_BY_OPTIONS } from "@pjyk-web/shared/constants/ui-options.ts";
 import { generateYearOptions } from "@pjyk-web/shared/utils/dateUtils.ts";
+import { computed } from "vue";
+
 import type { GetAnimeListQueryVariables } from "@/graphql/generated/graphql";
 
 const props = defineProps<{
@@ -51,8 +52,8 @@ const handleFilterChange = (filter: GetAnimeListQueryVariables) => {
 </script>
 
 <template>
-  <div class="mb-6 grid grid-cols-[repeat(auto-fill,12.5rem)] gap-5 justify-center">
-    <div class="flex items-center gap-5 col-span-full">
+  <div class="mb-6 grid grid-cols-[repeat(auto-fill,12.5rem)] justify-center gap-5">
+    <div class="col-span-full flex items-center gap-5">
       <el-icon size="20"><Filter /></el-icon>
 
       <el-select

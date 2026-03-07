@@ -1,11 +1,13 @@
-import { createApp } from "vue";
-import App from "@/App.vue";
-import router from "@/router";
-import "@/index.css";
-import { initRem } from "./utils/rem";
 import { createHead } from "@unhead/vue/client";
 import install from "@urql/vue";
+import { createApp } from "vue";
+
+import "@/index.css";
+import App from "@/App.vue";
+import router from "@/router";
+
 import { client } from "./graphql/client";
+import { initRem } from "./utils/rem";
 
 initRem();
 

@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import { useQuery } from "@urql/vue";
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+
 import AnimeFilter from "@/components/AnimeFilter.vue";
 import AnimeList from "@/components/AnimeList.vue";
-import { filtersToQuery, queryToFilters } from "@/utils/queryUtils";
 import { useAnimeListHead } from "@/composables/useAnimeListHead";
-import { useQuery } from "@urql/vue";
 import { GetAnimeListDocument, type GetAnimeListQueryVariables } from "@/graphql/generated/graphql";
+import { filtersToQuery, queryToFilters } from "@/utils/queryUtils";
 
 const router = useRouter();
 const route = useRoute();
@@ -33,7 +34,7 @@ useAnimeListHead(animeListParams);
 </script>
 
 <template>
-  <div class="p-5 max-w-[1400px] mx-auto">
+  <div class="mx-auto max-w-[1400px] p-5">
     <!-- 筛选器 -->
     <AnimeFilter v-model="animeListParams" />
 

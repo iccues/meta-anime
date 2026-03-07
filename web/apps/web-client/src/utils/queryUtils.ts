@@ -1,4 +1,5 @@
 import type { LocationQuery } from "vue-router";
+
 import type { GetAnimeListQueryVariables, Season, SortBy } from "@/graphql/generated/graphql";
 
 /**

@@ -1,9 +1,10 @@
-import { computed } from "vue";
-import { useHead } from "@unhead/vue";
 import { SEASON_NAME_MAP, SORT_BY_NAME_MAP } from "@pjyk-web/shared/constants/ui-options.ts";
+import { useHead } from "@unhead/vue";
 import type { Ref } from "vue";
-import { buildSeoHead } from "@/utils/seoUtils";
+import { computed } from "vue";
+
 import type { GetAnimeListQueryVariables } from "@/graphql/generated/graphql";
+import { buildSeoHead } from "@/utils/seoUtils";
 
 export function useAnimeListHead(animeListParams: Ref<GetAnimeListQueryVariables>) {
   const pageTitle = computed(() => {
