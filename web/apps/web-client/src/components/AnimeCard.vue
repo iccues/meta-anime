@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import type { Anime } from "@/types/anime.ts";
 import AnimeScoreItem from "./AnimeScoreItem.vue";
+import type { AnimeCardFragment } from "@/graphql/generated/graphql";
 
-defineProps<{
-  anime: Anime;
+const props = defineProps<{
+  anime: AnimeCardFragment;
 }>();
 
 const flipped = ref(true);
@@ -20,7 +20,7 @@ const flipped = ref(true);
         <img
           class="w-full h-full object-cover block"
           :src="anime.coverImage"
-          :alt="anime.title.titleCn || anime.title.titleNative"
+          :alt="anime.title.titleCn || anime.title.titleNative || 'Anime Cover'"
         />
         <div
           class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent"
@@ -54,7 +54,7 @@ const flipped = ref(true);
     </div>
     <h3
       class="text-[14px] font-medium text-gray-800 m-0 px-2 leading-[1.4] h-[40px] line-clamp-2"
-      :title="anime.title.titleCn || anime.title.titleNative"
+      :title="anime.title.titleCn || anime.title.titleNative || ''"
     >
       {{ anime.title.titleCn || anime.title.titleNative }}
     </h3>

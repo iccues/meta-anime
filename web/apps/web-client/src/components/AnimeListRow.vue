@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowRight } from "@element-plus/icons-vue";
-import { computed, onMounted, ref } from "vue";
-import { getAnimeList } from "@/api/anime";
-import type { Anime, Season, SortBy } from "@/types/anime.ts";
-import type { Page } from "@/types/page.ts";
+import { computed, nextTick, ref, watch } from "vue";
 import { filtersToQuery } from "@/utils/queryUtils";
 import AnimeCard from "./AnimeCard.vue";
+import { useQuery } from "@urql/vue";
+import { GetAnimeListRowDocument, type Season, type SortBy } from "@/graphql/generated/graphql";
 
 const props = defineProps<{
   year?: number;
@@ -14,9 +13,6 @@ const props = defineProps<{
   title?: string;
 }>();
 
-const animes = ref<Page<Anime> | null>(null);
-const loading = ref(false);
-const error = ref<string | null>(null);
 const scrollContainer = ref<HTMLElement | null>(null);
 const showLeftButton = ref(false);
 const showRightButton = ref(false);
@@ -28,20 +24,13 @@ const moreLink = computed(() => {
   return `/anime/list${queryString ? `?${queryString}` : ""}`;
 });
 
-const fetchAnimes = async () => {
-  try {
-    loading.value = true;
-    error.value = null;
-    animes.value = await getAnimeList({
-      ...props,
-      pageSize: 12,
-    });
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : "未知错误";
-  } finally {
-    loading.value = false;
-  }
-};
+const { data, fetching, error } = useQuery({
+  query: GetAnimeListRowDocument,
+  variables: computed(() => ({
+    ...props,
+    pageSize: 12,
+  })),
+});
 
 const updateButtonVisibility = () => {
   if (!scrollContainer.value) return;
@@ -94,8 +83,8 @@ const scrollRight = () => {
   });
 };
 
-onMounted(async () => {
-  await fetchAnimes();
+watch(data, async () => {
+  await nextTick();
   updateButtonVisibility();
 });
 </script>
@@ -116,10 +105,10 @@ onMounted(async () => {
 
   <!-- 动画列表 -->
   <div v-if="error" class="text-center py-10 text-base text-red-600">{{ error }}</div>
-  <div v-else-if="loading" class="text-center py-10 text-base text-gray-600">加载中...</div>
+  <div v-else-if="fetching" class="text-center py-10 text-base text-gray-600">加载中...</div>
 
   <div
-    v-else-if="animes && animes.content.length > 0"
+    v-else-if="data?.animeList && data?.animeList?.content.length > 0"
     class="relative group/row"
   >
     <!-- 滚动容器 -->
@@ -129,7 +118,7 @@ onMounted(async () => {
       class="flex gap-5 overflow-x-auto pb-4 px-[max(1.25rem,calc(50%-700px+1.25rem))] scroll-smooth scrollbar-hide"
     >
       <AnimeCard
-        v-for="anime in animes.content"
+        v-for="anime in data?.animeList?.content"
         :key="anime.animeId"
         :anime="anime"
         class="flex-shrink-0"

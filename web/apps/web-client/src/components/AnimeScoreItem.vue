@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { getPlatformConfig } from "@pjyk-web/shared/config/platforms.ts";
-import type { Mapping } from "@/types/anime";
+import type { ScoreItemFragment } from "@/graphql/generated/graphql";
 
 const props = defineProps<{
-  mapping: Mapping;
+  mapping: ScoreItemFragment;
 }>();
 
 // 根据平台名称获取配置
