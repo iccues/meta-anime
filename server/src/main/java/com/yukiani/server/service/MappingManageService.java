@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 处理管理员的映射管理操作
+ * 处理管理端平台 Mapping 的查询、关联、创建和删除。
  */
 @Service
 public class MappingManageService {
@@ -36,15 +36,15 @@ public class MappingManageService {
     @Resource
     AnimeAggregationService animeAggregationService;
 
-    /**
-     * 获取未关联的映射列表
-     */
     public List<Mapping> getUnmappedMappingList() {
         return mappingRepository.findAllByAnimeIsNull();
     }
 
     /**
-     * 更新映射的动画关联
+     * 将 Mapping 关联到目标动画，或在 animeId 为空时解除关联。
+     *
+     * @param animeId   目标动画的 animeId；为空时解除关联
+     * @throws ResourceNotFoundException Mapping 或目标动画不存在时抛出
      */
     @Transactional
     public Mapping updateMappingAnime(Long mappingId, Long animeId) {
@@ -67,7 +67,9 @@ public class MappingManageService {
     }
 
     /**
-     * 删除映射
+     * 删除 Mapping，并刷新原关联动画的聚合数据。
+     *
+     * @throws ResourceNotFoundException Mapping 不存在时抛出
      */
     @Transactional
     public void deleteMapping(Long mappingId) {
@@ -84,7 +86,9 @@ public class MappingManageService {
     }
 
     /**
-     * 从平台创建映射
+     * 从外部平台即时抓取并创建 Mapping。
+     *
+     * @throws ResourceAlreadyExistsException 相同平台 Mapping 已存在时抛出
      */
     public Mapping createMapping(Platform sourcePlatform, String platformId) {
         Mapping existingMapping = mappingRepository.findBySourcePlatformAndPlatformId(

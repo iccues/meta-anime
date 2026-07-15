@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
+/**
+ * 创建访问各外部动画平台 API 的 WebClient。
+ */
 @Configuration
 public class WebClientConfig {
 
@@ -14,7 +17,8 @@ public class WebClientConfig {
         return WebClient.builder()
                 .baseUrl("https://api.bgm.tv/v0/subjects?type=2&sort=rank")
                 .exchangeStrategies(ExchangeStrategies.builder()
-                        .codecs(cfg -> cfg.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)) // 16MB
+                        // 批量查询响应可能超过 WebClient 默认的 256 KiB 缓冲区。
+                        .codecs(cfg -> cfg.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
                         .build())
                 .build();
     }

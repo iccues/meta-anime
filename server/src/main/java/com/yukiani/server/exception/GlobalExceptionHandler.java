@@ -9,6 +9,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * 将控制器抛出的异常转换为统一响应和对应的 HTTP 状态码。
+ */
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {

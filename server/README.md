@@ -36,3 +36,12 @@ SPRING_PROFILES_ACTIVE=dev,local ./gradlew bootRun
 - 开发和生产使用 PostgreSQL
 - 默认数据库名在仓库的 Docker 配置里是 `pjyk`
 - 迁移脚本位于 `src/main/resources/db/migration`
+
+## 代码注释约定
+
+- JavaDoc 使用中文说明职责、非直观契约和关键业务规则，技术名词及代码名称保留英文
+- Controller 和 GraphQL Resolver 的所有对外 API 必须提供完整 JavaDoc，覆盖全部参数、返回结果和调用方可见的异常
+- 其他函数仅在签名无法表达意图、边界或副作用时添加注释；`@param`、`@return` 和 `@throws` 同样按需使用
+- 重要字段和业务状态应说明单位、来源、计算方式、空值语义或行为；含义明确的普通字段无需注释
+- 重写方法沿用父类契约；行内注释解释原因和取舍，不复述代码行为
+- 避免作者、日期、编号式步骤和失效注释；临时禁用的任务应说明启用条件

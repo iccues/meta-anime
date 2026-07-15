@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 平台配置属性，绑定 application.yml 中的 platform.* 配置
+ * 绑定 {@code application.yml} 中 {@code platform.*} 的平台指标配置。
  */
 @Configuration
 @ConfigurationProperties(prefix = "platform")
@@ -16,9 +16,6 @@ public class PlatformConfigProperties {
     private PlatformConfig aniList = new PlatformConfig();
     private PlatformConfig myAnimeList = new PlatformConfig();
 
-    /**
-     * 根据平台类型获取对应的配置
-     */
     public PlatformConfig getConfig(Platform platform) {
         return switch (platform) {
             case Bangumi -> bangumi;

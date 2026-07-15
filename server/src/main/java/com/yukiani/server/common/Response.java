@@ -2,6 +2,9 @@ package com.yukiani.server.common;
 
 import lombok.Data;
 
+/**
+ * REST API 的统一响应结构。
+ */
 @Data
 public class Response<T> {
     private boolean success;

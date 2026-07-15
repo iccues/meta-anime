@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 根据各平台归一化指标及权重计算动画的综合评分和热度。
+ */
 @Service
 public class MetricService {
 
@@ -35,6 +38,9 @@ public class MetricService {
         calculatePopularity(anime);
     }
 
+    /**
+     * 按平台权重计算归一化评分的加权平均值。
+     */
     @Transactional
     public void calculateAverageScore(Anime anime) {
         double totalScore = 0.0;
@@ -61,6 +67,9 @@ public class MetricService {
     }
 
 
+    /**
+     * 按平台权重累加有效的归一化热度。
+     */
     @Transactional
     public void calculatePopularity(Anime anime) {
         double totalPopularity = 0.0;

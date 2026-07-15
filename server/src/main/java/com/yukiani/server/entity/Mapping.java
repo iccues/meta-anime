@@ -9,6 +9,9 @@ import org.hibernate.annotations.NaturalId;
 
 import java.time.Instant;
 
+/**
+ * 外部平台 Mapping Entity，保存 Anime 关联及平台原始指标。
+ */
 @Data
 @Entity
 @NoArgsConstructor
@@ -20,35 +23,54 @@ public class Mapping {
     @Version
     Integer version = 0;
 
+    /** 关联的动画主数据；尚未关联时为 {@code null}。 */
     @ToString.Exclude
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "anime_id")
     Anime anime;
 
+    /**
+     * 获取关联动画的 animeId，避免触发 Anime Entity 的完整序列化。
+     *
+     * @return animeId；未关联动画时返回 {@code null}
+     */
     public Long getAnimeId() {
         if (anime == null) return null;
         return anime.getAnimeId();
     }
 
+    /** 与 {@link #platformId} 共同组成平台 Mapping 的 natural key。 */
     @NaturalId
     @Enumerated(EnumType.STRING)
     Platform sourcePlatform;
 
+    /** 来源平台中的 platformId，与 {@link #sourcePlatform} 共同组成 natural key。 */
     @NaturalId
     String platformId;
 
+    /** 来源平台返回的原始评分，无有效评分时为 {@code null}。 */
     Double rawScore;
+
+    /** 按来源平台均值和标准差转换后的统一尺度评分。 */
     Double normalizedScore;
 
+    /** 来源平台返回的原始热度指标。 */
     Double rawPopularity;
+
+    /** 按来源平台热度基准转换后的统一尺度热度。 */
     Double normalizedPopularity;
 
+    /** 最近一次抓取到的平台标题、封面和开播日期快照。 */
     @Embedded
     MappingInfo mappingInfo;
 
+    /** 最近一次成功抓取并保存该平台 Mapping 的时间。 */
     Instant updateTime;
 
+    /**
+     * 创建外部平台 Mapping 并记录首次更新时间。
+     */
     public Mapping(Platform sourcePlatform, String platformId, MappingInfo mappingInfo) {
         this.sourcePlatform = sourcePlatform;
         this.platformId = platformId;

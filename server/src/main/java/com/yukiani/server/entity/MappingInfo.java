@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+/**
+ * 外部平台提供的动画基础信息快照。
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

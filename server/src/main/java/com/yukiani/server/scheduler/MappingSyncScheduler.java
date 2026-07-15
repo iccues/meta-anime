@@ -7,6 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * 按固定周期收集并刷新需要同步的外部平台 Mapping。
+ */
 @Component
 @Slf4j
 public class MappingSyncScheduler {
@@ -14,9 +17,7 @@ public class MappingSyncScheduler {
     @Resource
     MappingSyncService mappingSyncService;
 
-    /**
-     * 每天凌晨 4 点收集需要同步的 mappings
-     */
+    /** 每天凌晨 4 点重新收集待同步 Mapping。 */
     @Scheduled(cron = "0 0 4 * * ?")
     public void scheduleDailyMappingCollection() {
         log.info("=== Daily mapping collection started ===");
@@ -28,9 +29,7 @@ public class MappingSyncScheduler {
         }
     }
 
-    /**
-     * 每 6 小时同步一次待处理的 mappings
-     */
+    /** 每 6 小时同步一次待处理 Mapping。 */
     @Scheduled(cron = "0 0 */6 * * ?")
     public void scheduleMappingSync() {
         log.info("=== Periodic mapping sync started ===");
@@ -43,9 +42,9 @@ public class MappingSyncScheduler {
     }
 
     /**
-     * 应用启动时初始化：收集 mappings 并触发首次同步
+     * 收集 Mapping 并触发首次同步；仅在需要启动时同步时手动启用 {@code @PostConstruct}。
      */
-//    @PostConstruct
+    // @PostConstruct
     public void init() {
         log.info("Initializing mapping sync scheduler");
         try {

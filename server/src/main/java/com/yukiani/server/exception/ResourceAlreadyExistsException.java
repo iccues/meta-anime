@@ -1,7 +1,7 @@
 package com.yukiani.server.exception;
 
 /**
- * 资源已存在异常
+ * 资源已存在异常。
  */
 public class ResourceAlreadyExistsException extends BusinessException {
 

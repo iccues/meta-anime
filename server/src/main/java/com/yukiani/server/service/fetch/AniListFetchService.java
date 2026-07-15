@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 通过 AniList GraphQL API 抓取动画 Mapping 和指标。
+ */
 @Service
 public class AniListFetchService extends AbstractAnimeFetchService {
     @Override

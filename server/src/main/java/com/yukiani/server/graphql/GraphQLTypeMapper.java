@@ -15,8 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * MapStruct mapper for converting JPA entities to GraphQL types.
- * Handles automatic field mapping and custom conversions (ID: Long→String, Date: LocalDate→String).
+ * 使用 MapStruct 在 JPA Entity 与 GraphQL Type 之间转换，并统一处理 ID 和 Date 格式。
  */
 @Mapper(componentModel = "spring")
 public interface GraphQLTypeMapper {

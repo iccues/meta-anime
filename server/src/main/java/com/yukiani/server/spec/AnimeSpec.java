@@ -12,7 +12,11 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 构建动画列表筛选、排序和标题搜索所需的 JPA Specification。
+ */
 public class AnimeSpec {
+    /** 审核状态为空时不生成筛选条件。 */
     public static Specification<Anime> reviewStatusEquals(ReviewStatus reviewStatus) {
         return (root, query, criteriaBuilder) -> {
             if (reviewStatus == null) return null;
@@ -20,6 +24,7 @@ public class AnimeSpec {
         };
     }
 
+    /** 日期范围为空时不生成筛选条件。 */
     public static Specification<Anime> startDateBetween(LocalDateRange range) {
         return (root, query, criteriaBuilder) -> {
             if (range == null) return null;
@@ -65,6 +70,10 @@ public class AnimeSpec {
         };
     }
 
+    /**
+     * 构建跨语种标题的模糊搜索条件，并按最高词相似度排序。
+     * 关键词为空时不生成筛选条件。
+     */
     public static Specification<Anime> similarTitle(String keyword) {
         return (root, query, criteriaBuilder) -> {
             if (keyword == null || keyword.isBlank()) return null;
@@ -74,7 +83,7 @@ public class AnimeSpec {
 
             List<String> fields = List.of("titleNative", "titleRomaji", "titleEn", "titleCn");
 
-            // WHERE: 任意 title 字段相似度超过阈值，或包含子串（解决短词嵌入长词中 trigram 无交集的问题）
+            // WHERE 使用子串匹配补足短词与长词之间可能没有 trigram 交集的情况。
             String likePattern = "%" + keyword + "%";
             List<Predicate> predicates = new ArrayList<>();
             for (String field : fields) {
@@ -87,7 +96,7 @@ public class AnimeSpec {
                 ));
             }
 
-            // ORDER BY GREATEST(similarity(...)) DESC
+            // Count Query 不能携带 ORDER BY；数据查询按 GREATEST(similarity(...)) DESC 排序。
             if (query != null && !Long.class.equals(query.getResultType())) {
                 @SuppressWarnings("unchecked")
                 Expression<Float>[] simExprs = fields.stream()

@@ -3,8 +3,14 @@ package com.yukiani.server.service;
 import com.yukiani.server.entity.*;
 import org.springframework.stereotype.Service;
 
+/**
+ * 从平台 Mapping 聚合动画的标题、封面和开播日期。
+ */
 @Service
 public class InfoService {
+    /**
+     * 重新聚合动画基础信息，并优先使用 Bangumi 封面。
+     */
     public void aggregateInfo(Anime anime) {
         cleanInfo(anime);
         for (Mapping mapping : anime.getMappings()) {
@@ -13,6 +19,9 @@ public class InfoService {
         setCoverImageFromBangumi(anime);
     }
 
+    /**
+     * 使用单个平台的信息补齐动画当前为空的字段。
+     */
     public void applyMappingInfo(Anime anime, Mapping mapping) {
         MappingInfo mappingInfo = mapping.getMappingInfo();
         if (mappingInfo == null) {
@@ -34,12 +43,18 @@ public class InfoService {
         }
     }
 
+    /**
+     * 清空由平台 Mapping 聚合产生的动画基础信息。
+     */
     public void cleanInfo(Anime anime) {
         anime.setCoverImage(null);
         anime.setStartDate(null);
         anime.setTitle(new AnimeTitles());
     }
 
+    /**
+     * 若存在 Bangumi Mapping，则使用其封面覆盖聚合结果。
+     */
     public void setCoverImageFromBangumi(Anime anime) {
         Mapping bangumi = anime.getMappingByPlatform(Platform.Bangumi);
         if (bangumi != null && bangumi.getMappingInfo() != null) {

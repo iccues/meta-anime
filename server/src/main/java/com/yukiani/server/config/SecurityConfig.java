@@ -7,9 +7,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * 配置生产与测试 Profile 使用的 SecurityFilterChain。
+ */
 @Configuration
 public class SecurityConfig {
 
+    /**
+     * 构建非测试 Profile 的 SecurityFilterChain，开放查询 API 并保护管理 API。
+     */
     @Bean
     @Profile("!test")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -26,6 +32,9 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * 构建测试 Profile 的 SecurityFilterChain，允许测试请求跳过认证与 CSRF 校验。
+     */
     @Bean
     @Profile("test")
     public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {

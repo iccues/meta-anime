@@ -3,7 +3,7 @@ package com.yukiani.server.exception;
 import com.yukiani.server.entity.Platform;
 
 /**
- * 从外部平台获取数据失败异常
+ * 从外部平台获取数据失败异常。
  */
 public class FetchFailedException extends BusinessException {
 

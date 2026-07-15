@@ -18,6 +18,7 @@ public abstract class AdminAnimeMapper {
     public abstract List<AdminMappingDTO> toMappingDtoList(List<Mapping> mappingList);
 
     public abstract AdminAnimeDTO toAnimeDto(Anime anime);
+
     public abstract List<AdminAnimeDTO> toAnimeDtoList(List<Anime> animeList);
 
     public abstract AdminMappingDTO toMappingDto(Mapping mapping);

@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 通过 Bangumi API 抓取动画 Mapping 和指标。
+ */
 @Service
 public class BangumiFetchService extends AbstractAnimeFetchService {
     @Override
@@ -90,6 +93,7 @@ public class BangumiFetchService extends AbstractAnimeFetchService {
     @Resource
     WebClient bangumiWebClient;
 
+    /** Bangumi 单次请求的最大记录数。 */
     final int pageSize = 50;
 
     JsonNode fetchPage(int year, Season season, int page) {
