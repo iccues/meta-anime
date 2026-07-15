@@ -3,6 +3,9 @@ package com.yukiani.server.service;
 import org.apache.commons.text.similarity.JaroWinklerSimilarity;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
+import java.util.Locale;
+
 /**
  * 使用 Jaro-Winkler 相似度判断两个动画标题是否指向同一作品。
  */
@@ -37,9 +40,18 @@ public class TitleMatchingService {
     }
 
     /**
-     * 标题归一化扩展点；当前保留原始字符和大小写。
+     * 将标题转换为 Unicode 兼容等价形式和小写，并移除标点、空白及其他符号。
+     * 字母和数字按 Unicode 码点保留，避免丢失中日文等非拉丁文字。
      */
     private String normalize(String input) {
-        return input;
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFKC)
+                .toLowerCase(Locale.ROOT);
+        StringBuilder result = new StringBuilder(normalized.length());
+
+        normalized.codePoints()
+                .filter(codePoint -> Character.isLetterOrDigit(codePoint))
+                .forEach(result::appendCodePoint);
+
+        return result.toString();
     }
 }

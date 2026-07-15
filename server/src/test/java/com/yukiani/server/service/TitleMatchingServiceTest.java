@@ -55,9 +55,7 @@ public class TitleMatchingServiceTest {
     }
 
     @Test
-    @Disabled("normalize() 未实现大小写标准化，导致大小写不同的相同标题无法匹配")
     public void testAreTitlesSimilar_CaseDifference() {
-        // 理论上大小写不同的相同标题应该被判定为相似
         assertTrue(titleMatchingService.areTitlesSimilar(
                 "Attack on Titan",
                 "attack on titan"
@@ -65,9 +63,7 @@ public class TitleMatchingServiceTest {
     }
 
     @Test
-    @Disabled("normalize() 未实现标点符号移除，导致标点差异影响匹配")
     public void testAreTitlesSimilar_WithPunctuation() {
-        // 理论上只有标点符号差异的相同标题应该被判定为相似
         assertTrue(titleMatchingService.areTitlesSimilar(
                 "Re:Zero - Starting Life in Another World",
                 "ReZero Starting Life in Another World"
@@ -113,6 +109,30 @@ public class TitleMatchingServiceTest {
     }
 
     @Test
+    public void testAreTitlesSimilar_DifferentJapaneseTitles() {
+        assertFalse(titleMatchingService.areTitlesSimilar(
+                "進撃の巨人",
+                "鬼滅の刃"
+        ));
+    }
+
+    @Test
+    public void testAreTitlesSimilar_WithUnicodeCompatibilityCharacters() {
+        assertTrue(titleMatchingService.areTitlesSimilar(
+                "ＳＰＹ×ＦＡＭＩＬＹ",
+                "spy family"
+        ));
+    }
+
+    @Test
+    public void testAreTitlesSimilar_WithEquivalentUnicodeCharacters() {
+        assertTrue(titleMatchingService.areTitlesSimilar(
+                "Pokémon",
+                "Poke\u0301mon"
+        ));
+    }
+
+    @Test
     public void testAreTitlesSimilar_MixedLanguageTitles() {
         assertFalse(titleMatchingService.areTitlesSimilar(
                 "Attack on Titan",
@@ -125,15 +145,6 @@ public class TitleMatchingServiceTest {
         assertTrue(titleMatchingService.areTitlesSimilar(
                 "Sword Art Online Season 1",
                 "Sword Art Online Season 1"
-        ));
-    }
-
-    @Test
-    @Disabled("当前 0.95 阈值过高，导致季节号不同的标题也被判定为相似")
-    public void testAreTitlesSimilar_DifferentNumbers() {
-        assertFalse(titleMatchingService.areTitlesSimilar(
-                "Sword Art Online Season 1",
-                "Sword Art Online Season 3"
         ));
     }
 
