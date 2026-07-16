@@ -167,6 +167,11 @@ public class MyAnimeListFetchServiceTest {
     }
 
     @Test
+    public void testAdjustScore_WithoutConfiguredPriorKeepsRawScore() {
+        assertEquals(8.5, service.adjustScore(8.5, 10), 0.0001);
+    }
+
+    @Test
     public void testNormalizeScore() {
         // MAL: mean=7.0, std=1.0
         // z = (8.5 - 7.0) / 1.0 = 1.5

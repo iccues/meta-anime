@@ -16,6 +16,11 @@ public class PlatformConfig {
     /** 归一化评分参与动画加权平均时使用的权重。 */
     private int scoreWeight = 1;
 
+    /**
+     * 评分平滑使用的归一化热度先验强度；未配置时不平滑。
+     */
+    private Double scorePriorStrength;
+
     /** 评分 z-score 标准化使用的均值。 */
     private double scoreMean = 7.0;
 

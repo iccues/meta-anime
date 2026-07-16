@@ -38,6 +38,7 @@ platform:
   bangumi:
     popularity-multiplier: 100.0
     score-weight: 2
+    score-prior-strength: 1000
     score-mean: 6.0
     score-std: 1.0
   anilist:

@@ -53,6 +53,7 @@ public class AbstractAnimeFetchServiceTest {
         PlatformConfig bangumiConfig = new PlatformConfig();
         bangumiConfig.setScoreMean(6.0);
         bangumiConfig.setScoreStd(1.0);
+        bangumiConfig.setScorePriorStrength(1000.0);
         bangumiConfig.setPopularityMedian(10000.0);
         lenient().when(platformConfigProperties.getConfig(Platform.Bangumi)).thenReturn(bangumiConfig);
     }
@@ -100,6 +101,30 @@ public class AbstractAnimeFetchServiceTest {
     }
 
     @Test
+    public void testProcessAndSaveMapping_AdjustsScoreBeforeNormalization() throws Exception {
+        String jsonString = """
+                {
+                    "id": "12345",
+                    "title": "Test Anime",
+                    "score": 9.0,
+                    "popularity": 1000
+                }
+                """;
+        JsonNode jsonNode = objectMapper.readTree(jsonString);
+
+        testService.processAndSaveMapping(jsonNode);
+
+        var mappingCaptor = org.mockito.ArgumentCaptor.forClass(Mapping.class);
+        verify(mappingRepoService).saveOrUpdate(mappingCaptor.capture());
+        Mapping savedMapping = mappingCaptor.getValue();
+
+        assertEquals(9.0, savedMapping.getRawScore(), 0.0001);
+        assertEquals(1000.0, savedMapping.getRawPopularity(), 0.0001);
+        assertEquals(1000.0, savedMapping.getNormalizedPopularity(), 0.0001);
+        assertEquals(75.0, savedMapping.getNormalizedScore(), 0.0001);
+    }
+
+    @Test
     public void testProcessAndSaveMapping_WithoutScore() throws Exception {
         // 准备 JSON 数据（无评分）
         String jsonString = """
@@ -114,6 +139,7 @@ public class AbstractAnimeFetchServiceTest {
         // 调用方法
         testService.processAndSaveMapping(jsonNode);
 
+        // 验证：应该调用 saveOrUpdate
         var mappingCaptor = org.mockito.ArgumentCaptor.forClass(Mapping.class);
         verify(mappingRepoService).saveOrUpdate(mappingCaptor.capture());
         assertNull(mappingCaptor.getValue().getNormalizedScore());

@@ -29,6 +29,7 @@ public class BangumiFetchServiceTest {
         PlatformConfig bangumiConfig = new PlatformConfig();
         bangumiConfig.setScoreMean(6.0);
         bangumiConfig.setScoreStd(1.0);
+        bangumiConfig.setScorePriorStrength(1000.0);
 
         Field bangumiField = PlatformConfigProperties.class.getDeclaredField("bangumi");
         bangumiField.setAccessible(true);
@@ -135,6 +136,27 @@ public class BangumiFetchServiceTest {
         Double result = service.extractRawScore(jsonNode);
 
         assertNull(result);
+    }
+
+    @Test
+    public void testAdjustScore_WithBayesianSmoothing() {
+        assertEquals(6.2727, service.adjustScore(9.0, 100), 0.0001);
+        assertEquals(7.5, service.adjustScore(9.0, 1000), 0.0001);
+        assertEquals(8.7273, service.adjustScore(9.0, 10000), 0.0001);
+    }
+
+    @Test
+    public void testAdjustScore_WithoutRatingsFallsBackToPriorMean() {
+        assertEquals(6.0, service.adjustScore(9.0, 0), 0.0001);
+        assertEquals(6.0, service.adjustScore(9.0, -1), 0.0001);
+    }
+
+    @Test
+    public void testAdjustedAndNormalizedScore_IsNotClamped() {
+        Double adjustedScore = service.adjustScore(10.0, 100000);
+        double normalizedScore = service.normalizeScore(adjustedScore);
+
+        assertTrue(normalizedScore > 100);
     }
 
     @Test

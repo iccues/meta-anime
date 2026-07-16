@@ -64,6 +64,31 @@ public abstract class AbstractAnimeFetchService {
     protected abstract Double extractRawScore(JsonNode jsonNode);
 
     /**
+     * 按平台先验均值和归一化热度对原始评分进行平滑。
+     *
+     * <p>未配置先验强度时返回原始评分。</p>
+     *
+     * @param rawScore             平台原始评分
+     * @param normalizedPopularity 以平台热度中位数为 10000 归一化后的热度
+     * @return 平滑后的评分；原始评分无效时返回 {@code null}
+     */
+    public Double adjustScore(Double rawScore, double normalizedPopularity) {
+        if (rawScore == null || rawScore <= 0) {
+            return null;
+        }
+
+        PlatformConfig config = platformConfigProperties.getConfig(getPlatform());
+        Double priorStrength = config.getScorePriorStrength();
+        if (priorStrength == null || priorStrength <= 0) {
+            return rawScore;
+        }
+
+        double validPopularity = Math.max(normalizedPopularity, 0);
+        return (validPopularity * rawScore + priorStrength * config.getScoreMean())
+                / (validPopularity + priorStrength);
+    }
+
+    /**
      * 使用平台均值和标准差将评分映射到以 50 为中心的统一尺度。
      *
      * @return 归一化评分；原始评分无效时返回 {@code null}
@@ -129,15 +154,16 @@ public abstract class AbstractAnimeFetchService {
 
         Mapping mapping = new Mapping(getPlatform(), platformId, mappingInfo);
 
-        Double rawScore = extractRawScore(jsonNode);
-        Double normalizedScore = normalizeScore(rawScore);
-        mapping.setRawScore(rawScore);
-        mapping.setNormalizedScore(normalizedScore);
-
         double rawPopularity = extractRawPopularity(jsonNode);
         double normalizedPopularity = normalizePopularity(rawPopularity);
         mapping.setRawPopularity(rawPopularity);
         mapping.setNormalizedPopularity(normalizedPopularity);
+
+        Double rawScore = extractRawScore(jsonNode);
+        Double adjustedScore = adjustScore(rawScore, normalizedPopularity);
+        Double normalizedScore = normalizeScore(adjustedScore);
+        mapping.setRawScore(rawScore);
+        mapping.setNormalizedScore(normalizedScore);
 
         mappingRepoService.saveOrUpdate(mapping);
     }
