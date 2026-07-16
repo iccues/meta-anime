@@ -40,7 +40,8 @@ public class AnimeSpec {
             if (query == null) return null;
             query.orderBy(
                     criteriaBuilder.asc(criteriaBuilder.isNull(root.get("averageScore"))),
-                    criteriaBuilder.desc(root.get("averageScore")));
+                    criteriaBuilder.desc(root.get("averageScore")),
+                    criteriaBuilder.asc(root.get("animeId")));
             return criteriaBuilder.conjunction();
         };
     }
@@ -50,7 +51,8 @@ public class AnimeSpec {
             if (query == null) return null;
             query.orderBy(
                     criteriaBuilder.asc(criteriaBuilder.isNull(root.get("popularity"))),
-                    criteriaBuilder.desc(root.get("popularity")));
+                    criteriaBuilder.desc(root.get("popularity")),
+                    criteriaBuilder.asc(root.get("animeId")));
             return criteriaBuilder.conjunction();
         };
     }
@@ -96,7 +98,7 @@ public class AnimeSpec {
                 ));
             }
 
-            // Count Query 不能携带 ORDER BY；数据查询按 GREATEST(similarity(...)) DESC 排序。
+            // Count Query 不能携带 ORDER BY；数据查询按最高相似度降序、animeId 升序稳定排序。
             if (query != null && !Long.class.equals(query.getResultType())) {
                 @SuppressWarnings("unchecked")
                 Expression<Float>[] simExprs = fields.stream()
@@ -105,7 +107,9 @@ public class AnimeSpec {
                                 criteriaBuilder.literal(keyword), titlePath.get(field)))
                         .toArray(Expression[]::new);
                 Expression<Float> greatest = criteriaBuilder.function("GREATEST", Float.class, simExprs);
-                query.orderBy(criteriaBuilder.desc(greatest));
+                query.orderBy(
+                        criteriaBuilder.desc(greatest),
+                        criteriaBuilder.asc(root.get("animeId")));
             }
 
             return criteriaBuilder.or(predicates.toArray(Predicate[]::new));

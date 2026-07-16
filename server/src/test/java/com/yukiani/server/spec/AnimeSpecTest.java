@@ -320,6 +320,28 @@ public class AnimeSpecTest {
         assertEquals("低人气", result.get(1).getTitle().getTitleNative());
     }
 
+    @Test
+    public void testOrderBy_UsesAnimeIdToBreakScoreAndPopularityTies() {
+        Anime anime1 = createAnime("动画1", LocalDate.of(2024, 1, 15), ReviewStatus.APPROVED);
+        anime1.setAverageScore(80.0);
+        anime1.setPopularity(100.0);
+
+        Anime anime2 = createAnime("动画2", LocalDate.of(2024, 1, 16), ReviewStatus.APPROVED);
+        anime2.setAverageScore(80.0);
+        anime2.setPopularity(100.0);
+
+        anime1 = animeRepository.save(anime1);
+        anime2 = animeRepository.save(anime2);
+
+        List<Anime> scoreResult = animeRepository.findAll(AnimeSpec.orderByScoreNullLast());
+        List<Anime> popularityResult = animeRepository.findAll(AnimeSpec.orderByPopularityNullLast());
+
+        assertEquals(List.of(anime1.getAnimeId(), anime2.getAnimeId()),
+                scoreResult.stream().map(Anime::getAnimeId).toList());
+        assertEquals(List.of(anime1.getAnimeId(), anime2.getAnimeId()),
+                popularityResult.stream().map(Anime::getAnimeId).toList());
+    }
+
     // 辅助方法：创建测试用的 Anime
     private Anime createAnime(String titleNative, LocalDate startDate, ReviewStatus reviewStatus) {
         AnimeTitles titles = new AnimeTitles();
