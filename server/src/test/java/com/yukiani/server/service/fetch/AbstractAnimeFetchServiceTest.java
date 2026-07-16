@@ -114,8 +114,9 @@ public class AbstractAnimeFetchServiceTest {
         // 调用方法
         testService.processAndSaveMapping(jsonNode);
 
-        // 验证：应该调用 saveOrUpdate
-        verify(mappingRepoService, times(1)).saveOrUpdate(any(Mapping.class));
+        var mappingCaptor = org.mockito.ArgumentCaptor.forClass(Mapping.class);
+        verify(mappingRepoService).saveOrUpdate(mappingCaptor.capture());
+        assertNull(mappingCaptor.getValue().getNormalizedScore());
     }
 
     @Test

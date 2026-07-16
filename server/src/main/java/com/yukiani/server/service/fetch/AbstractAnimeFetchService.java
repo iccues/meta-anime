@@ -69,7 +69,7 @@ public abstract class AbstractAnimeFetchService {
      * @return 归一化评分；原始评分无效时返回 {@code null}
      */
     public Double normalizeScore(Double rawScore) {
-        if (rawScore == null || rawScore < 0) {
+        if (rawScore == null || rawScore <= 0) {
             return null;
         }
         PlatformConfig config = platformConfigProperties.getConfig(getPlatform());
