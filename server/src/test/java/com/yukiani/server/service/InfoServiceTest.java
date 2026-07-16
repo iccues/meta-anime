@@ -68,8 +68,8 @@ public class InfoServiceTest {
         // 聚合信息
         infoService.aggregateInfo(anime);
 
-        // 验证：封面应该来自 Bangumi（优先级最高）
-        assertEquals("https://example.com/bangumi.jpg", anime.getCoverImage());
+        // 验证：封面应该来自 MyAnimeList（优先级最高）
+        assertEquals("https://example.com/cover2.jpg", anime.getCoverImage());
         
         // 验证：开始日期应该是第一个 mapping 的日期
         assertEquals(LocalDate.of(2024, 4, 1), anime.getStartDate());
@@ -257,62 +257,74 @@ public class InfoServiceTest {
         assertNotNull(anime.getTitle());
     }
 
-    // ==================== setCoverImageFromBangumi 测试 ====================
+    // ==================== setCoverImageFromMyAnimeList 测试 ====================
 
     @Test
-    void testSetCoverImageFromBangumi_WithBangumiMapping() {
-        // 添加 Bangumi mapping
-        anime.addMapping(mapping3);
-
-        // 设置封面
-        infoService.setCoverImageFromBangumi(anime);
-
-        // 验证：封面来自 Bangumi
-        assertEquals("https://example.com/bangumi.jpg", anime.getCoverImage());
-    }
-
-    @Test
-    void testSetCoverImageFromBangumi_WithoutBangumiMapping() {
-        // 只添加非 Bangumi mapping
-        anime.addMapping(mapping1);
+    void testSetCoverImageFromMyAnimeList_WithMyAnimeListMapping() {
+        // 添加 MyAnimeList mapping
         anime.addMapping(mapping2);
 
         // 设置封面
-        infoService.setCoverImageFromBangumi(anime);
+        infoService.setCoverImageFromMyAnimeList(anime);
+
+        // 验证：封面来自 MyAnimeList
+        assertEquals("https://example.com/cover2.jpg", anime.getCoverImage());
+    }
+
+    @Test
+    void testSetCoverImageFromMyAnimeList_WithoutMyAnimeListMapping() {
+        // 只添加非 MyAnimeList mapping
+        anime.addMapping(mapping1);
+        anime.addMapping(mapping3);
+
+        // 设置封面
+        infoService.setCoverImageFromMyAnimeList(anime);
 
         // 验证：封面保持为 null
         assertNull(anime.getCoverImage());
     }
 
     @Test
-    void testSetCoverImageFromBangumi_WithNullMappingInfo() {
-        // 创建没有 MappingInfo 的 Bangumi Mapping
-        Mapping bangumiWithoutInfo = new Mapping();
-        bangumiWithoutInfo.setSourcePlatform(Platform.Bangumi);
-        bangumiWithoutInfo.setPlatformId("999");
+    void testSetCoverImageFromMyAnimeList_WithNullMappingInfo() {
+        // 创建没有 MappingInfo 的 MyAnimeList Mapping
+        Mapping myAnimeListWithoutInfo = new Mapping();
+        myAnimeListWithoutInfo.setSourcePlatform(Platform.MyAnimeList);
+        myAnimeListWithoutInfo.setPlatformId("999");
         
-        anime.addMapping(bangumiWithoutInfo);
+        anime.addMapping(myAnimeListWithoutInfo);
 
         // 设置封面
-        infoService.setCoverImageFromBangumi(anime);
+        infoService.setCoverImageFromMyAnimeList(anime);
 
         // 验证：不会出错，封面保持为 null
         assertNull(anime.getCoverImage());
     }
 
     @Test
-    void testSetCoverImageFromBangumi_OverwritesExisting() {
+    void testSetCoverImageFromMyAnimeList_WithNullCoverImage() {
+        MappingInfo mappingInfo = new MappingInfo(new AnimeTitles(), null, LocalDate.of(2024, 4, 1));
+        Mapping myAnimeListWithoutCover = new Mapping(Platform.MyAnimeList, "999", mappingInfo);
+        anime.setCoverImage("https://example.com/fallback.jpg");
+        anime.addMapping(myAnimeListWithoutCover);
+
+        infoService.setCoverImageFromMyAnimeList(anime);
+
+        assertEquals("https://example.com/fallback.jpg", anime.getCoverImage());
+    }
+
+    @Test
+    void testSetCoverImageFromMyAnimeList_OverwritesExisting() {
         // anime 已有封面
         anime.setCoverImage("https://example.com/old.jpg");
         
-        // 添加 Bangumi mapping
-        anime.addMapping(mapping3);
+        // 添加 MyAnimeList mapping
+        anime.addMapping(mapping2);
 
         // 设置封面
-        infoService.setCoverImageFromBangumi(anime);
+        infoService.setCoverImageFromMyAnimeList(anime);
 
-        // 验证：封面被 Bangumi 的封面覆盖
-        assertEquals("https://example.com/bangumi.jpg", anime.getCoverImage());
+        // 验证：封面被 MyAnimeList 的封面覆盖
+        assertEquals("https://example.com/cover2.jpg", anime.getCoverImage());
     }
 
     // ==================== 集成测试 ====================
@@ -332,8 +344,8 @@ public class InfoServiceTest {
         anime.addMapping(mapping2);
         infoService.aggregateInfo(anime);
         
-        // 封面和日期保持不变（已有值）
-        assertEquals("https://example.com/cover1.jpg", anime.getCoverImage());
+        // MyAnimeList 封面优先级最高
+        assertEquals("https://example.com/cover2.jpg", anime.getCoverImage());
         assertEquals(LocalDate.of(2024, 4, 1), anime.getStartDate());
         // 标题被合并
         assertEquals("Anime Romaji 2", anime.getTitle().getTitleRomaji());
@@ -342,8 +354,8 @@ public class InfoServiceTest {
         anime.addMapping(mapping3);
         infoService.aggregateInfo(anime);
         
-        // Bangumi 封面优先级最高，覆盖之前的封面
-        assertEquals("https://example.com/bangumi.jpg", anime.getCoverImage());
+        // MyAnimeList 封面优先级最高，Bangumi 不会覆盖它
+        assertEquals("https://example.com/cover2.jpg", anime.getCoverImage());
         assertEquals(LocalDate.of(2024, 4, 1), anime.getStartDate());
     }
 }

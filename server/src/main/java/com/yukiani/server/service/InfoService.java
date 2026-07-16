@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class InfoService {
     /**
-     * 重新聚合动画基础信息，并优先使用 Bangumi 封面。
+     * 重新聚合动画基础信息，并优先使用 MyAnimeList 封面。
      */
     public void aggregateInfo(Anime anime) {
         cleanInfo(anime);
         for (Mapping mapping : anime.getMappings()) {
             applyMappingInfo(anime, mapping);
         }
-        setCoverImageFromBangumi(anime);
+        setCoverImageFromMyAnimeList(anime);
     }
 
     /**
@@ -53,12 +53,15 @@ public class InfoService {
     }
 
     /**
-     * 若存在 Bangumi Mapping，则使用其封面覆盖聚合结果。
+     * 若存在 MyAnimeList Mapping 且封面有效，则使用其封面覆盖聚合结果。
      */
-    public void setCoverImageFromBangumi(Anime anime) {
-        Mapping bangumi = anime.getMappingByPlatform(Platform.Bangumi);
-        if (bangumi != null && bangumi.getMappingInfo() != null) {
-            anime.setCoverImage(bangumi.getMappingInfo().getCoverImage());
+    public void setCoverImageFromMyAnimeList(Anime anime) {
+        Mapping myAnimeList = anime.getMappingByPlatform(Platform.MyAnimeList);
+        if (myAnimeList != null && myAnimeList.getMappingInfo() != null) {
+            String coverImage = myAnimeList.getMappingInfo().getCoverImage();
+            if (coverImage != null && !coverImage.isBlank()) {
+                anime.setCoverImage(coverImage);
+            }
         }
     }
 }
