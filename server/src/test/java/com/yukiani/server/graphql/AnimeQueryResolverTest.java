@@ -220,6 +220,36 @@ public class AnimeQueryResolverTest {
                 .andExpect(jsonPath("$.data.animeListBySearch.pageInfo.totalPages").value(1));
     }
 
+    @Test
+    public void testAnimeListBySearch_Pagination_UsesAnimeIdToBreakSimilarityTies() throws Exception {
+        Anime anime1 = createAndSaveAnime("搜索动画1", LocalDate.of(2024, 4, 1), 8.0, 1000.0);
+        Anime anime2 = createAndSaveAnime("搜索动画2", LocalDate.of(2024, 4, 2), 8.0, 1000.0);
+        Anime anime3 = createAndSaveAnime("搜索动画3", LocalDate.of(2024, 4, 3), 8.0, 1000.0);
+        Anime anime4 = createAndSaveAnime("搜索动画4", LocalDate.of(2024, 4, 4), 8.0, 1000.0);
+
+        String query = """
+                {
+                  "query": "{ firstPage: animeListBySearch(keyword: \\"搜索\\", pageNumber: 0, pageSize: 2) { content { animeId } } secondPage: animeListBySearch(keyword: \\"搜索\\", pageNumber: 1, pageSize: 2) { content { animeId } } }"
+                }
+                """;
+
+        mockMvc.perform(post(GRAPHQL_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(query))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(jsonPath("$.data.firstPage.content", hasSize(2)))
+                .andExpect(jsonPath("$.data.firstPage.content[0].animeId")
+                        .value(anime1.getAnimeId().toString()))
+                .andExpect(jsonPath("$.data.firstPage.content[1].animeId")
+                        .value(anime2.getAnimeId().toString()))
+                .andExpect(jsonPath("$.data.secondPage.content", hasSize(2)))
+                .andExpect(jsonPath("$.data.secondPage.content[0].animeId")
+                        .value(anime3.getAnimeId().toString()))
+                .andExpect(jsonPath("$.data.secondPage.content[1].animeId")
+                        .value(anime4.getAnimeId().toString()));
+    }
+
     // ============ 排序测试 ============
 
     @Test
@@ -313,6 +343,36 @@ public class AnimeQueryResolverTest {
                 .andExpect(jsonPath("$.errors").doesNotExist())
                 .andExpect(jsonPath("$.data.animeList.content", hasSize(2)))
                 .andExpect(jsonPath("$.data.animeList.pageInfo.number").value(1));
+    }
+
+    @Test
+    public void testAnimeList_Pagination_UsesAnimeIdToBreakScoreTies() throws Exception {
+        Anime anime1 = createAndSaveAnime("动画1", LocalDate.of(2024, 4, 1), 8.0, 1000.0);
+        Anime anime2 = createAndSaveAnime("动画2", LocalDate.of(2024, 4, 2), 8.0, 1000.0);
+        Anime anime3 = createAndSaveAnime("动画3", LocalDate.of(2024, 4, 3), 8.0, 1000.0);
+        Anime anime4 = createAndSaveAnime("动画4", LocalDate.of(2024, 4, 4), 8.0, 1000.0);
+
+        String query = """
+                {
+                  "query": "{ firstPage: animeList(pageNumber: 0, pageSize: 2, sortBy: SCORE) { content { animeId } } secondPage: animeList(pageNumber: 1, pageSize: 2, sortBy: SCORE) { content { animeId } } }"
+                }
+                """;
+
+        mockMvc.perform(post(GRAPHQL_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(query))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(jsonPath("$.data.firstPage.content", hasSize(2)))
+                .andExpect(jsonPath("$.data.firstPage.content[0].animeId")
+                        .value(anime1.getAnimeId().toString()))
+                .andExpect(jsonPath("$.data.firstPage.content[1].animeId")
+                        .value(anime2.getAnimeId().toString()))
+                .andExpect(jsonPath("$.data.secondPage.content", hasSize(2)))
+                .andExpect(jsonPath("$.data.secondPage.content[0].animeId")
+                        .value(anime3.getAnimeId().toString()))
+                .andExpect(jsonPath("$.data.secondPage.content[1].animeId")
+                        .value(anime4.getAnimeId().toString()));
     }
 
     // ============ 字段转换验证 ============

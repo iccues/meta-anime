@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * 封装基于开播日期和标题的 Anime 查找与 Entity 创建逻辑。
+ */
 @Service
 public class AnimeRepoService {
 
@@ -29,6 +32,11 @@ public class AnimeRepoService {
         return repo.findByStartDateBetween(start, end);
     }
 
+    /**
+     * 在开播日期相近的动画中查找原文标题相似的 Anime Entity，并补齐其标题。
+     *
+     * @return 匹配的动画；未找到时返回 {@code null}
+     */
     @Transactional
     public Anime findAnime(LocalDate date, AnimeTitles titles) {
         List<Anime> list = findAnimeAroundDate(date);

@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+/**
+ * 编排异步平台抓取、Mapping 关联和综合指标计算任务。
+ */
 @Service
 @Slf4j
 public class FetchService {
@@ -25,12 +28,24 @@ public class FetchService {
     @Resource
     MetricService metricService;
 
+    /**
+     * 异步抓取平台 Mapping，并在抓取完成后关联孤立 Mapping。
+     *
+     * @param season   开播季度；为空时抓取全年
+     * @param platform 目标平台；为空时依次抓取全部平台
+     */
     @Async
     public void fetchAnime(int year, Season season, Platform platform) {
         fetchMapping(year, season, platform);
         linkMappings();
     }
 
+    /**
+     * 异步抓取并保存指定平台或全部平台的季度 Mapping。
+     *
+     * @param season   开播季度；为空时抓取全年
+     * @param platform 目标平台；为空时依次抓取全部平台
+     */
     @Async
     public void fetchMapping(int year, Season season, Platform platform) {
         switch (platform) {

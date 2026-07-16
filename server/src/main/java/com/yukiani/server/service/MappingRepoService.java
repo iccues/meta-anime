@@ -7,6 +7,9 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 封装平台 Mapping 的幂等保存及关联动画指标刷新逻辑。
+ */
 @Service
 public class MappingRepoService {
     @Resource
@@ -15,6 +18,9 @@ public class MappingRepoService {
     @Resource
     MetricService metricService;
 
+    /**
+     * 按平台 natural key 新增或更新 Mapping；更新现有 Mapping 后同步刷新动画指标。
+     */
     @Transactional
     public void saveOrUpdate(Mapping m) {
         var existing = repo.findBySourcePlatformAndPlatformId(m.getSourcePlatform(), m.getPlatformId());

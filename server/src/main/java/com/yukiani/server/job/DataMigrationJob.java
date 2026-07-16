@@ -14,15 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 数据迁移工具：重新计算 Mapping 的归一化数据
- * 使用场景：
- * 1. 修改了 application.yml 中的平台配置参数（popularity-multiplier, score-mean, score-std 等）
- * 2. 需要将现有数据按新的参数重新归一化
- * 使用方法：
- * 1. 取消注释需要执行的方法上的 @PostConstruct 注解
- * 2. 启动应用，任务会自动执行
- * 3. 执行完成后，重新注释掉 @PostConstruct 注解
- * 注意：此任务会遍历所有 Mapping 并更新数据库，请谨慎使用
+ * 在平台归一化配置变更后，批量重算历史 Mapping 数据。
+ *
+ * <p>修改 {@code application.yml} 中的 {@code popularity-median}、
+ * {@code score-mean} 或 {@code score-std} 后，可临时启用对应 method 的
+ * {@code @PostConstruct}，在应用启动时使用新参数执行 migration。
+ * 执行完成后应立即重新注释，避免后续启动时重复执行。</p>
+ *
+ * <p>任务会遍历并更新全部 Mapping，执行前应确认数据量并做好数据库备份。</p>
  */
 @Slf4j
 @Service
@@ -33,8 +32,8 @@ public class DataMigrationJob {
     FetchService fetchService;
 
     /**
-     * 重新计算所有 Mapping 的 normalizedPopularity
-     * 使用场景：修改了 popularity-multiplier 配置后
+     * 根据当前 {@code popularity-median}，从 {@code rawPopularity}
+     * 重新计算所有 Mapping 的 {@code normalizedPopularity}；原始值为空时跳过。
      */
     // @PostConstruct
     @Transactional
@@ -64,10 +63,10 @@ public class DataMigrationJob {
     }
 
     /**
-     * 重新计算所有 Mapping 的 normalizedScore
-     * 使用场景：修改了 score-mean 或 score-std 配置后
+     * 根据当前 {@code score-mean} 和 {@code score-std}，从 {@code rawScore}
+     * 重新计算所有 Mapping 的 {@code normalizedScore}；原始值无效时清空归一化结果。
      */
-//    @PostConstruct
+    // @PostConstruct
     @Transactional
     public void recalculateAllScores() {
         log.info("开始重新计算所有 Mapping 的 normalizedScore...");

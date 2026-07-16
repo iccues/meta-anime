@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 根据开播日期和标题相似度，将孤立平台 Mapping 关联到动画主数据。
+ */
 @Service
 public class TitleBasedLinkService {
     @Resource
@@ -24,6 +27,9 @@ public class TitleBasedLinkService {
     @Resource
     AnimeAggregationService animeAggregationService;
 
+    /**
+     * 查找标题和开播日期匹配的动画，未找到时创建新动画。
+     */
     @Transactional
     Anime findOrCreateAnime(MappingInfo mappingInfo) {
         Anime existing = animeRepoService.findAnime(
@@ -39,6 +45,9 @@ public class TitleBasedLinkService {
         return animeRepository.save(anime);
     }
 
+    /**
+     * 将尚未关联且具有开播日期的 Mapping 关联到已有或新建动画。
+     */
     @Transactional
     public void linkMappingToAnime(Mapping mapping) {
         if (mapping.getAnime() == null && mapping.getMappingInfo().getStartDate() != null) {

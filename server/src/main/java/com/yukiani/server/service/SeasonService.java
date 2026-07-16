@@ -6,8 +6,18 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+/**
+ * 将年份和季度转换为数据库查询使用的开播日期范围。
+ */
 @Service
 public class SeasonService {
+    /**
+     * 计算季度查询的左闭右开日期范围，并向前扩展一个月以容纳跨月排期。
+     *
+     * @param year   开播年份；为空时返回 {@code null}
+     * @param season 开播季度；为空时覆盖全年
+     * @return 查询日期范围；年份为空时返回 {@code null}
+     */
     public LocalDateRange getStartDateRange(Integer year, Season season) {
         if (year == null) {
             return null;

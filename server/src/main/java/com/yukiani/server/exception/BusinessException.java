@@ -4,7 +4,7 @@ import com.yukiani.server.common.Response;
 import lombok.Getter;
 
 /**
- * 业务逻辑异常
+ * 携带稳定业务错误码、可转换为统一响应的异常基类。
  */
 @Getter
 public abstract class BusinessException extends RuntimeException {

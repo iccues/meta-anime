@@ -14,6 +14,9 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 通过 MyAnimeList API 抓取动画 Mapping 和指标。
+ */
 @Service
 public class MyAnimeListFetchService extends AbstractAnimeFetchService {
 
@@ -99,6 +102,7 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
         page.path("data").forEach(jsonNode -> {
             JsonNode node = jsonNode.path("node");
             String mediaType = node.path("media_type").asText();
+            // Season API 也会返回 music 和 pv，此类条目不参与动画主数据聚合。
             if ("music".equals(mediaType) || "pv".equals(mediaType)) {
                 return;
             }
@@ -109,6 +113,7 @@ public class MyAnimeListFetchService extends AbstractAnimeFetchService {
     @Resource
     WebClient myAnimeListWebClient;
 
+    /** MyAnimeList 单次请求的最大记录数。 */
     final int pageSize = 100;
 
     JsonNode fetchPage(int year, Season season, int page) {

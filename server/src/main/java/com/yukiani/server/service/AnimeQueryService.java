@@ -15,7 +15,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.stereotype.Service;
 
 /**
- * 处理公开的动画查询逻辑
+ * 处理仅面向已审核动画的公开 API 分页查询和标题搜索。
  */
 @Service
 public class AnimeQueryService {
@@ -27,8 +27,11 @@ public class AnimeQueryService {
     SeasonService seasonService;
 
     /**
-     * 获取动画列表（公开API）
-     * 只返回已审核通过的动画
+     * 分页查询指定年份和季度的已审核动画。
+     *
+     * @param year       开播年份；为空时不过滤日期
+     * @param season     开播季度；为空时查询全年
+     * @param pageSize   每页数量，上限为 60
      */
     public Page<Anime> getAnimeList(Integer year, Season season, int pageNumber, int pageSize, SortBy sortBy) {
         int limitedPageSize = Math.min(pageSize, 60);
@@ -43,6 +46,12 @@ public class AnimeQueryService {
         return animeRepository.findAll(spec, pageRequest);
     }
 
+    /**
+     * 按多语种标题模糊搜索已审核动画。
+     *
+     * @param pageSize   每页数量，上限为 60
+     * @return 动画分页结果；关键词为空时返回空页
+     */
     public Page<Anime> getAnimeListBySearch(
             String keyword,
             Integer pageNumber,
@@ -60,6 +69,11 @@ public class AnimeQueryService {
         return animeRepository.findAll(spec, pageRequest);
     }
 
+    /**
+     * 按 animeId 查询已审核动画。
+     *
+     * @return Anime Entity；不存在或未审核通过时返回 {@code null}
+     */
     public Anime getAnimeById(Long animeId) {
         return animeRepository.findByAnimeIdAndReviewStatus(animeId, ReviewStatus.APPROVED);
     }
