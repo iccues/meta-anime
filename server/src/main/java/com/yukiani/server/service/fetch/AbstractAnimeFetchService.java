@@ -7,7 +7,6 @@ import com.yukiani.server.entity.*;
 import com.yukiani.server.exception.FetchFailedException;
 import com.yukiani.server.repo.MappingRepository;
 import com.yukiani.server.service.MappingRepoService;
-import com.yukiani.server.service.MetricService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,12 +63,37 @@ public abstract class AbstractAnimeFetchService {
     protected abstract Double extractRawScore(JsonNode jsonNode);
 
     /**
+     * 按平台先验均值和归一化热度对原始评分进行平滑。
+     *
+     * <p>未配置先验强度时返回原始评分。</p>
+     *
+     * @param rawScore             平台原始评分
+     * @param normalizedPopularity 以平台热度中位数为 10000 归一化后的热度
+     * @return 平滑后的评分；原始评分无效时返回 {@code null}
+     */
+    public Double adjustScore(Double rawScore, double normalizedPopularity) {
+        if (rawScore == null || rawScore <= 0) {
+            return null;
+        }
+
+        PlatformConfig config = platformConfigProperties.getConfig(getPlatform());
+        Double priorStrength = config.getScorePriorStrength();
+        if (priorStrength == null || priorStrength <= 0) {
+            return rawScore;
+        }
+
+        double validPopularity = Math.max(normalizedPopularity, 0);
+        return (validPopularity * rawScore + priorStrength * config.getScoreMean())
+                / (validPopularity + priorStrength);
+    }
+
+    /**
      * 使用平台均值和标准差将评分映射到以 50 为中心的统一尺度。
      *
      * @return 归一化评分；原始评分无效时返回 {@code null}
      */
     public Double normalizeScore(Double rawScore) {
-        if (rawScore == null || rawScore < 0) {
+        if (rawScore == null || rawScore <= 0) {
             return null;
         }
         PlatformConfig config = platformConfigProperties.getConfig(getPlatform());
@@ -129,17 +153,34 @@ public abstract class AbstractAnimeFetchService {
 
         Mapping mapping = new Mapping(getPlatform(), platformId, mappingInfo);
 
-        Double rawScore = extractRawScore(jsonNode);
-        Double normalizedScore = normalizeScore(rawScore);
-        mapping.setRawScore(rawScore);
-        mapping.setNormalizedScore(normalizedScore);
-
         double rawPopularity = extractRawPopularity(jsonNode);
-        double normalizedPopularity = normalizePopularity(rawPopularity);
         mapping.setRawPopularity(rawPopularity);
+        mapping.setRawScore(extractRawScore(jsonNode));
+
+        recalculateMetrics(mapping);
+        mappingRepoService.saveOrUpdate(mapping);
+    }
+
+    /**
+     * 使用当前平台配置，从 Mapping 原始指标重新计算归一化指标。
+     *
+     * @param mapping 与当前抓取服务属于同一平台的 Mapping
+     * @throws IllegalArgumentException Mapping 平台与当前抓取服务不一致时抛出
+     */
+    public void recalculateMetrics(Mapping mapping) {
+        if (mapping.getSourcePlatform() != getPlatform()) {
+            throw new IllegalArgumentException("Mapping 平台与 FetchService 不匹配");
+        }
+
+        Double rawPopularity = mapping.getRawPopularity();
+        Double normalizedPopularity = rawPopularity == null
+                ? null
+                : normalizePopularity(rawPopularity);
         mapping.setNormalizedPopularity(normalizedPopularity);
 
-        mappingRepoService.saveOrUpdate(mapping);
+        double popularityForAdjustment = normalizedPopularity == null ? 0 : normalizedPopularity;
+        Double adjustedScore = adjustScore(mapping.getRawScore(), popularityForAdjustment);
+        mapping.setNormalizedScore(normalizeScore(adjustedScore));
     }
 
     /**

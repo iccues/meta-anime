@@ -31,9 +31,6 @@ public class MappingSyncService {
     @Resource
     FetchService fetchService;
 
-    @Resource
-    MetricService metricService;
-
     /** 线程安全的待同步 Mapping 队列；成功项会移除，失败项保留到下一轮重试。 */
     List<Mapping> pendingMappings = Collections.synchronizedList(new ArrayList<>());
 

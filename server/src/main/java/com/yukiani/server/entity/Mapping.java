@@ -52,7 +52,7 @@ public class Mapping {
     /** 来源平台返回的原始评分，无有效评分时为 {@code null}。 */
     Double rawScore;
 
-    /** 按来源平台均值和标准差转换后的统一尺度评分。 */
+    /** 来源平台评分经平台规则处理并转换到统一尺度后的结果，无有效评分时为 {@code null}。 */
     Double normalizedScore;
 
     /** 来源平台返回的原始热度指标。 */

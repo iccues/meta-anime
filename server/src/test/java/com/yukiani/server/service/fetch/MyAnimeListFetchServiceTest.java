@@ -29,6 +29,7 @@ public class MyAnimeListFetchServiceTest {
         PlatformConfig malConfig = new PlatformConfig();
         malConfig.setScoreMean(7.0);
         malConfig.setScoreStd(1.0);
+        malConfig.setPopularityMedian(25000.0);
 
         Field malField = PlatformConfigProperties.class.getDeclaredField("myAnimeList");
         malField.setAccessible(true);
@@ -167,6 +168,11 @@ public class MyAnimeListFetchServiceTest {
     }
 
     @Test
+    public void testAdjustScore_WithoutConfiguredPriorKeepsRawScore() {
+        assertEquals(8.5, service.adjustScore(8.5, 10), 0.0001);
+    }
+
+    @Test
     public void testNormalizeScore() {
         // MAL: mean=7.0, std=1.0
         // z = (8.5 - 7.0) / 1.0 = 1.5
@@ -174,6 +180,11 @@ public class MyAnimeListFetchServiceTest {
         double result = service.normalizeScore(8.5);
 
         assertEquals(75.0, result, 0.01);
+    }
+
+    @Test
+    public void testNormalizePopularity() {
+        assertEquals(1000.0, service.normalizePopularity(2500.0), 0.0001);
     }
 
     @Test

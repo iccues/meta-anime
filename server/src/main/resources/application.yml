@@ -20,6 +20,7 @@ platform:
     popularity-weight: 2
     popularity-median: 807.0
     score-weight: 2
+    score-prior-strength: 1000
     score-mean: 6.41
     score-std: 0.99
   anilist:

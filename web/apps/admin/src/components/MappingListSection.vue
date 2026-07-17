@@ -6,7 +6,7 @@ import { storeToRefs } from "pinia";
 import { ref, toRaw, watch } from "vue";
 import { VueDraggable } from "vue-draggable-plus";
 
-import { deleteMapping, getUnmappedMappingList } from "@/api/mapping";
+import { deleteMapping, getUnlinkedMappings } from "@/api/mapping";
 import AdminMappingItem from "@/components/AdminMappingItem.vue";
 import MappingFormDialog from "@/components/MappingFormDialog.vue";
 import { useAdminListPageStore } from "@/stores/adminListPageStore.ts";
@@ -23,7 +23,7 @@ const mappingDialogVisible = ref(false);
 
 const { isFetching, isError, error, data, refetch } = useQuery({
   queryKey: ["admin-mapping-list"],
-  queryFn: ({ signal }) => getUnmappedMappingList(signal),
+  queryFn: ({ signal }) => getUnlinkedMappings(signal),
 });
 
 watch(

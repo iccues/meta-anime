@@ -36,17 +36,21 @@ oidc:
 
 platform:
   bangumi:
-    popularity-multiplier: 100.0
+    popularity-weight: 2
+    popularity-median: 800.0
     score-weight: 2
+    score-prior-strength: 1000
     score-mean: 6.0
     score-std: 1.0
   anilist:
-    popularity-multiplier: 10.0
+    popularity-weight: 1
+    popularity-median: 16000.0
     score-weight: 1
     score-mean: 70.0
     score-std: 10.0
   myanimelist:
-    popularity-multiplier: 1.0
+    popularity-weight: 1
+    popularity-median: 25000.0
     score-weight: 1
     score-mean: 7.0
     score-std: 1.0

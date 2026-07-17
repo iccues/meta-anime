@@ -29,6 +29,7 @@ public class AniListFetchServiceTest {
         PlatformConfig aniListConfig = new PlatformConfig();
         aniListConfig.setScoreMean(70.0);
         aniListConfig.setScoreStd(10.0);
+        aniListConfig.setPopularityMedian(16000.0);
 
         Field aniListField = PlatformConfigProperties.class.getDeclaredField("aniList");
         aniListField.setAccessible(true);
@@ -150,6 +151,11 @@ public class AniListFetchServiceTest {
         double result = service.normalizeScore(85.0);
 
         assertEquals(75.0, result, 0.01);
+    }
+
+    @Test
+    public void testNormalizePopularity() {
+        assertEquals(1000.0, service.normalizePopularity(1600.0), 0.0001);
     }
 
     @Test

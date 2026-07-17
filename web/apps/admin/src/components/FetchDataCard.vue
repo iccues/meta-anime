@@ -4,7 +4,7 @@ import { PLATFORM_OPTIONS, SEASON_OPTIONS } from "@pjyk-web/shared/constants/ui-
 import { ElMessage } from "element-plus";
 import { ref } from "vue";
 
-import { calculateMetric, fetchAnime, fetchMapping, linkMappings } from "@/api/fetch";
+import { fetchAnime, fetchMapping, linkMappings, recalculateMetrics } from "@/api/fetch";
 
 // 数据抓取相关
 const fetchDialogVisible = ref(false);
@@ -67,7 +67,7 @@ const handleLinkMappings = async () => {
 const handleCalculateScores = async () => {
   try {
     fetchLoading.value = true;
-    await calculateMetric();
+    await recalculateMetrics();
     ElMessage.success("指标计算任务已启动，请稍后查看结果");
   } catch (e) {
     ElMessage.error("启动失败: " + (e instanceof Error ? e.message : "未知错误"));

@@ -4,7 +4,6 @@ import com.yukiani.server.entity.Platform;
 import com.yukiani.server.entity.Season;
 import com.yukiani.server.exception.FetchFailedException;
 import com.yukiani.server.service.TitleBasedLinkService;
-import com.yukiani.server.service.MetricService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,9 +27,6 @@ public class FetchServiceTest {
 
     @Mock
     private TitleBasedLinkService titleBasedLinkService;
-
-    @Mock
-    private MetricService metricService;
 
     @InjectMocks
     private FetchService fetchService;
@@ -79,13 +75,6 @@ public class FetchServiceTest {
     }
 
     @Test
-    public void testCalculateAllMetricService() {
-        fetchService.calculateAllMetric();
-
-        verify(metricService, times(1)).calculateAllMetric();
-    }
-
-    @Test
     public void testFetchAnime_CallsAllSteps() {
         int year = 2024;
         Season season = Season.SPRING;
@@ -98,8 +87,6 @@ public class FetchServiceTest {
 
         verify(titleBasedLinkService, times(1)).linkAllOrphanedMappings();
 
-        // calculateAllMetric() 已被注释，因为在 linkMappings 过程中已经通过 AnimeMergeService 计算了指标
-        verify(metricService, never()).calculateAllMetric();
     }
 
     @Test

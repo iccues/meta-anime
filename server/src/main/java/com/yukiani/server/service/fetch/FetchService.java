@@ -25,8 +25,6 @@ public class FetchService {
 
     @Resource
     TitleBasedLinkService titleBasedLinkService;
-    @Resource
-    MetricService metricService;
 
     /**
      * 异步抓取平台 Mapping，并在抓取完成后关联孤立 Mapping。
@@ -78,17 +76,6 @@ public class FetchService {
             log.debug("link mappings completed");
         } catch (Exception e) {
             log.error("link mappings failed: {}", e.getMessage());
-        }
-    }
-
-    @Async
-    public void calculateAllMetric() {
-        try {
-            log.debug("calculate metric start");
-            metricService.calculateAllMetric();
-            log.debug("calculate metric completed");
-        } catch (Exception e) {
-            log.error("calculate metric failed: {}", e.getMessage());
         }
     }
 
