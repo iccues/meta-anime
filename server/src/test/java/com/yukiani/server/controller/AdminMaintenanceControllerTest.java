@@ -29,7 +29,7 @@ class AdminMaintenanceControllerTest {
     void startsMetricRecalculation() throws Exception {
         when(metricRecalculationService.tryStart()).thenReturn(true);
 
-        mockMvc.perform(post("/api/admin/recalculate_metrics"))
+        mockMvc.perform(post("/api/admin/tasks/metric-recalculation"))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").value("指标重算任务已启动"));
@@ -41,7 +41,7 @@ class AdminMaintenanceControllerTest {
     void rejectsDuplicateMetricRecalculation() throws Exception {
         when(metricRecalculationService.tryStart()).thenReturn(false);
 
-        mockMvc.perform(post("/api/admin/recalculate_metrics"))
+        mockMvc.perform(post("/api/admin/tasks/metric-recalculation"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("TASK_RUNNING"))

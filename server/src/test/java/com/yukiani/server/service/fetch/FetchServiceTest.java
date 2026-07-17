@@ -79,13 +79,6 @@ public class FetchServiceTest {
     }
 
     @Test
-    public void testCalculateAllMetricService() {
-        fetchService.calculateAllMetric();
-
-        verify(metricService, times(1)).calculateAllMetric();
-    }
-
-    @Test
     public void testFetchAnime_CallsAllSteps() {
         int year = 2024;
         Season season = Season.SPRING;

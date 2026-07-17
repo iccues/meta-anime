@@ -54,7 +54,7 @@ public class AdminAnimeControllerTest {
         animeRepository.save(anime1);
         animeRepository.save(anime2);
 
-        mockMvc.perform(get("/api/admin/get_anime_list"))
+        mockMvc.perform(get("/api/admin/animes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").isArray())
@@ -69,7 +69,7 @@ public class AdminAnimeControllerTest {
         animeRepository.save(approvedAnime);
         animeRepository.save(pendingAnime);
 
-        mockMvc.perform(get("/api/admin/get_anime_list")
+        mockMvc.perform(get("/api/admin/animes")
                         .param("reviewStatus", "APPROVED"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -86,7 +86,7 @@ public class AdminAnimeControllerTest {
         animeRepository.save(anime2024);
         animeRepository.save(anime2023);
 
-        mockMvc.perform(get("/api/admin/get_anime_list")
+        mockMvc.perform(get("/api/admin/animes")
                         .param("year", "2024"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -104,7 +104,7 @@ public class AdminAnimeControllerTest {
         Anime summerAnime = createAnime("夏季动画", LocalDate.of(2024, 7, 15), ReviewStatus.APPROVED);
         animeRepository.save(summerAnime);
 
-        mockMvc.perform(get("/api/admin/get_anime_list")
+        mockMvc.perform(get("/api/admin/animes")
                         .param("year", "2024")
                         .param("season", "SPRING"))
                 .andExpect(status().isOk())
@@ -126,7 +126,7 @@ public class AdminAnimeControllerTest {
                 LocalDate.of(2024, 4, 1)
         );
 
-        mockMvc.perform(post("/api/admin/create_anime")
+        mockMvc.perform(post("/api/admin/animes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -159,7 +159,7 @@ public class AdminAnimeControllerTest {
                 LocalDate.of(2024, 4, 1)
         );
 
-        mockMvc.perform(put("/api/admin/update_anime")
+        mockMvc.perform(put("/api/admin/animes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -189,7 +189,7 @@ public class AdminAnimeControllerTest {
                 LocalDate.of(2024, 4, 1)
         );
 
-        mockMvc.perform(put("/api/admin/update_anime")
+        mockMvc.perform(put("/api/admin/animes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -205,7 +205,7 @@ public class AdminAnimeControllerTest {
 
         Long animeId = anime.getAnimeId();
 
-        mockMvc.perform(delete("/api/admin/delete_anime/" + animeId))
+        mockMvc.perform(delete("/api/admin/animes/" + animeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
 
@@ -215,7 +215,7 @@ public class AdminAnimeControllerTest {
 
     @Test
     public void testDeleteAnime_NotFound() throws Exception {
-        mockMvc.perform(delete("/api/admin/delete_anime/999"))
+        mockMvc.perform(delete("/api/admin/animes/999"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"));
@@ -237,7 +237,7 @@ public class AdminAnimeControllerTest {
         Long animeId = anime.getAnimeId();
         Long mappingId = mapping.getMappingId();
 
-        mockMvc.perform(delete("/api/admin/delete_anime/" + animeId))
+        mockMvc.perform(delete("/api/admin/animes/" + animeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
 
@@ -261,7 +261,7 @@ public class AdminAnimeControllerTest {
         anime1 = animeRepository.save(anime1);
         anime2 = animeRepository.save(anime2);
 
-        mockMvc.perform(get("/api/admin/get_anime_list"))
+        mockMvc.perform(get("/api/admin/animes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data", hasSize(3)))
@@ -273,95 +273,11 @@ public class AdminAnimeControllerTest {
 
     @Test
     public void testGetAnimeList_EmptyResult() throws Exception {
-        mockMvc.perform(get("/api/admin/get_anime_list"))
+        mockMvc.perform(get("/api/admin/animes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data", hasSize(0)));
-    }
-
-    @Test
-    public void testDeleteNonApprovedAnimes_Success() throws Exception {
-        // 准备测试数据
-        Anime approved = createAnime("已审核", LocalDate.of(2024, 1, 15), ReviewStatus.APPROVED);
-        Anime pending = createAnime("待审核", LocalDate.of(2024, 1, 16), ReviewStatus.PENDING);
-        Anime rejected = createAnime("已拒绝", LocalDate.of(2024, 1, 17), ReviewStatus.REJECTED);
-
-        approved = animeRepository.save(approved);
-        pending = animeRepository.save(pending);
-        rejected = animeRepository.save(rejected);
-
-        // 验证初始状态
-        assertEquals(3, animeRepository.count());
-
-        // 执行删除请求
-        mockMvc.perform(delete("/api/admin/delete_non_approved_animes"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
-
-        // 验证：只有 APPROVED 状态的动画保留
-        assertEquals(1, animeRepository.count());
-        assertTrue(animeRepository.existsById(approved.getAnimeId()));
-        assertFalse(animeRepository.existsById(pending.getAnimeId()));
-        assertFalse(animeRepository.existsById(rejected.getAnimeId()));
-    }
-
-    @Test
-    public void testDeleteNonApprovedAnimes_WithMappings() throws Exception {
-        // 创建 PENDING 动画并关联映射
-        Anime pendingAnime = createAnime("待审核", LocalDate.of(2024, 1, 15), ReviewStatus.PENDING);
-        pendingAnime = animeRepository.save(pendingAnime);
-
-        com.yukiani.server.entity.Mapping mapping = new com.yukiani.server.entity.Mapping();
-        mapping.setSourcePlatform(Platform.MyAnimeList);
-        mapping.setPlatformId("12345");
-        mapping.setAnime(pendingAnime);
-        mapping = mappingRepository.save(mapping);
-
-        Long mappingId = mapping.getMappingId();
-
-        // 执行删除请求
-        mockMvc.perform(delete("/api/admin/delete_non_approved_animes"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
-
-        // 验证：动画和映射都被删除
-        assertEquals(0, animeRepository.count());
-        assertFalse(mappingRepository.existsById(mappingId));
-    }
-
-    @Test
-    public void testDeleteNonApprovedAnimes_EmptyDatabase() throws Exception {
-        // 不创建任何数据
-        assertEquals(0, animeRepository.count());
-
-        // 执行删除请求（不应该报错）
-        mockMvc.perform(delete("/api/admin/delete_non_approved_animes"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
-
-        // 验证：仍然为空
-        assertEquals(0, animeRepository.count());
-    }
-
-    @Test
-    public void testDeleteNonApprovedAnimes_OnlyApproved() throws Exception {
-        // 只创建 APPROVED 状态的动画
-        Anime approved1 = createAnime("已审核1", LocalDate.of(2024, 1, 15), ReviewStatus.APPROVED);
-        Anime approved2 = createAnime("已审核2", LocalDate.of(2024, 1, 16), ReviewStatus.APPROVED);
-
-        approved1 = animeRepository.save(approved1);
-        approved2 = animeRepository.save(approved2);
-
-        // 执行删除请求
-        mockMvc.perform(delete("/api/admin/delete_non_approved_animes"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
-
-        // 验证：所有 APPROVED 动画都保留
-        assertEquals(2, animeRepository.count());
-        assertTrue(animeRepository.existsById(approved1.getAnimeId()));
-        assertTrue(animeRepository.existsById(approved2.getAnimeId()));
     }
 
     // 辅助方法：创建测试用的 Anime

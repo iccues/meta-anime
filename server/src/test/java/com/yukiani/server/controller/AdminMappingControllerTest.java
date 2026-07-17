@@ -72,7 +72,7 @@ public class AdminMappingControllerTest {
         mappedMapping.setAnime(anime);
         mappingRepository.save(mappedMapping);
 
-        mockMvc.perform(get("/api/admin/get_unmapped_mapping_list"))
+        mockMvc.perform(get("/api/admin/mappings/unlinked"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").isArray())
@@ -82,7 +82,7 @@ public class AdminMappingControllerTest {
 
     @Test
     public void testGetUnmappedMappingList_EmptyResult() throws Exception {
-        mockMvc.perform(get("/api/admin/get_unmapped_mapping_list"))
+        mockMvc.perform(get("/api/admin/mappings/unlinked"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").isArray())
@@ -104,7 +104,7 @@ public class AdminMappingControllerTest {
                 anime.getAnimeId()
         );
 
-        mockMvc.perform(put("/api/admin/update_mapping_anime")
+        mockMvc.perform(put("/api/admin/mappings/anime")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -133,7 +133,7 @@ public class AdminMappingControllerTest {
                 null  // null 表示解除关联
         );
 
-        mockMvc.perform(put("/api/admin/update_mapping_anime")
+        mockMvc.perform(put("/api/admin/mappings/anime")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -164,7 +164,7 @@ public class AdminMappingControllerTest {
                 newAnime.getAnimeId()
         );
 
-        mockMvc.perform(put("/api/admin/update_mapping_anime")
+        mockMvc.perform(put("/api/admin/mappings/anime")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -180,7 +180,7 @@ public class AdminMappingControllerTest {
     public void testUpdateMappingAnime_MappingNotFound() throws Exception {
         UpdateMappingAnimeRequest request = new UpdateMappingAnimeRequest(999L, null);
 
-        mockMvc.perform(put("/api/admin/update_mapping_anime")
+        mockMvc.perform(put("/api/admin/mappings/anime")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -199,7 +199,7 @@ public class AdminMappingControllerTest {
                 999L  // 不存在的动画 ID
         );
 
-        mockMvc.perform(put("/api/admin/update_mapping_anime")
+        mockMvc.perform(put("/api/admin/mappings/anime")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -215,7 +215,7 @@ public class AdminMappingControllerTest {
 
         Long mappingId = mapping.getMappingId();
 
-        mockMvc.perform(delete("/api/admin/delete_mapping/" + mappingId))
+        mockMvc.perform(delete("/api/admin/mappings/" + mappingId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
 
@@ -235,7 +235,7 @@ public class AdminMappingControllerTest {
 
         Long mappingId = mapping.getMappingId();
 
-        mockMvc.perform(delete("/api/admin/delete_mapping/" + mappingId))
+        mockMvc.perform(delete("/api/admin/mappings/" + mappingId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
 
@@ -248,7 +248,7 @@ public class AdminMappingControllerTest {
 
     @Test
     public void testDeleteMapping_NotFound() throws Exception {
-        mockMvc.perform(delete("/api/admin/delete_mapping/999"))
+        mockMvc.perform(delete("/api/admin/mappings/999"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"));
@@ -266,7 +266,7 @@ public class AdminMappingControllerTest {
 
         CreateMappingRequest request = new CreateMappingRequest(Platform.MyAnimeList, "12345");
 
-        mockMvc.perform(post("/api/admin/create_mapping")
+        mockMvc.perform(post("/api/admin/mappings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -286,7 +286,7 @@ public class AdminMappingControllerTest {
 
         CreateMappingRequest request = new CreateMappingRequest(Platform.MyAnimeList, "12345");
 
-        mockMvc.perform(post("/api/admin/create_mapping")
+        mockMvc.perform(post("/api/admin/mappings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())

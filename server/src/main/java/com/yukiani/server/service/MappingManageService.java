@@ -28,9 +28,6 @@ public class MappingManageService {
     MappingRepository mappingRepository;
 
     @Resource
-    MetricService metricService;
-
-    @Resource
     FetchService fetchService;
 
     @Resource

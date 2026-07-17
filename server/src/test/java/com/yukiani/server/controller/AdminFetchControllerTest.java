@@ -27,7 +27,7 @@ public class AdminFetchControllerTest {
     public void testFetchAnime_Success() throws Exception {
         doNothing().when(fetchService).fetchAnime(2024, Season.SPRING, null);
 
-        mockMvc.perform(post("/api/admin/fetch/anime")
+        mockMvc.perform(post("/api/admin/tasks/anime-fetch")
                         .param("year", "2024")
                         .param("season", "SPRING"))
                 .andExpect(status().isOk())
@@ -41,7 +41,7 @@ public class AdminFetchControllerTest {
     public void testFetchAnime_WinterSeason() throws Exception {
         doNothing().when(fetchService).fetchAnime(2024, Season.WINTER, null);
 
-        mockMvc.perform(post("/api/admin/fetch/anime")
+        mockMvc.perform(post("/api/admin/tasks/anime-fetch")
                         .param("year", "2024")
                         .param("season", "WINTER"))
                 .andExpect(status().isOk())
@@ -54,7 +54,7 @@ public class AdminFetchControllerTest {
     public void testFetchAnime_SummerSeason() throws Exception {
         doNothing().when(fetchService).fetchAnime(2024, Season.SUMMER, null);
 
-        mockMvc.perform(post("/api/admin/fetch/anime")
+        mockMvc.perform(post("/api/admin/tasks/anime-fetch")
                         .param("year", "2024")
                         .param("season", "SUMMER"))
                 .andExpect(status().isOk())
@@ -67,7 +67,7 @@ public class AdminFetchControllerTest {
     public void testFetchAnime_FallSeason() throws Exception {
         doNothing().when(fetchService).fetchAnime(2024, Season.FALL, null);
 
-        mockMvc.perform(post("/api/admin/fetch/anime")
+        mockMvc.perform(post("/api/admin/tasks/anime-fetch")
                         .param("year", "2024")
                         .param("season", "FALL"))
                 .andExpect(status().isOk())
@@ -80,7 +80,7 @@ public class AdminFetchControllerTest {
     public void testFetchMapping_Success() throws Exception {
         doNothing().when(fetchService).fetchMapping(2024, Season.SPRING, null);
 
-        mockMvc.perform(post("/api/admin/fetch/mapping")
+        mockMvc.perform(post("/api/admin/tasks/mapping-fetch")
                         .param("year", "2024")
                         .param("season", "SPRING"))
                 .andExpect(status().isOk())
@@ -94,7 +94,7 @@ public class AdminFetchControllerTest {
     public void testFetchMapping_DifferentYearAndSeason() throws Exception {
         doNothing().when(fetchService).fetchMapping(2023, Season.WINTER, null);
 
-        mockMvc.perform(post("/api/admin/fetch/mapping")
+        mockMvc.perform(post("/api/admin/tasks/mapping-fetch")
                         .param("year", "2023")
                         .param("season", "WINTER"))
                 .andExpect(status().isOk())
@@ -107,7 +107,7 @@ public class AdminFetchControllerTest {
     public void testLinkMappings_Success() throws Exception {
         doNothing().when(fetchService).linkMappings();
 
-        mockMvc.perform(post("/api/admin/fetch/link"))
+        mockMvc.perform(post("/api/admin/tasks/mapping-link"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").value("映射合并任务已启动"));
@@ -116,23 +116,11 @@ public class AdminFetchControllerTest {
     }
 
     @Test
-    public void testCalculateMetric_Success() throws Exception {
-        doNothing().when(fetchService).calculateAllMetric();
-
-        mockMvc.perform(post("/api/admin/fetch/calculate_metric"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data").value("评分计算任务已启动"));
-
-        verify(fetchService, times(1)).calculateAllMetric();
-    }
-
-    @Test
     public void testFetchAnime_ServiceException() throws Exception {
         // Mock service 抛出异常
         doThrow(new RuntimeException("服务异常")).when(fetchService).fetchAnime(2024, Season.SPRING, null);
 
-        mockMvc.perform(post("/api/admin/fetch/anime")
+        mockMvc.perform(post("/api/admin/tasks/anime-fetch")
                         .param("year", "2024")
                         .param("season", "SPRING"))
                 .andExpect(status().isInternalServerError())
@@ -146,22 +134,11 @@ public class AdminFetchControllerTest {
         // Mock service 抛出异常
         doThrow(new RuntimeException("链接失败")).when(fetchService).linkMappings();
 
-        mockMvc.perform(post("/api/admin/fetch/link"))
+        mockMvc.perform(post("/api/admin/tasks/mapping-link"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.success").value(false));
 
         verify(fetchService, times(1)).linkMappings();
     }
 
-    @Test
-    public void testCalculateMetric_ServiceException() throws Exception {
-        // Mock service 抛出异常
-        doThrow(new RuntimeException("计算失败")).when(fetchService).calculateAllMetric();
-
-        mockMvc.perform(post("/api/admin/fetch/calculate_metric"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.success").value(false));
-
-        verify(fetchService, times(1)).calculateAllMetric();
-    }
 }
