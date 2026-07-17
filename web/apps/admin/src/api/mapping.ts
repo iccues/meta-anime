@@ -5,8 +5,8 @@ import adminClient from "./request";
 /**
  * 获取未关联的孤立映射列表（管理后台）
  */
-export async function getUnmappedMappingList(signal?: AbortSignal): Promise<AdminMapping[]> {
-  const response = await adminClient.get<AdminMapping[]>("/api/admin/get_unmapped_mapping_list", {
+export async function getUnlinkedMappings(signal?: AbortSignal): Promise<AdminMapping[]> {
+  const response = await adminClient.get<AdminMapping[]>("/api/admin/mappings/unlinked", {
     signal,
   });
   return response.data;
@@ -21,7 +21,7 @@ export async function updateMappingAnime(
   mappingId: number,
   animeId: number | null,
 ): Promise<AdminMapping> {
-  const response = await adminClient.put<AdminMapping>("/api/admin/update_mapping_anime", {
+  const response = await adminClient.put<AdminMapping>("/api/admin/mappings/anime", {
     mappingId,
     animeId,
   });
@@ -37,7 +37,7 @@ export async function createMapping(
   sourcePlatform: string,
   platformId: string,
 ): Promise<AdminMapping> {
-  const response = await adminClient.post<AdminMapping>("/api/admin/create_mapping", {
+  const response = await adminClient.post<AdminMapping>("/api/admin/mappings", {
     sourcePlatform,
     platformId,
   });
@@ -49,6 +49,6 @@ export async function createMapping(
  * @param mappingId 映射 ID
  */
 export async function deleteMapping(mappingId: number): Promise<void> {
-  const response = await adminClient.delete<void>(`/api/admin/delete_mapping/${mappingId}`);
+  const response = await adminClient.delete<void>(`/api/admin/mappings/${mappingId}`);
   return response.data;
 }

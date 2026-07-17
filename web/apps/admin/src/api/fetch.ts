@@ -11,7 +11,7 @@ export async function fetchAnime(
   season?: string,
   platform?: string,
 ): Promise<string> {
-  const response = await adminClient.post<string>("/api/admin/fetch/anime", null, {
+  const response = await adminClient.post<string>("/api/admin/tasks/anime-fetch", null, {
     params: { year: year.toString(), season, platform },
   });
   return response.data;
@@ -28,7 +28,7 @@ export async function fetchMapping(
   season?: string,
   platform?: string,
 ): Promise<string> {
-  const response = await adminClient.post<string>("/api/admin/fetch/mapping", null, {
+  const response = await adminClient.post<string>("/api/admin/tasks/mapping-fetch", null, {
     params: { year: year.toString(), season, platform },
   });
   return response.data;
@@ -38,14 +38,14 @@ export async function fetchMapping(
  * 合并映射数据
  */
 export async function linkMappings(): Promise<string> {
-  const response = await adminClient.post<string>("/api/admin/fetch/link", null);
+  const response = await adminClient.post<string>("/api/admin/tasks/mapping-link", null);
   return response.data;
 }
 
 /**
- * 计算所有动画的平均评分
+ * 重新计算 Mapping 归一化指标和 Anime 聚合指标
  */
-export async function calculateMetric(): Promise<string> {
-  const response = await adminClient.post<string>("/api/admin/fetch/calculate_metric", null);
+export async function recalculateMetrics(): Promise<string> {
+  const response = await adminClient.post<string>("/api/admin/tasks/metric-recalculation", null);
   return response.data;
 }
