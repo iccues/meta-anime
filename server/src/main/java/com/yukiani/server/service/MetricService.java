@@ -4,12 +4,9 @@ import com.yukiani.server.config.PlatformConfigProperties;
 import com.yukiani.server.entity.Anime;
 import com.yukiani.server.entity.Mapping;
 import com.yukiani.server.entity.Platform;
-import com.yukiani.server.repo.AnimeRepository;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 根据各平台归一化指标及权重计算动画的综合评分和热度。
@@ -18,19 +15,7 @@ import java.util.List;
 public class MetricService {
 
     @Resource
-    AnimeRepository animeRepository;
-
-    @Resource
     PlatformConfigProperties platformConfigProperties;
-
-    @Transactional
-    public void calculateAllMetric() {
-        List<Anime> list = animeRepository.findAll();
-
-        for (Anime anime : list) {
-            calculateMetric(anime);
-        }
-    }
 
     @Transactional
     public void calculateMetric(Anime anime) {

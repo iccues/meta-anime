@@ -1,6 +1,8 @@
 package com.yukiani.server.service;
 
+import com.yukiani.server.entity.Anime;
 import com.yukiani.server.entity.Mapping;
+import com.yukiani.server.repo.AnimeRepository;
 import com.yukiani.server.repo.MappingRepository;
 import com.yukiani.server.service.fetch.AbstractAnimeFetchService;
 import com.yukiani.server.service.fetch.FetchService;
@@ -23,6 +25,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MetricRecalculationService {
     @Resource
     MappingRepository mappingRepository;
+    @Resource
+    AnimeRepository animeRepository;
     @Resource
     FetchService fetchService;
     @Resource
@@ -56,13 +60,23 @@ public class MetricRecalculationService {
 
             mappingRepository.saveAll(mappingList);
             mappingRepository.flush();
-            metricService.calculateAllMetric();
+            recalculateAllAnimeMetrics();
             log.info("全部指标重新计算完成！Mapping 总计: {}", mappingList.size());
         } catch (RuntimeException e) {
             log.error("指标重新计算失败", e);
             throw e;
         } finally {
             running.set(false);
+        }
+    }
+
+    /**
+     * 根据当前 Mapping 归一化指标重新计算全部 Anime 聚合指标。
+     */
+    void recalculateAllAnimeMetrics() {
+        List<Anime> animeList = animeRepository.findAll();
+        for (Anime anime : animeList) {
+            metricService.calculateMetric(anime);
         }
     }
 }

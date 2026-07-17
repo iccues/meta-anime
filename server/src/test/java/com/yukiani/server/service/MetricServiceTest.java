@@ -3,7 +3,6 @@ package com.yukiani.server.service;
 import com.yukiani.server.entity.Anime;
 import com.yukiani.server.entity.Mapping;
 import com.yukiani.server.entity.Platform;
-import com.yukiani.server.repo.AnimeRepository;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,9 +16,6 @@ public class MetricServiceTest {
 
     @Resource
     MetricService metricService;
-
-    @Resource
-    AnimeRepository animeRepository;
 
     @Test
     public void testCalculateAverageScore_WithEqualWeights() {
@@ -184,43 +180,6 @@ public class MetricServiceTest {
         metricService.calculateAverageScore(anime);
 
         assertNull(anime.getAverageScore());
-    }
-
-    @Test
-    public void testCalculateAllMetric() {
-        // 创建并保存带有 mapping 的测试 anime
-        Anime anime1 = new Anime();
-        Mapping mapping1 = new Mapping();
-        mapping1.setSourcePlatform(Platform.Bangumi);
-        mapping1.setNormalizedScore(8.0);
-        anime1.addMapping(mapping1);
-
-        Anime anime2 = new Anime();
-        Mapping mapping2 = new Mapping();
-        mapping2.setSourcePlatform(Platform.Bangumi);
-        mapping2.setNormalizedScore(9.0);
-        Mapping mapping3 = new Mapping();
-        mapping3.setSourcePlatform(Platform.MyAnimeList);
-        mapping3.setNormalizedScore(6.0);
-        anime2.addMapping(mapping2);
-        anime2.addMapping(mapping3);
-
-        anime1 = animeRepository.save(anime1);
-        anime2 = animeRepository.save(anime2);
-
-        metricService.calculateAllMetric();
-
-        // 重新加载以获取更新后的值
-        Anime reloadedAnime1 = animeRepository.findById(anime1.getAnimeId()).orElseThrow();
-        Anime reloadedAnime2 = animeRepository.findById(anime2.getAnimeId()).orElseThrow();
-
-        // 验证计算结果
-        assertNotNull(reloadedAnime1.getAverageScore());
-        assertEquals(8.0, reloadedAnime1.getAverageScore(), 0.0001);
-
-        assertNotNull(reloadedAnime2.getAverageScore());
-        // (9.0*2 + 6.0*1) / (2+1) = 24/3 = 8.0
-        assertEquals(8.0, reloadedAnime2.getAverageScore(), 0.0001);
     }
 
     @Test
