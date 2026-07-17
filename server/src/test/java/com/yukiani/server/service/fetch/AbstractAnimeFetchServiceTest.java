@@ -125,6 +125,27 @@ public class AbstractAnimeFetchServiceTest {
     }
 
     @Test
+    public void testRecalculateMetrics_UsesRawValues() {
+        Mapping mapping = new Mapping();
+        mapping.setSourcePlatform(Platform.Bangumi);
+        mapping.setRawPopularity(80.0);
+        mapping.setRawScore(9.0);
+
+        testService.recalculateMetrics(mapping);
+
+        assertEquals(1000.0, mapping.getNormalizedPopularity(), 0.0001);
+        assertEquals(75.0, mapping.getNormalizedScore(), 0.0001);
+    }
+
+    @Test
+    public void testRecalculateMetrics_RejectsAnotherPlatform() {
+        Mapping mapping = new Mapping();
+        mapping.setSourcePlatform(Platform.AniList);
+
+        assertThrows(IllegalArgumentException.class, () -> testService.recalculateMetrics(mapping));
+    }
+
+    @Test
     public void testProcessAndSaveMapping_WithoutScore() throws Exception {
         // 准备 JSON 数据（无评分）
         String jsonString = """

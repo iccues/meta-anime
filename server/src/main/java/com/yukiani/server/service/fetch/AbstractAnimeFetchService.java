@@ -7,7 +7,6 @@ import com.yukiani.server.entity.*;
 import com.yukiani.server.exception.FetchFailedException;
 import com.yukiani.server.repo.MappingRepository;
 import com.yukiani.server.service.MappingRepoService;
-import com.yukiani.server.service.MetricService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -155,17 +154,33 @@ public abstract class AbstractAnimeFetchService {
         Mapping mapping = new Mapping(getPlatform(), platformId, mappingInfo);
 
         double rawPopularity = extractRawPopularity(jsonNode);
-        double normalizedPopularity = normalizePopularity(rawPopularity);
         mapping.setRawPopularity(rawPopularity);
+        mapping.setRawScore(extractRawScore(jsonNode));
+
+        recalculateMetrics(mapping);
+        mappingRepoService.saveOrUpdate(mapping);
+    }
+
+    /**
+     * 使用当前平台配置，从 Mapping 原始指标重新计算归一化指标。
+     *
+     * @param mapping 与当前抓取服务属于同一平台的 Mapping
+     * @throws IllegalArgumentException Mapping 平台与当前抓取服务不一致时抛出
+     */
+    public void recalculateMetrics(Mapping mapping) {
+        if (mapping.getSourcePlatform() != getPlatform()) {
+            throw new IllegalArgumentException("Mapping 平台与 FetchService 不匹配");
+        }
+
+        Double rawPopularity = mapping.getRawPopularity();
+        Double normalizedPopularity = rawPopularity == null
+                ? null
+                : normalizePopularity(rawPopularity);
         mapping.setNormalizedPopularity(normalizedPopularity);
 
-        Double rawScore = extractRawScore(jsonNode);
-        Double adjustedScore = adjustScore(rawScore, normalizedPopularity);
-        Double normalizedScore = normalizeScore(adjustedScore);
-        mapping.setRawScore(rawScore);
-        mapping.setNormalizedScore(normalizedScore);
-
-        mappingRepoService.saveOrUpdate(mapping);
+        double popularityForAdjustment = normalizedPopularity == null ? 0 : normalizedPopularity;
+        Double adjustedScore = adjustScore(mapping.getRawScore(), popularityForAdjustment);
+        mapping.setNormalizedScore(normalizeScore(adjustedScore));
     }
 
     /**
