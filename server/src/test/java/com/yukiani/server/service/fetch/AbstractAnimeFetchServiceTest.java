@@ -54,7 +54,7 @@ public class AbstractAnimeFetchServiceTest {
         bangumiConfig.setScoreMean(6.0);
         bangumiConfig.setScoreStd(1.0);
         bangumiConfig.setScorePriorStrength(1000.0);
-        bangumiConfig.setPopularityMedian(10000.0);
+        bangumiConfig.setPopularityMedian(800.0);
         lenient().when(platformConfigProperties.getConfig(Platform.Bangumi)).thenReturn(bangumiConfig);
     }
 
@@ -107,7 +107,7 @@ public class AbstractAnimeFetchServiceTest {
                     "id": "12345",
                     "title": "Test Anime",
                     "score": 9.0,
-                    "popularity": 1000
+                    "popularity": 80
                 }
                 """;
         JsonNode jsonNode = objectMapper.readTree(jsonString);
@@ -119,7 +119,7 @@ public class AbstractAnimeFetchServiceTest {
         Mapping savedMapping = mappingCaptor.getValue();
 
         assertEquals(9.0, savedMapping.getRawScore(), 0.0001);
-        assertEquals(1000.0, savedMapping.getRawPopularity(), 0.0001);
+        assertEquals(80.0, savedMapping.getRawPopularity(), 0.0001);
         assertEquals(1000.0, savedMapping.getNormalizedPopularity(), 0.0001);
         assertEquals(75.0, savedMapping.getNormalizedScore(), 0.0001);
     }

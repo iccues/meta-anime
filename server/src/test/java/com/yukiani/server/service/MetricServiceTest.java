@@ -275,4 +275,30 @@ public class MetricServiceTest {
         // (7.5*2) / 2 = 7.5
         assertEquals(7.5, anime.getAverageScore(), 0.0001);
     }
+
+    @Test
+    public void testCalculatePopularity_WithPlatformWeights() {
+        Anime anime = new Anime();
+
+        Mapping bangumi = new Mapping();
+        bangumi.setSourcePlatform(Platform.Bangumi);
+        bangumi.setNormalizedPopularity(1000.0);
+
+        Mapping anilist = new Mapping();
+        anilist.setSourcePlatform(Platform.AniList);
+        anilist.setNormalizedPopularity(1000.0);
+
+        Mapping mal = new Mapping();
+        mal.setSourcePlatform(Platform.MyAnimeList);
+        mal.setNormalizedPopularity(1000.0);
+
+        anime.addMapping(bangumi);
+        anime.addMapping(anilist);
+        anime.addMapping(mal);
+
+        metricService.calculatePopularity(anime);
+
+        // Bangumi: 1000×2，AniList 和 MyAnimeList: 1000×1
+        assertEquals(4000.0, anime.getPopularity(), 0.0001);
+    }
 }

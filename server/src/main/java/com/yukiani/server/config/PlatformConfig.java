@@ -14,7 +14,7 @@ public class PlatformConfig {
     private double popularityMedian = 10000;
 
     /** 归一化评分参与动画加权平均时使用的权重。 */
-    private int scoreWeight = 1;
+    private double scoreWeight = 1;
 
     /**
      * 评分平滑使用的归一化热度先验强度；未配置时不平滑。

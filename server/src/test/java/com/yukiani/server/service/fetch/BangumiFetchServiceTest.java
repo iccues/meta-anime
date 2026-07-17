@@ -30,6 +30,7 @@ public class BangumiFetchServiceTest {
         bangumiConfig.setScoreMean(6.0);
         bangumiConfig.setScoreStd(1.0);
         bangumiConfig.setScorePriorStrength(1000.0);
+        bangumiConfig.setPopularityMedian(800.0);
 
         Field bangumiField = PlatformConfigProperties.class.getDeclaredField("bangumi");
         bangumiField.setAccessible(true);
@@ -167,6 +168,11 @@ public class BangumiFetchServiceTest {
         double result = service.normalizeScore(8.5);
 
         assertEquals(91.67, result, 0.01);
+    }
+
+    @Test
+    public void testNormalizePopularity() {
+        assertEquals(1000.0, service.normalizePopularity(80.0), 0.0001);
     }
 
     @Test

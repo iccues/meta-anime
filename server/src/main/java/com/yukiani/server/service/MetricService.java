@@ -44,12 +44,12 @@ public class MetricService {
     @Transactional
     public void calculateAverageScore(Anime anime) {
         double totalScore = 0.0;
-        int totalWeight = 0;
+        double totalWeight = 0;
 
         for (Mapping mapping : anime.getMappings()) {
             Double normalizedScore = mapping.getNormalizedScore();
             if (normalizedScore != null) {
-                int weight = getScoreWeight(mapping.getSourcePlatform());
+                double weight = getScoreWeight(mapping.getSourcePlatform());
                 totalScore += normalizedScore * weight;
                 totalWeight += weight;
             }
@@ -62,7 +62,7 @@ public class MetricService {
         }
     }
 
-    private int getScoreWeight(Platform platform) {
+    private double getScoreWeight(Platform platform) {
         return platformConfigProperties.getConfig(platform).getScoreWeight();
     }
 
