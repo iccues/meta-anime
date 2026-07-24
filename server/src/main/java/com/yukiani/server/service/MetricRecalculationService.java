@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 使用当前平台配置异步重算 Mapping 归一化指标和 Anime 聚合指标。
@@ -32,21 +33,21 @@ public class MetricRecalculationService {
     @Resource
     MetricService metricService;
 
-    private final AtomicBoolean running = new AtomicBoolean(false);
+    /** 进程内执行锁，确保同一时刻只有一个重算任务运行。 */
+    private final Lock lock = new ReentrantLock();
 
     /**
-     * 尝试占用任务执行权；已有任务运行时返回 {@code false}。
-     */
-    public boolean tryStart() {
-        return running.compareAndSet(false, true);
-    }
-
-    /**
-     * 使用当前平台配置重算全部 Mapping 和 Anime 指标，完成后释放执行锁。
+     * 使用当前平台配置异步重算全部 Mapping 和 Anime 指标。
+     *
+     * <p>已有任务运行时跳过本次触发并记录日志；任务内异常会在记录后重新抛出，确保事务回滚。</p>
      */
     @Async
     @Transactional
     public void recalculateAllMetrics() {
+        if (!lock.tryLock()) {
+            log.warn("指标重算任务正在运行，忽略本次触发");
+            return;
+        }
         try {
             log.info("开始重新计算所有 Mapping 的归一化指标...");
 
@@ -66,7 +67,7 @@ public class MetricRecalculationService {
             log.error("指标重新计算失败", e);
             throw e;
         } finally {
-            running.set(false);
+            lock.unlock();
         }
     }
 

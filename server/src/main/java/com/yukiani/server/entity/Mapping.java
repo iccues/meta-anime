@@ -2,8 +2,9 @@ package com.yukiani.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.NaturalId;
 
@@ -12,7 +13,9 @@ import java.time.Instant;
 /**
  * 外部平台 Mapping Entity，保存 Anime 关联及平台原始指标。
  */
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @NoArgsConstructor
 public class Mapping {
@@ -76,5 +79,24 @@ public class Mapping {
         this.platformId = platformId;
         this.mappingInfo = mappingInfo;
         this.updateTime = Instant.now();
+    }
+
+    /**
+     * 基于主键判定实体相等，避免 Anime 反向引用参与比较导致的递归。
+     *
+     * <p>主键为空的瞬时实体仅与自身相等，从而区分尚未持久化的不同对象。</p>
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Mapping other)) return false;
+        Long id = getMappingId();
+        return id != null && id.equals(other.getMappingId());
+    }
+
+    /** 返回按类固定的哈希值，保证主键赋值前后及代理对象间的一致性。 */
+    @Override
+    public int hashCode() {
+        return Mapping.class.hashCode();
     }
 }

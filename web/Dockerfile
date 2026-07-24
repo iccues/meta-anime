@@ -30,6 +30,6 @@ COPY --from=build /app/apps/admin/dist /usr/share/nginx/admin
 EXPOSE 80 81
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
+  CMD curl --fail --silent --show-error http://localhost/health > /dev/null || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]

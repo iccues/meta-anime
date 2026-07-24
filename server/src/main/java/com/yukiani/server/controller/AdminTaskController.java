@@ -61,15 +61,11 @@ public class AdminTaskController {
 
     /**
      * 异步重新计算全部 Mapping 归一化指标和 Anime 聚合指标。
+     *
+     * <p>仅表示任务已提交；是否真正开始执行、以及执行结果均由服务端日志记录，已有任务运行时会被跳过。</p>
      */
     @PostMapping("/metric-recalculation")
     public ResponseEntity<Response<String>> recalculateMetrics() {
-        if (!metricRecalculationService.tryStart()) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(Response.fail("TASK_RUNNING", "指标重算任务正在运行"));
-        }
-
         metricRecalculationService.recalculateAllMetrics();
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
