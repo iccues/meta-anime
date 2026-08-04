@@ -1,5 +1,5 @@
 import { ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter, type RouteLocationRaw } from "vue-router";
 
 import type { GetAnimeListBySearchQueryVariables } from "@/graphql/generated/graphql";
 
@@ -39,20 +39,20 @@ export function useSearchQuery() {
     });
   };
 
-  // 处理分页
-  const handlePageChange = (page: number) => {
-    router.push({
+  // 根据 0-base 页码生成分页链接
+  const createPageLink = (pageNumber: number): RouteLocationRaw => {
+    return {
       query: {
         ...route.query,
-        page,
+        page: pageNumber,
       },
-    });
+    };
   };
 
   return {
     searchInput,
     searchParams,
     handleSearch,
-    handlePageChange,
+    createPageLink,
   };
 }

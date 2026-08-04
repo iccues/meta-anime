@@ -7,7 +7,7 @@ import { useSearchHead } from "@/composables/useSearchHead";
 import { useSearchQuery } from "@/composables/useSearchQuery";
 import { GetAnimeListBySearchDocument } from "@/graphql/generated/graphql";
 
-const { searchInput, searchParams, handleSearch, handlePageChange } = useSearchQuery();
+const { searchInput, searchParams, handleSearch, createPageLink } = useSearchQuery();
 
 useSearchHead(searchParams);
 
@@ -46,7 +46,7 @@ const { data, fetching, error } = useQuery({
       :animeList="data?.animeListBySearch"
       :fetching="fetching"
       :error="error"
-      v-on:page-change="handlePageChange"
+      :page-link="createPageLink"
     />
   </div>
 </template>

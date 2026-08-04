@@ -7,7 +7,7 @@ import { useAnimeListHead } from "@/composables/useAnimeListHead";
 import { useAnimeListQuery } from "@/composables/useAnimeListQuery";
 import { GetAnimeListDocument } from "@/graphql/generated/graphql";
 
-const { animeListParams, filtersModel, handlePageChange } = useAnimeListQuery();
+const { animeListParams, filtersModel, createPageLink } = useAnimeListQuery();
 
 const { data, fetching, error } = useQuery({
   query: GetAnimeListDocument,
@@ -27,7 +27,7 @@ useAnimeListHead(animeListParams);
       :animeList="data?.animeList"
       :fetching="fetching"
       :error="error"
-      v-on:page-change="handlePageChange"
+      :page-link="createPageLink"
     />
   </div>
 </template>

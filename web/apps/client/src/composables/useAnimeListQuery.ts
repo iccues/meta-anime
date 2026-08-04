@@ -1,5 +1,5 @@
 import { computed, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter, type RouteLocationRaw } from "vue-router";
 
 import type { GetAnimeListQueryVariables } from "@/graphql/generated/graphql";
 import { filtersToQuery, queryToFilters } from "@/utils/queryUtils";
@@ -36,19 +36,19 @@ export function useAnimeListQuery() {
     },
   });
 
-  // 处理分页
-  const handlePageChange = (pageNumber: number) => {
-    router.push({
+  // 根据 0-base 页码生成分页链接
+  const createPageLink = (pageNumber: number): RouteLocationRaw => {
+    return {
       query: filtersToQuery({
         ...animeListParams.value,
         pageNumber,
       }),
-    });
+    };
   };
 
   return {
     animeListParams,
     filtersModel,
-    handlePageChange,
+    createPageLink,
   };
 }
