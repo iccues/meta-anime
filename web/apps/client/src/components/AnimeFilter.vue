@@ -1,108 +1,48 @@
 <script setup lang="ts">
-import { Filter } from "@element-plus/icons-vue";
 import { SEASON_OPTIONS, SORT_BY_OPTIONS } from "@pjyk-web/shared/constants/ui-options.ts";
 import { generateYearOptionsFrom } from "@pjyk-web/shared/utils/dateUtils.ts";
-import { computed } from "vue";
+import type { RouteLocationRaw } from "vue-router";
 
 import type { GetAnimeListQueryVariables } from "@/graphql/generated/graphql";
 
-const props = defineProps<{
-  modelValue: GetAnimeListQueryVariables;
+import LinkDropdownFilter from "./LinkDropdownFilter.vue";
+import LinkSegmentedFilter from "./LinkSegmentedFilter.vue";
+
+defineProps<{
+  filters: GetAnimeListQueryVariables;
+  filterLink: (changes: Partial<GetAnimeListQueryVariables>) => RouteLocationRaw;
 }>();
 
-const emit = defineEmits<{
-  "update:modelValue": [filters: GetAnimeListQueryVariables];
-}>();
-
-// 使用统一的常量和工具函数
-const seasonOptions = SEASON_OPTIONS;
-const sortByOptions = SORT_BY_OPTIONS;
-const yearOptions = computed(() => generateYearOptionsFrom(1990));
-
-// 处理筛选变化
-const handleYearChange = (value: number | undefined) => {
-  handleFilterChange({
-    ...props.modelValue,
-    year: value,
-    // 清空季度如果年份被清除
-    season: value === undefined ? undefined : props.modelValue.season,
-  });
-};
-
-const handleSeasonChange = (value: string | undefined) => {
-  handleFilterChange({
-    ...props.modelValue,
-    season: value as any,
-  });
-};
-
-const handleSortByChange = (value: string) => {
-  handleFilterChange({
-    ...props.modelValue,
-    sortBy: value as any,
-  });
-};
-
-const handleFilterChange = (filter: GetAnimeListQueryVariables) => {
-  emit("update:modelValue", {
-    ...filter,
-    pageNumber: 0,
-  });
-};
+const yearOptions = generateYearOptionsFrom(1990);
 </script>
 
 <template>
-  <div class="mb-6 grid grid-cols-[repeat(auto-fill,12.5rem)] justify-center gap-5">
-    <div class="col-span-full flex items-center gap-5">
-      <el-icon size="20"><Filter /></el-icon>
+  <section
+    class="mb-6 grid grid-cols-[repeat(auto-fill,12.5rem)] justify-center gap-5"
+    aria-label="动画筛选"
+  >
+    <div class="col-span-full flex flex-wrap items-center gap-x-[20px] gap-y-[16px]">
+      <LinkDropdownFilter
+        label="年份"
+        :options="yearOptions"
+        :value="filters.year ?? undefined"
+        :option-link="(value) => filterLink({ year: value })"
+      />
 
-      <el-select
-        :model-value="modelValue.year"
-        placeholder="年份"
-        size="medium"
-        class="!w-40 [&_input]:!text-[16px]"
-        clearable
-        @change="handleYearChange"
-      >
-        <el-option
-          v-for="option in yearOptions"
-          :key="option.label"
-          :label="option.label"
-          :value="option.value"
-        />
-      </el-select>
+      <LinkSegmentedFilter
+        label="季度"
+        :options="SEASON_OPTIONS"
+        :value="filters.season ?? undefined"
+        :option-link="(value) => filterLink({ season: value })"
+        :disabled="filters.year == null"
+      />
 
-      <el-select
-        :model-value="modelValue.season"
-        placeholder="季度"
-        size="medium"
-        class="!w-40 [&_input]:!text-[16px]"
-        clearable
-        @change="handleSeasonChange"
-        :disabled="modelValue.year === undefined"
-      >
-        <el-option
-          v-for="option in seasonOptions"
-          :key="option.label"
-          :label="option.label"
-          :value="option.value"
-        />
-      </el-select>
-
-      <el-select
-        :model-value="modelValue.sortBy"
-        placeholder="排序方式"
-        size="medium"
-        class="!w-40 [&_input]:!text-[16px]"
-        @change="handleSortByChange"
-      >
-        <el-option
-          v-for="option in sortByOptions"
-          :key="option.label"
-          :label="option.label"
-          :value="option.value"
-        />
-      </el-select>
+      <LinkSegmentedFilter
+        label="排序"
+        :options="SORT_BY_OPTIONS"
+        :value="filters.sortBy ?? undefined"
+        :option-link="(value) => filterLink({ sortBy: value })"
+      />
     </div>
-  </div>
+  </section>
 </template>
