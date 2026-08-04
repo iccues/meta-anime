@@ -10,9 +10,16 @@ export type SortBy = "SCORE" | "POPULARITY";
 export type Platform = "AniList" | "Bangumi" | "MyAnimeList";
 
 /**
+ * 选项的通用形状：label 用于展示，value 用于取值
+ *
+ * value 为 undefined 表示"全部"这类不限定的选项
+ */
+export type SelectOption<T> = { label: string; value: T };
+
+/**
  * 季度选项（含"全部"选项，用于筛选器）
  */
-export const SEASON_OPTIONS: { label: string; value: Season | undefined }[] = [
+export const SEASON_OPTIONS: SelectOption<Season | undefined>[] = [
   { label: "全部", value: undefined },
   { label: "1月", value: "WINTER" },
   { label: "4月", value: "SPRING" },
@@ -23,10 +30,7 @@ export const SEASON_OPTIONS: { label: string; value: Season | undefined }[] = [
 /**
  * 审核状态选项
  */
-export const REVIEW_STATUS_OPTIONS: {
-  label: string;
-  value: ReviewStatus | undefined;
-}[] = [
+export const REVIEW_STATUS_OPTIONS: SelectOption<ReviewStatus | undefined>[] = [
   { label: "全部", value: undefined },
   { label: "待审核", value: "PENDING" },
   { label: "已通过", value: "APPROVED" },
@@ -36,7 +40,7 @@ export const REVIEW_STATUS_OPTIONS: {
 /**
  * 排序选项
  */
-export const SORT_BY_OPTIONS: { label: string; value: SortBy }[] = [
+export const SORT_BY_OPTIONS: SelectOption<SortBy>[] = [
   { label: "按评分", value: "SCORE" },
   { label: "按人气", value: "POPULARITY" },
 ];
@@ -44,7 +48,7 @@ export const SORT_BY_OPTIONS: { label: string; value: SortBy }[] = [
 /**
  * 平台选项
  */
-export const PLATFORM_OPTIONS: { label: string; value: Platform | undefined }[] = [
+export const PLATFORM_OPTIONS: SelectOption<Platform | undefined>[] = [
   { label: "全部", value: undefined },
   { label: "Bangumi", value: "Bangumi" },
   { label: "AniList", value: "AniList" },
