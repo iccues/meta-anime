@@ -14,7 +14,7 @@ import LinkButton from "@/components/LinkButton.vue";
       <div class="container-page flex items-center justify-between py-3.5">
         <!-- Logo 为装饰图，链接名称由文字提供。 -->
         <router-link to="/" class="flex cursor-pointer items-center gap-2">
-          <img :src="logo" alt="" class="h-8 w-8 rounded-full shadow-lg" />
+          <img :src="logo" alt="" class="h-8 w-8" />
           <span
             class="bg-linear-to-r from-gray-800 to-gray-600 bg-clip-text text-xl font-bold text-transparent"
           >

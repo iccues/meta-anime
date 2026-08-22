@@ -1,1 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path fill="#00a2ff" fill-rule="evenodd" d="M200 100C200 44.772 155.228 0 100 0S0 44.772 0 100s44.772 100 100 100 100-44.772 100-100"/><path fill="#fff" d="M44.137 49.422h35.367l20.812 34.805 20.813-34.805h35.156l-40.078 59.906V152.5H84.285v-43.172Z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 132 132" role="img">
+  <title>有希计划</title>
+  <path
+    d="M64 4C110.992 4 124 17.008 124 64S110.992 124 64 124 4 110.992 4 64 17.008 4 64 4Z"
+    data-superellipse-n="3"
+    fill="#25272E"
+    stroke="#fff"
+    stroke-opacity=".5"
+    stroke-width="8"
+    paint-order="stroke fill"
+  />
+  <path
+    d="M36 36 64 64 92 36M64 64v34"
+    fill="none"
+    stroke="#fff"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="16"
+  />
+</svg>
