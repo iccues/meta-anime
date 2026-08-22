@@ -4,6 +4,7 @@ import { useQuery } from "@urql/vue";
 import type { RouteLocationRaw } from "vue-router";
 
 import AnimeListRow from "@/components/AnimeListRow.vue";
+import HomeHero from "@/components/HomeHero.vue";
 import {
   GetHomeAnimeRowsDocument,
   type GetAnimeListQueryVariables,
@@ -53,7 +54,9 @@ const { data, fetching, error } = useQuery({
 </script>
 
 <template>
-  <div class="space-y-16 pt-5 pb-20">
+  <HomeHero />
+
+  <div class="space-y-16 pt-6">
     <div v-if="error" class="py-10 text-center text-base text-red-600">{{ error }}</div>
 
     <template v-else>

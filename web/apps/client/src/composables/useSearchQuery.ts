@@ -7,7 +7,7 @@ export function useSearchQuery() {
   const router = useRouter();
   const route = useRoute();
 
-  // Hero Search 用的搜索文本
+  // 搜索输入
   const searchInput = ref((route.query.q as string) || "");
 
   // 查询参数
@@ -17,7 +17,7 @@ export function useSearchQuery() {
     pageSize: 30,
   });
 
-  // 监听路由变化，同步到组件状态
+  // 路由变化时同步查询参数
   watch(
     () => route.query,
     (newQuery) => {
@@ -34,9 +34,8 @@ export function useSearchQuery() {
   // 处理搜索提交
   const handleSearch = () => {
     const keyword = searchInput.value.trim();
-    router.push({
-      query: keyword ? { q: keyword, page: 0 } : {},
-    });
+    // 空关键词会清除 URL 中的查询参数。
+    router.push({ query: keyword ? { q: keyword, page: 0 } : {} });
   };
 
   // 根据 0-base 页码生成分页链接
