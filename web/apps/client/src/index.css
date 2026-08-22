@@ -18,6 +18,11 @@
   --page-gutter: 1.25rem;
 }
 
+/* 卡片基础宽度：窄屏使用 45%，宽屏最多 200px。 */
+:root {
+  --card-width: min(200px, 45%);
+}
+
 /* 页面通用容器 */
 @utility container-page {
   margin-inline: auto;

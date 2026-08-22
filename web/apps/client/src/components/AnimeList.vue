@@ -16,17 +16,20 @@ const props = defineProps<{
 }>();
 
 const skeletonCount = 6;
+
+const gridClass =
+  "grid grid-cols-[repeat(auto-fill,minmax(var(--card-width),1fr))] gap-x-5 gap-y-7";
 </script>
 
 <template>
   <div v-if="error" class="py-10 text-center text-base text-red-600">{{ error }}</div>
   <div v-else-if="fetching">
-    <div class="grid grid-cols-[repeat(auto-fill,12.5rem)] justify-center gap-5">
+    <div :class="gridClass">
       <AnimeCardSkeleton v-for="index in skeletonCount" :key="index" />
     </div>
   </div>
   <div v-else-if="animeList && animeList.content.length > 0">
-    <div class="grid grid-cols-[repeat(auto-fill,12.5rem)] justify-center gap-5">
+    <div :class="gridClass">
       <AnimeCard v-for="anime in animeList.content" :key="anime.animeId" :anime="anime" />
     </div>
 

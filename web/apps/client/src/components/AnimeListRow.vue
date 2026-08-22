@@ -82,7 +82,11 @@ onMounted(updateButtonVisibility);
     <div
       class="scrollbar-hide flex gap-5 overflow-x-auto px-[max(1.25rem,calc(50%-700px+1.25rem))] pb-4"
     >
-      <AnimeCardSkeleton v-for="index in skeletonCount" :key="index" class="flex-shrink-0" />
+      <AnimeCardSkeleton
+        v-for="index in skeletonCount"
+        :key="index"
+        class="w-[var(--card-width)] shrink-0"
+      />
     </div>
   </div>
 
@@ -97,7 +101,7 @@ onMounted(updateButtonVisibility);
         v-for="anime in animeList"
         :key="anime.animeId"
         :anime="anime"
-        class="flex-shrink-0"
+        class="w-[var(--card-width)] shrink-0"
       />
     </div>
 
