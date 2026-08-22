@@ -18,11 +18,13 @@ const content = md.render(props.raw);
 </template>
 
 <style scoped>
+/* github-markdown-css 会覆盖工具类，因此在组件内定义容器样式。 */
 .markdown-body {
-  max-width: 720px;
-  margin: 5rem auto;
-  padding: 0 1.5rem 4rem;
   box-sizing: border-box;
+  max-width: 720px;
+  margin-inline: auto;
+  padding-block-start: 2.5rem;
+  padding-inline: var(--page-gutter);
 }
 
 /* 块级公式超出时横向滚动，而非撑破布局 */

@@ -19,7 +19,7 @@ useAnimeListHead(animeListParams);
 </script>
 
 <template>
-  <div class="mx-auto max-w-[1400px] p-5">
+  <div class="container-page pt-8">
     <!-- 筛选器 -->
     <AnimeFilter :filters="animeListParams" :filter-link="createFilterLink" />
 

@@ -25,7 +25,7 @@ const formater = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-8 sm:flex-row sm:items-start">
+  <div class="container-detail flex flex-col items-center gap-8 py-10 sm:flex-row sm:items-start">
     <!-- Cover Image -->
     <div v-if="anime.coverImage" class="shrink-0">
       <img
@@ -37,7 +37,7 @@ const formater = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
     <!-- Info -->
     <div
-      class="flex flex-col items-center justify-center gap-3 text-center sm:items-start sm:justify-start sm:text-left"
+      class="flex min-w-0 flex-col items-center justify-center gap-3 text-center sm:items-start sm:justify-start sm:text-left"
     >
       <!-- Main title -->
       <h1 class="m-0 text-[24px] leading-tight font-bold text-gray-900 sm:text-[30px]">
