@@ -44,14 +44,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex items-center gap-[6px]" role="group" :aria-label="label">
+  <div class="flex items-center gap-1.5" role="group" :aria-label="label">
     <span class="shrink-0 text-[13px] font-semibold text-gray-600">{{ label }}</span>
 
     <div ref="dropdown" class="relative">
       <button
         ref="trigger"
         type="button"
-        class="inline-flex h-[30px] min-w-[104px] items-center justify-between gap-[8px] rounded-[8px] border border-gray-500 bg-white px-[10px] text-[14px] font-semibold text-gray-900 transition-colors hover:bg-gray-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        class="inline-flex h-7.5 min-w-26 items-center justify-between gap-2 rounded-lg border border-gray-500 bg-white px-2.5 text-[14px] font-semibold text-gray-900 transition-colors hover:bg-gray-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         :aria-label="`${label}：${currentLabel}`"
         :aria-expanded="isOpen"
         :aria-controls="isOpen ? panelId : undefined"
@@ -59,29 +59,29 @@ onBeforeUnmount(() => {
       >
         <span>{{ currentLabel }}</span>
         <span
-          class="size-[7px] border-r border-b border-current transition-transform"
-          :class="isOpen ? 'translate-y-[2px] rotate-[225deg]' : '-translate-y-[2px] rotate-45'"
+          class="size-1.75 border-r border-b border-current transition-transform"
+          :class="isOpen ? 'translate-y-0.5 rotate-225' : '-translate-y-0.5 rotate-45'"
           aria-hidden="true"
         />
       </button>
 
       <Transition
         enter-active-class="transition duration-150 ease-out motion-reduce:transition-none"
-        enter-from-class="-translate-y-[4px] opacity-0"
+        enter-from-class="-translate-y-1 opacity-0"
         leave-active-class="transition duration-100 ease-in motion-reduce:transition-none"
-        leave-to-class="-translate-y-[4px] opacity-0"
+        leave-to-class="-translate-y-1 opacity-0"
       >
         <div
           v-if="isOpen"
           :id="panelId"
-          class="dropdown-options absolute top-full left-0 z-50 mt-[6px] flex max-h-[320px] min-w-full flex-col gap-[2px] overflow-y-auto rounded-[10px] bg-white p-[3px] shadow-[0_2px_8px_rgba(0,0,0,0.14)]"
+          class="dropdown-options absolute top-full left-0 z-50 mt-1.5 flex max-h-80 min-w-full flex-col gap-0.5 overflow-y-auto rounded-[10px] bg-white p-0.75 shadow-[0_2px_8px_rgba(0,0,0,0.14)]"
         >
           <LinkButton
             v-for="option in options"
             :key="String(option.value)"
             :to="optionLink(option.value)"
             :active="option.value === value"
-            class="h-[30px] w-full shrink-0 rounded-[7px] px-[9px] text-[14px] whitespace-nowrap"
+            class="h-7.5 w-full shrink-0 rounded-[7px] px-2.25 text-[14px] whitespace-nowrap"
             @click="closeDropdown"
           >
             {{ option.label }}

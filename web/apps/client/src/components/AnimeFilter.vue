@@ -17,7 +17,7 @@ const yearOptions = generateYearOptionsFrom(1990);
 </script>
 
 <template>
-  <section class="mb-6 flex flex-wrap items-center gap-x-[20px] gap-y-[16px]" aria-label="动画筛选">
+  <section class="mb-6 flex flex-wrap items-center gap-x-5 gap-y-4" aria-label="动画筛选">
     <LinkDropdownFilter
       label="年份"
       :options="yearOptions"

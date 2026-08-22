@@ -31,7 +31,7 @@ const formater = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
       <img
         :src="anime.coverImage"
         :alt="displayTitle"
-        class="w-[16rem] rounded-2xl object-cover shadow-lg sm:w-60"
+        class="w-64 rounded-2xl object-cover shadow-lg sm:w-60"
       />
     </div>
 

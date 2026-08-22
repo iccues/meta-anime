@@ -27,7 +27,7 @@ const formater = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
         v-if="platformConfig.logo"
         :src="platformConfig.logo"
         :alt="platformConfig.name"
-        class="h-[24px] w-[24px] object-contain"
+        class="size-6 object-contain"
       />
       <span
         class="text-[15px] font-semibold text-gray-800 transition-colors group-hover:text-indigo-600"
@@ -37,7 +37,7 @@ const formater = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
       <!-- 通过父元素设置图标颜色，并加粗描边。 -->
       <span
         aria-hidden="true"
-        class="ml-auto inline-flex shrink-0 text-gray-400 transition-colors group-hover:text-gray-600 [&_svg]:stroke-current [&_svg]:[stroke-width:60]"
+        class="ml-auto inline-flex shrink-0 text-gray-400 transition-colors group-hover:text-gray-600 [&_svg]:stroke-current [&_svg]:stroke-60"
       >
         <el-icon :size="14"><TopRight /></el-icon>
       </span>

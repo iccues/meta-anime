@@ -1,15 +1,15 @@
 <template>
   <div class="animate-pulse">
     <div class="flex flex-col items-center gap-8 sm:flex-row sm:items-start">
-      <div class="w-[16rem] shrink-0 sm:w-60">
+      <div class="w-64 shrink-0 sm:w-60">
         <div class="aspect-[1/1.4] w-full rounded-2xl bg-gray-200 shadow-lg"></div>
       </div>
 
       <div
         class="flex w-full flex-col items-center justify-center gap-5 text-center sm:items-start sm:justify-start sm:text-left"
       >
-        <div class="h-8 w-full max-w-[28rem] rounded-full bg-gray-200"></div>
-        <div class="flex w-full max-w-[24rem] flex-col items-center gap-2 sm:items-start">
+        <div class="h-8 w-full max-w-md rounded-full bg-gray-200"></div>
+        <div class="flex w-full max-w-sm flex-col items-center gap-2 sm:items-start">
           <div class="h-4 w-2/3 rounded-full bg-gray-200"></div>
           <div class="h-4 w-3/4 rounded-full bg-gray-200"></div>
           <div class="h-4 w-1/2 rounded-full bg-gray-200"></div>
@@ -43,7 +43,7 @@
           </div>
 
           <div class="flex items-baseline gap-2">
-            <div class="h-[22px] w-14 rounded-full bg-gray-200"></div>
+            <div class="h-5.5 w-14 rounded-full bg-gray-200"></div>
             <div class="h-4 w-20 rounded-full bg-gray-200"></div>
           </div>
 

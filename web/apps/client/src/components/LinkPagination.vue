@@ -57,7 +57,7 @@ const cellClass = "inline-flex size-9 items-center justify-center rounded-[10px]
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-[8px]">
+  <div class="flex flex-col items-center gap-2">
     <template v-if="pageCount > 1">
       <!-- 窄屏显示当前页、总页数和首尾跳转。 -->
       <nav class="flex items-center justify-center gap-1 sm:hidden" aria-label="分页导航">

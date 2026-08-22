@@ -33,7 +33,7 @@ const title = computed(() => props.anime.title.titleCn || props.anime.title.titl
 
         <div
           v-if="anime.averageScore"
-          class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent"
+          class="absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-black/70 to-transparent"
         ></div>
         <div
           v-if="anime.averageScore"
@@ -44,7 +44,7 @@ const title = computed(() => props.anime.title.titleCn || props.anime.title.titl
       </div>
 
       <h3
-        class="m-0 line-clamp-2 h-[40px] px-2 text-[14px] leading-[1.4] font-medium text-gray-800"
+        class="m-0 line-clamp-2 h-10 px-2 text-[14px] leading-[1.4] font-medium text-gray-800"
         :title="title"
       >
         {{ title }}

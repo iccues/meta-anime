@@ -16,7 +16,7 @@ import LinkButton from "@/components/LinkButton.vue";
         <router-link to="/" class="flex cursor-pointer items-center gap-2">
           <img :src="logo" alt="" class="h-8 w-8 rounded-full shadow-lg" />
           <span
-            class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-xl font-bold text-transparent"
+            class="bg-linear-to-r from-gray-800 to-gray-600 bg-clip-text text-xl font-bold text-transparent"
           >
             有希计划
           </span>
