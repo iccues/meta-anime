@@ -17,8 +17,10 @@ useHead(
 <template>
   <div class="flex flex-col items-center justify-center py-20 text-center">
     <div class="max-w-md space-y-6">
-      <!-- 大号 404 -->
-      <p class="text-[8rem] leading-none font-extrabold text-gray-200 select-none">404</p>
+      <!-- 小屏使用较小字号，避免横向溢出。 -->
+      <p class="text-[96px] leading-none font-extrabold text-gray-200 select-none sm:text-[128px]">
+        404
+      </p>
 
       <!-- 标题 -->
       <h1 class="text-2xl font-bold text-gray-800">页面不存在</h1>

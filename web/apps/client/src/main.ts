@@ -7,9 +7,6 @@ import App from "@/App.vue";
 import router from "@/router";
 
 import { client } from "./graphql/client";
-import { initRem } from "./utils/rem";
-
-initRem();
 
 const app = createApp(App);
 const head = createHead();
