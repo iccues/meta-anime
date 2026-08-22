@@ -1,1 +1,46 @@
 @import "tailwindcss";
+
+@layer base {
+  /* 固定浅色配色，避免透明画布受浏览器深色模式影响。 */
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-white);
+    color: var(--color-gray-900);
+  }
+}
+
+/* 页面布局变量 */
+:root {
+  --page-max-width: 1400px;
+  --page-gutter: 1.25rem;
+}
+
+/* 卡片基础宽度：窄屏使用 45%，宽屏最多 200px。 */
+:root {
+  --card-width: min(200px, 45%);
+}
+
+/* 页面通用容器 */
+@utility container-page {
+  margin-inline: auto;
+  max-width: var(--page-max-width);
+  padding-inline: var(--page-gutter);
+}
+
+/* 详情页窄版容器 */
+@utility container-detail {
+  margin-inline: auto;
+  max-width: 1100px;
+  padding-inline: var(--page-gutter);
+}
+
+/* 与页面内容对齐的全宽横向滚动容器 */
+@utility container-page-bleed {
+  padding-inline: max(
+    var(--page-gutter),
+    calc((100% - var(--page-max-width)) / 2 + var(--page-gutter))
+  );
+}

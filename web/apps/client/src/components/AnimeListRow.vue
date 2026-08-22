@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ArrowLeft, ArrowRight } from "@element-plus/icons-vue";
-import { onMounted, ref, watch } from "vue";
-import type { RouteLocationRaw } from "vue-router";
+import { ArrowLeftBold, ArrowRightBold } from "@element-plus/icons-vue";
+import { ref, watch } from "vue";
+import { RouterLink, type RouteLocationRaw } from "vue-router";
 
 import type { AnimeCardFragment } from "@/graphql/generated/graphql";
 
@@ -16,121 +16,138 @@ const props = defineProps<{
 }>();
 
 const scrollContainer = ref<HTMLElement | null>(null);
-const showLeftButton = ref(false);
-const showRightButton = ref(false);
+const canScrollLeft = ref(false);
+const canScrollRight = ref(false);
 const skeletonCount = 6;
 
-const updateButtonVisibility = () => {
-  if (!scrollContainer.value) return;
+// 保留 1px 的滚动边界容差。
+const updateScrollState = () => {
+  const container = scrollContainer.value;
+  if (!container) {
+    canScrollLeft.value = false;
+    canScrollRight.value = false;
+    return;
+  }
 
-  const { scrollLeft, scrollWidth, clientWidth } = scrollContainer.value;
-  showLeftButton.value = scrollLeft > 0;
-  showRightButton.value = scrollLeft < scrollWidth - clientWidth;
+  const { scrollLeft, scrollWidth, clientWidth } = container;
+  canScrollLeft.value = scrollLeft > 1;
+  canScrollRight.value = scrollLeft + clientWidth < scrollWidth - 1;
 };
 
-const getCardWidth = () => {
-  const fontSize =
-    typeof window !== "undefined"
-      ? parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-      : 16;
-  return fontSize * (12.5 + 1.25); // 卡片宽度 (12.5rem) + 间距 (1.25rem/gap-5)
+const getCardStep = (container: HTMLElement) => {
+  const first = container.children[0];
+  const second = container.children[1];
+  if (!(first instanceof HTMLElement)) return 0;
+
+  return second instanceof HTMLElement
+    ? second.getBoundingClientRect().left - first.getBoundingClientRect().left
+    : first.getBoundingClientRect().width;
 };
 
-const scrollLeft = () => {
-  if (!scrollContainer.value) return;
-  const totalCardWidth = getCardWidth();
-  const index = Math.ceil(scrollContainer.value.scrollLeft / totalCardWidth);
-  const targetScroll = (index - 2) * totalCardWidth;
-  scrollContainer.value.scrollTo({
-    left: targetScroll,
-    behavior: "smooth",
-  });
+const scroll = (direction: -1 | 1) => {
+  const container = scrollContainer.value;
+  if (!container) return;
+
+  const step = getCardStep(container);
+  if (step <= 0) return;
+
+  const position = container.scrollLeft / step;
+  const index = direction < 0 ? Math.ceil(position) : Math.floor(position);
+
+  container.scrollTo({ left: (index + direction * 2) * step, behavior: "smooth" });
 };
 
-const scrollRight = () => {
-  if (!scrollContainer.value) return;
-  const totalCardWidth = getCardWidth();
-  const index = Math.floor(scrollContainer.value.scrollLeft / totalCardWidth);
-  const targetScroll = (index + 2) * totalCardWidth;
-  scrollContainer.value.scrollTo({
-    left: targetScroll,
-    behavior: "smooth",
-  });
-};
+// 列表或容器变化时刷新滚动状态。
+watch(
+  [scrollContainer, () => props.animeList],
+  ([container], _, onCleanup) => {
+    updateScrollState();
+    if (!container) return;
 
-watch(() => props.animeList, updateButtonVisibility, { flush: "post" });
+    const observer = new ResizeObserver(updateScrollState);
+    observer.observe(container);
+    onCleanup(() => observer.disconnect());
+  },
+  { flush: "post" },
+);
 
-onMounted(updateButtonVisibility);
+const cardWidthClass = "w-[var(--card-width)] shrink-0";
+
+const arrowClass =
+  "inline-flex size-9 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-300 disabled:hover:bg-gray-50";
 </script>
 
 <template>
-  <!-- 标题栏 -->
-  <div class="mx-auto mb-8 flex max-w-[1400px] items-center justify-between px-5">
-    <h2 class="border-l-4 border-blue-500 pl-4 text-3xl font-bold text-gray-900">
-      {{ title }}
+  <div class="container-page mb-5 flex items-center justify-between gap-3">
+    <h2 class="m-0 min-w-0 text-[22px] font-bold text-gray-900">
+      <RouterLink
+        :to="moreLink"
+        class="group -m-1 inline-flex items-center gap-1.5 rounded p-1 text-gray-900 no-underline transition-colors hover:text-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+      >
+        <span class="relative py-0.5">
+          {{ title }}
+          <span
+            aria-hidden="true"
+            class="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 rounded-full bg-indigo-500/70 transition-transform duration-200 group-hover:scale-x-100"
+          ></span>
+        </span>
+        <!-- el-icon 通过父元素继承颜色。 -->
+        <span
+          aria-hidden="true"
+          class="inline-flex shrink-0 text-gray-400 transition duration-200 group-hover:translate-x-0.5 group-hover:text-indigo-600"
+        >
+          <el-icon :size="18"><ArrowRightBold /></el-icon>
+        </span>
+      </RouterLink>
     </h2>
-    <router-link
-      :to="moreLink"
-      class="-m-5 flex items-center gap-1 p-5 text-[14px] font-medium text-blue-600 transition-colors hover:text-blue-500"
-    >
-      查看更多 <span aria-hidden="true">&rarr;</span>
-    </router-link>
+
+    <!-- 仅为支持精细指针的设备显示滚动按钮。 -->
+    <div class="hidden shrink-0 items-center gap-2 any-pointer-fine:flex">
+      <button
+        :disabled="!canScrollLeft"
+        @click="scroll(-1)"
+        :class="arrowClass"
+        aria-label="向左滚动"
+      >
+        <el-icon :size="20"><ArrowLeftBold /></el-icon>
+      </button>
+      <button
+        :disabled="!canScrollRight"
+        @click="scroll(1)"
+        :class="arrowClass"
+        aria-label="向右滚动"
+      >
+        <el-icon :size="20"><ArrowRightBold /></el-icon>
+      </button>
+    </div>
   </div>
 
-  <!-- 动画列表 -->
   <div v-if="fetching">
-    <div
-      class="scrollbar-hide flex gap-5 overflow-x-auto px-[max(1.25rem,calc(50%-700px+1.25rem))] pb-4"
-    >
-      <AnimeCardSkeleton v-for="index in skeletonCount" :key="index" class="flex-shrink-0" />
+    <div class="scrollbar-hide container-page-bleed flex gap-5 overflow-x-auto py-4">
+      <AnimeCardSkeleton v-for="index in skeletonCount" :key="index" :class="cardWidthClass" />
     </div>
   </div>
 
-  <div v-else-if="animeList && animeList.length > 0" class="group/row relative">
-    <!-- 滚动容器 -->
-    <div
-      ref="scrollContainer"
-      @scroll="updateButtonVisibility"
-      class="scrollbar-hide flex gap-5 overflow-x-auto scroll-smooth px-[max(1.25rem,calc(50%-700px+1.25rem))] pb-4"
-    >
-      <AnimeCard
-        v-for="anime in animeList"
-        :key="anime.animeId"
-        :anime="anime"
-        class="flex-shrink-0"
-      />
-    </div>
-
-    <!-- 左侧滚动按钮 -->
-    <button
-      v-show="showLeftButton"
-      @click="scrollLeft"
-      class="absolute top-30 left-[max(1.25rem,calc(50%-700px+1.25rem))] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 opacity-0 shadow-lg transition-opacity duration-300 group-hover/row:opacity-100 hover:scale-110 hover:bg-white active:scale-95"
-      aria-label="向左滚动"
-    >
-      <el-icon :size="24" class="text-gray-700">
-        <ArrowLeft />
-      </el-icon>
-    </button>
-
-    <!-- 右侧滚动按钮 -->
-    <button
-      v-show="showRightButton"
-      @click="scrollRight"
-      class="absolute top-30 right-[max(1.25rem,calc(50%-700px+1.25rem))] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 opacity-0 shadow-lg transition-opacity duration-300 group-hover/row:opacity-100 hover:scale-110 hover:bg-white active:scale-95"
-      aria-label="向右滚动"
-    >
-      <el-icon :size="24" class="text-gray-700">
-        <ArrowRight />
-      </el-icon>
-    </button>
+  <!-- 垂直内边距避免卡片悬浮效果被滚动容器裁切。 -->
+  <div
+    v-else-if="animeList && animeList.length > 0"
+    ref="scrollContainer"
+    @scroll="updateScrollState"
+    class="scrollbar-hide container-page-bleed flex gap-5 overflow-x-auto scroll-smooth py-4"
+  >
+    <AnimeCard
+      v-for="anime in animeList"
+      :key="anime.animeId"
+      :anime="anime"
+      :class="cardWidthClass"
+    />
   </div>
 
   <div v-else class="py-10 text-center text-base text-gray-600">暂无数据</div>
 </template>
 
 <style scoped>
-/* 隐藏滚动条但保持滚动功能 */
+/* 隐藏滚动条并保留滚动功能 */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

@@ -7,7 +7,7 @@ import { useAnimeListHead } from "@/composables/useAnimeListHead";
 import { useAnimeListQuery } from "@/composables/useAnimeListQuery";
 import { GetAnimeListDocument } from "@/graphql/generated/graphql";
 
-const { animeListParams, filtersModel, handlePageChange } = useAnimeListQuery();
+const { animeListParams, createFilterLink, createPageLink } = useAnimeListQuery();
 
 const { data, fetching, error } = useQuery({
   query: GetAnimeListDocument,
@@ -19,15 +19,15 @@ useAnimeListHead(animeListParams);
 </script>
 
 <template>
-  <div class="mx-auto max-w-[1400px] p-5">
+  <div class="container-page pt-8">
     <!-- 筛选器 -->
-    <AnimeFilter v-model="filtersModel" />
+    <AnimeFilter :filters="animeListParams" :filter-link="createFilterLink" />
 
     <AnimeList
       :animeList="data?.animeList"
       :fetching="fetching"
       :error="error"
-      v-on:page-change="handlePageChange"
+      :page-link="createPageLink"
     />
   </div>
 </template>
