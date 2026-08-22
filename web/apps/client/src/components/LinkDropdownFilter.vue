@@ -51,7 +51,7 @@ onBeforeUnmount(() => {
       <button
         ref="trigger"
         type="button"
-        class="inline-flex h-[30px] min-w-[104px] items-center justify-between gap-[8px] rounded-[8px] border border-gray-500 bg-white px-[10px] text-[14px] font-semibold text-gray-900 transition-colors hover:bg-gray-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+        class="inline-flex h-[30px] min-w-[104px] items-center justify-between gap-[8px] rounded-[8px] border border-gray-500 bg-white px-[10px] text-[14px] font-semibold text-gray-900 transition-colors hover:bg-gray-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         :aria-label="`${label}：${currentLabel}`"
         :aria-expanded="isOpen"
         :aria-controls="isOpen ? panelId : undefined"

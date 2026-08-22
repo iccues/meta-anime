@@ -26,7 +26,7 @@ const stateClass = computed(() => {
 });
 
 const baseClass =
-  "inline-flex items-center border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500";
+  "inline-flex items-center border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600";
 </script>
 
 <template>
