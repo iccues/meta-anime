@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div class="mt-10">
+    <div class="mt-20">
       <div class="mb-4 h-7 w-32 rounded-full bg-gray-200"></div>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div
@@ -38,18 +38,20 @@
           class="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-gray-50/50 p-5"
         >
           <div class="flex items-center gap-3">
-            <div class="h-7 w-7 rounded-md bg-gray-200"></div>
+            <div class="size-6 rounded-md bg-gray-200"></div>
             <div class="h-4 w-24 rounded-full bg-gray-200"></div>
           </div>
-          <div class="grid grid-cols-2 gap-y-2">
-            <div class="h-4 w-16 rounded-full bg-gray-200"></div>
-            <div class="h-4 w-12 rounded-full bg-gray-200"></div>
+
+          <div class="flex items-baseline gap-2">
+            <div class="h-[22px] w-14 rounded-full bg-gray-200"></div>
             <div class="h-4 w-20 rounded-full bg-gray-200"></div>
-            <div class="h-4 w-14 rounded-full bg-gray-200"></div>
-            <div class="h-4 w-16 rounded-full bg-gray-200"></div>
-            <div class="h-4 w-18 rounded-full bg-gray-200"></div>
-            <div class="h-4 w-20 rounded-full bg-gray-200"></div>
-            <div class="h-4 w-16 rounded-full bg-gray-200"></div>
+          </div>
+
+          <div class="flex flex-wrap gap-x-6 gap-y-2">
+            <div v-for="field in 3" :key="field" class="flex flex-col gap-0.5">
+              <div class="h-3.5 w-14 rounded-full bg-gray-200"></div>
+              <div class="h-5 w-12 rounded-full bg-gray-200"></div>
+            </div>
           </div>
         </div>
       </div>

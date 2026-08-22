@@ -61,26 +61,20 @@ const formater = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
       <!-- Stats Row -->
       <div class="mt-4 flex flex-wrap items-center justify-center gap-6 sm:justify-start">
-        <div
-          v-if="anime.averageScore"
-          class="flex flex-col items-center text-indigo-600 sm:items-start"
-        >
-          <span class="text-[12px] font-bold tracking-wider uppercase opacity-60">综合评分</span>
+        <div v-if="anime.averageScore" class="flex flex-col items-center sm:items-start">
+          <span class="text-[12px] font-bold tracking-wider text-gray-500 uppercase">综合评分</span>
           <div class="flex items-baseline">
-            <span class="text-[32px] leading-none font-black">{{
-              anime.averageScore.toFixed(1)
-            }}</span>
+            <span class="text-[32px] leading-none font-black text-indigo-600">
+              {{ anime.averageScore.toFixed(1) }}
+            </span>
             <span class="ml-1 text-[16px] font-medium text-gray-400">/100</span>
           </div>
         </div>
-        <div
-          v-if="anime.popularity"
-          class="flex flex-col items-center text-pink-500 sm:items-start"
-        >
-          <span class="text-[12px] font-bold tracking-wider uppercase opacity-60">人气值</span>
-          <span class="text-[32px] leading-none font-black tabular-nums">{{
-            formater.format(anime.popularity)
-          }}</span>
+        <div v-if="anime.popularity" class="flex flex-col items-center sm:items-start">
+          <span class="text-[12px] font-bold tracking-wider text-gray-500 uppercase">人气值</span>
+          <span class="text-[32px] leading-none font-black text-pink-500 tabular-nums">
+            {{ formater.format(anime.popularity) }}
+          </span>
         </div>
       </div>
     </div>
