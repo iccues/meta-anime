@@ -4,9 +4,11 @@ import com.yukiani.server.entity.Anime;
 import com.yukiani.server.entity.AnimeTitles;
 import com.yukiani.server.entity.Mapping;
 import com.yukiani.server.entity.MappingInfo;
+import com.yukiani.server.entity.MappingMetricHistory;
 import com.yukiani.server.entity.Platform;
 import com.yukiani.server.repo.AnimeRepository;
 import com.yukiani.server.repo.MappingRepository;
+import com.yukiani.server.repo.MappingMetricHistoryRepository;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,6 +35,9 @@ public class MappingRepoServiceTest {
     @Resource
     private MappingRepoService mappingRepoService;
 
+    @Resource
+    private MappingMetricHistoryRepository mappingMetricHistoryRepository;
+
     private MappingInfo testMappingInfo;
 
     @BeforeEach
@@ -42,6 +49,7 @@ public class MappingRepoServiceTest {
 
     @AfterEach
     public void cleanup() {
+        mappingMetricHistoryRepository.deleteAll();
         mappingRepository.deleteAll();
         animeRepository.deleteAll();
     }
@@ -329,5 +337,108 @@ public class MappingRepoServiceTest {
 
         Mapping updated = mappingRepository.findBySourcePlatformAndPlatformId(Platform.MyAnimeList, "12345");
         assertEquals(1, updated.getVersion());
+    }
+    private List<MappingMetricHistory> historyByTime() {
+        return mappingMetricHistoryRepository.findAll().stream()
+                .sorted(Comparator.comparing(MappingMetricHistory::getRecordedAt))
+                .toList();
+    }
+
+    private Mapping metricMapping(Double rawScore, Double rawPopularity, Instant updateTime) {
+        Mapping mapping = new Mapping();
+        mapping.setSourcePlatform(Platform.MyAnimeList);
+        mapping.setPlatformId("12345");
+        mapping.setRawScore(rawScore);
+        mapping.setRawPopularity(rawPopularity);
+        mapping.setMappingInfo(testMappingInfo);
+        mapping.setUpdateTime(updateTime);
+        return mapping;
+    }
+
+    @Test
+    public void testSaveOrUpdate_NewMapping_RecordsFirstSnapshot() {
+        Instant recordedAt = Instant.parse("2024-01-01T00:00:00Z");
+
+        mappingRepoService.saveOrUpdate(metricMapping(8.5, 1000.0, recordedAt));
+
+        List<MappingMetricHistory> history = historyByTime();
+        assertEquals(1, history.size());
+        MappingMetricHistory snapshot = history.get(0);
+        assertEquals(Platform.MyAnimeList, snapshot.getSourcePlatform());
+        assertEquals("12345", snapshot.getPlatformId());
+        assertEquals(8.5, snapshot.getRawScore());
+        assertEquals(1000.0, snapshot.getRawPopularity());
+        assertEquals(recordedAt, snapshot.getRecordedAt());
+    }
+
+    @Test
+    public void testSaveOrUpdate_NewMappingWithoutMetrics_RecordsSnapshot() {
+        mappingRepoService.saveOrUpdate(metricMapping(null, null, Instant.parse("2024-01-01T00:00:00Z")));
+
+        List<MappingMetricHistory> history = historyByTime();
+        assertEquals(1, history.size());
+        assertNull(history.get(0).getRawScore());
+        assertNull(history.get(0).getRawPopularity());
+
+        mappingRepoService.saveOrUpdate(metricMapping(8.5, 1000.0, Instant.parse("2024-01-02T00:00:00Z")));
+
+        assertEquals(2, mappingMetricHistoryRepository.count());
+    }
+
+    @Test
+    public void testSaveOrUpdate_UnchangedMetrics_StillRecordsSnapshot() {
+        mappingRepoService.saveOrUpdate(metricMapping(8.5, 1000.0, Instant.parse("2024-01-01T00:00:00Z")));
+        mappingRepoService.saveOrUpdate(metricMapping(8.5, 1000.0, Instant.parse("2024-01-02T00:00:00Z")));
+
+        List<MappingMetricHistory> history = historyByTime();
+        assertEquals(2, history.size());
+        assertEquals(Instant.parse("2024-01-02T00:00:00Z"), history.get(1).getRecordedAt());
+    }
+
+    @Test
+    public void testSaveOrUpdate_ScoreChanged_RecordsSnapshot() {
+        mappingRepoService.saveOrUpdate(metricMapping(8.5, 1000.0, Instant.parse("2024-01-01T00:00:00Z")));
+        mappingRepoService.saveOrUpdate(metricMapping(8.6, 1000.0, Instant.parse("2024-01-02T00:00:00Z")));
+
+        List<MappingMetricHistory> history = historyByTime();
+        assertEquals(2, history.size());
+        assertEquals(8.6, history.get(1).getRawScore());
+        assertEquals(Instant.parse("2024-01-02T00:00:00Z"), history.get(1).getRecordedAt());
+    }
+
+    @Test
+    public void testSaveOrUpdate_PopularityChanged_RecordsSnapshot() {
+        mappingRepoService.saveOrUpdate(metricMapping(8.5, 1000.0, Instant.parse("2024-01-01T00:00:00Z")));
+        mappingRepoService.saveOrUpdate(metricMapping(8.5, 1200.0, Instant.parse("2024-01-02T00:00:00Z")));
+
+        List<MappingMetricHistory> history = historyByTime();
+        assertEquals(2, history.size());
+        assertEquals(8.5, history.get(1).getRawScore());
+        assertEquals(1200.0, history.get(1).getRawPopularity());
+    }
+
+    @Test
+    public void testSaveOrUpdate_MetricsClearedToNull_RecordsSnapshot() {
+        mappingRepoService.saveOrUpdate(metricMapping(8.5, 1000.0, Instant.parse("2024-01-01T00:00:00Z")));
+        mappingRepoService.saveOrUpdate(metricMapping(null, null, Instant.parse("2024-01-02T00:00:00Z")));
+
+        List<MappingMetricHistory> history = historyByTime();
+        assertEquals(2, history.size());
+        assertNull(history.get(1).getRawScore());
+        assertNull(history.get(1).getRawPopularity());
+    }
+
+    @Test
+    public void testMetricHistory_SurvivesMappingDeletion() {
+        mappingRepoService.saveOrUpdate(metricMapping(8.5, 1000.0, Instant.parse("2024-01-01T00:00:00Z")));
+
+        Mapping saved = mappingRepository.findBySourcePlatformAndPlatformId(Platform.MyAnimeList, "12345");
+        assertNotNull(saved);
+        mappingRepository.delete(saved);
+        mappingRepository.flush();
+
+        List<MappingMetricHistory> history = historyByTime();
+        assertEquals(1, history.size());
+        assertEquals("12345", history.get(0).getPlatformId());
     }
 }

@@ -2,13 +2,15 @@ package com.yukiani.server.service;
 
 import com.yukiani.server.entity.Anime;
 import com.yukiani.server.entity.Mapping;
+import com.yukiani.server.entity.MappingMetricHistory;
 import com.yukiani.server.repo.MappingRepository;
+import com.yukiani.server.repo.MappingMetricHistoryRepository;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 封装平台 Mapping 的幂等保存及关联动画指标刷新逻辑。
+ * 保存平台 Mapping，并维护关联动画的聚合指标和平台指标历史。
  */
 @Service
 public class MappingRepoService {
@@ -18,8 +20,14 @@ public class MappingRepoService {
     @Resource
     MetricService metricService;
 
+    @Resource
+    MappingMetricHistoryRepository mappingMetricHistoryRepository;
+
     /**
-     * 按平台 natural key 新增或更新 Mapping；更新现有 Mapping 后同步刷新动画指标。
+     * 按平台 natural key 新增或更新 Mapping，并在更新现有 Mapping 后刷新关联动画指标。
+     *
+     * <p>每次保存都会追加一条原始指标快照，包括指标未变化或两项指标均为空的情况。
+     * Mapping 与快照在同一事务中写入。</p>
      */
     @Transactional
     public void saveOrUpdate(Mapping m) {
@@ -38,8 +46,21 @@ public class MappingRepoService {
             }
 
             repo.save(existing);
+            recordMetricHistory(existing);
         } else {
             repo.save(m);
+            recordMetricHistory(m);
         }
+    }
+
+    /** 将 Mapping 当前的原始指标和更新时间保存为历史记录。 */
+    private void recordMetricHistory(Mapping mapping) {
+        mappingMetricHistoryRepository.save(new MappingMetricHistory(
+                mapping.getSourcePlatform(),
+                mapping.getPlatformId(),
+                mapping.getRawScore(),
+                mapping.getRawPopularity(),
+                mapping.getUpdateTime()
+        ));
     }
 }
